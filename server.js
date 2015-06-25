@@ -48,9 +48,17 @@ app.post('/api/webhook', function(req, res) {
             });
         break;
 
+        case '/kaljoja':
+            db.models.Drink.count('id')
+            .then(function fetchOk(count) {
+                console.log(count);
+                _sendMessage(msg.chat.id, 'Kaljoja: ' + count);
+                res.sendStatus(200);
+            });
+        break;
 
         default:
-            console.log('! Unknown command', msg);
+            console.log('! Unknown command', msg.text);
             res.sendStatus(200);
     }
 
