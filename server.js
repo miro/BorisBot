@@ -3,7 +3,7 @@ var bodyParser  = require('body-parser');
 var request     = require('request');
 var _           = require('lodash');
 
-var database    = require('./database');
+var db          = require('./database');
 
 var app = express();
 
@@ -18,6 +18,13 @@ var apiUrl = 'https://api.telegram.org/bot' + apiKey;
 app.use(bodyParser.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
 app.use(bodyParser.json()); // parse json
 
+// # Helper functions
+var _sendMessage = function(chatId, text) {
+    request.post(apiUrl + '/sendMessage', { form: {
+        chat_id: chatId,
+        text: text
+    }});
+};
 
 // # Routes
 //
@@ -25,13 +32,30 @@ app.post('/api/webhook', function(req, res) {
     console.log('webhook event!', req.body);
 
     var msg = req.body.message;
+    var commandParts = msg.text.split(' ');
 
-    request.post(apiUrl + '/sendMessage', { form: {
-        chat_id: msg.chat.id,
-        text: 'Sain komennon: ' + msg.text
-    }});
+    switch (commandParts[0]) {
+        case '/kalja':
 
-    res.sendStatus(200);
+            var drink = new db.models.Drink({
+                creatorId: msg.from.id,
+                drinkType: 'kalja'
+            });
+            drink.save()
+            .then(function saveOk(newPerson) {
+                _sendMessage(msg.chat.id, 'Kalja rekisteröity');
+                res.sendStatus(200);
+            });
+        break;
+
+
+        default:
+            console.log('! Unknown command', msg);
+            res.sendStatus(200);
+    }
+
+    
+
 });
 
 // Catch all 404 route (this needs to be last)
