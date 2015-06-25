@@ -21,6 +21,14 @@ app.use(bodyParser.json()); // parse json
 //
 app.post('/api/webhook', function(req, res) {
     console.log('webhook event!', req.body);
+
+    var msg = req.body.message;
+
+    request.post(apiUrl + '/sendMessage', { form: {
+        chat_id: msg.chat.id,
+        text: 'Sain komennon: ' + msg.text
+    }});
+
     res.sendStatus(200);
 });
 
