@@ -3,6 +3,8 @@ var bodyParser  = require('body-parser');
 var request     = require('request');
 var _           = require('lodash');
 
+var database    = require('./database');
+
 var app = express();
 
 
