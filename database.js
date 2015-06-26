@@ -35,7 +35,6 @@ bookshelf.knex.schema.hasTable('expls').then(function(exists) {
 
 // Model definitions
 var models = {};
-
 models.Drink = bookshelf.Model.extend({
     tableName: 'drinks'
 });
@@ -44,7 +43,16 @@ models.Expl = bookshelf.Model.extend({
 });
 
 
+var collections = {};
+collections.Drinks = bookshelf.Collection.extend({
+	model: models.Drink
+});
+collections.Expls = bookshelf.Collection.extend({
+	model: models.Expl
+});
+
 module.exports = {
 	bookshelf: bookshelf,
-	models: models
+	models: models,
+	collections: collections
 };
