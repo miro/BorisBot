@@ -43,7 +43,7 @@ app.post('/api/webhook', function(req, res) {
             });
             drink.save()
             .then(function saveOk(newPerson) {
-                _sendMessage(msg.chat.id, 'Kalja rekisteröity');
+                _sendMessage(msg.chat.id, 'Kippis!');
                 res.sendStatus(200);
             });
         break;
