@@ -94,13 +94,15 @@ app.listen(cfg.serverPort, function() {
 });
 
 // Subscribe webhook
-request.post(
-    cfg.tgApiUrl + '/setWebhook', { form: { url: cfg.webhookUrl }}, 
+request.post(cfg.tgApiUrl + '/setWebhook', { form: { url: cfg.webhookUrl }}, 
     function (error, response, body) {
         console.log('Webhook subscribtion callback:', response.body); 
     }
-)
+);
 
+// Run test sequence
 request(cfg.tgApiUrl + '/getMe', function (error, res, body) {
     console.log('getme test', body);
 });
+commander.sendMessage(cfg.allowedGroups.testChatId, 'Reboot! ' + Date());
+
