@@ -3,29 +3,17 @@ var bodyParser  = require('body-parser');
 var request     = require('request');
 var _           = require('lodash');
 
-var db          = require('./database');
+var commander   = require('./commander');
 var cfg         = require('./config');
 
-var app = express();
+var app         = express();
 
-
-// # Config
-var serverPort = process.env.PORT || 3000;
-var apiKey = process.env.BORISBOT_TELEGRAM_APIKEY;
-var apiUrl = 'https://api.telegram.org/bot' + apiKey;
 
 
 // # Express middleware
 app.use(bodyParser.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
 app.use(bodyParser.json()); // parse json
 
-// # Helper functions
-var _sendMessage = function(chatId, text) {
-    request.post(apiUrl + '/sendMessage', { form: {
-        chat_id: chatId,
-        text: text
-    }});
-};
 
 // # Routes
 //
@@ -37,24 +25,17 @@ app.post('/api/webhook', function(req, res) {
 
     switch (commandParts[0]) {
         case '/kalja':
-
-            var drink = new db.models.Drink({
-                creatorId: msg.from.id,
-                drinkType: 'kalja'
-            });
-            drink.save()
+            commander.registerDrink(msg.from.id, 'kalja')
             .then(function saveOk(newPerson) {
-                _sendMessage(msg.chat.id, 'Kippis!');
+                commander.sendMessage(msg.chat.id, 'Kippis!');
                 res.sendStatus(200);
             });
         break;
 
         case '/kaljoja':
-            db.bookshelf.knex('drinks')
-            .count('id')
+            commander.getDrinksAmount()
             .then(function fetchOk(result) {
-                console.log(result);
-                _sendMessage(msg.chat.id, 'Kaljoja juotu: ' + result[0].count);
+                commander.sendMessage(msg.chat.id, 'Kaljoja juotu: ' + result[0].count);
                 res.sendStatus(200);
             });
         break;
