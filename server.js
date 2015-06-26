@@ -4,6 +4,7 @@ var request     = require('request');
 var _           = require('lodash');
 
 var db          = require('./database');
+var cfg         = require('./config');
 
 var app = express();
 
@@ -95,18 +96,18 @@ app.use(function genericErrorHandler(err, req, res, next) { // 500
 
 
 // # Start the server
-app.listen(serverPort, function() {
-    console.log('BorisBot backend started at port', serverPort);
+app.listen(cfg.serverPort, function() {
+    console.log('BorisBot backend started at port', cfg.serverPort);
 });
 
 // Subscribe webhook
 request.post(
-    apiUrl + '/setWebhook', { form: { url: 'https://borisbot.herokuapp.com/api/webhook' }}, 
+    cfg.tgApiUrl + '/setWebhook', { form: { url: cfg.webhookUrl }}, 
     function (error, response, body) {
         console.log('Webhook subscribtion callback:', response.body); 
     }
 )
 
-request(apiUrl + '/getMe', function (error, res, body) {
+request(cfg.tgApiUrl + '/getMe', function (error, res, body) {
     console.log('getme test', body);
 });
