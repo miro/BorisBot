@@ -27,10 +27,17 @@ app.post('/api/webhook', function(req, res) {
         case '/kalja':
         case '/kippis':
             commander.registerDrink(msg.from.id, commandParts[1])
-            .then(function(todaysDrinks) {
+            .then(function(drinksCollection) {
+
+                var drinksToday = drinksCollection.models.length;
+                var drinksTodayForThisUser = _.filter(drinksCollection.models, function(model) {
+                    return model.attributes.creatorId === msg.from.id;
+                }).length;
+
                 commander.sendMessage(
                     msg.chat.id,
-                    'Kippis!! Se olikin jo ' + todaysDrinks.models.length + '. tälle päivälle!'
+                    'Kippis!! Se olikin jo Spännin ' + drinksToday + '. tälle päivälle, ja ' +
+                    drinksTodayForThisUser + '. käyttäjälle @' + msg.from.username
                 );
                 res.sendStatus(200);
             })
