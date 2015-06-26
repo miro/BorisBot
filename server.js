@@ -25,6 +25,7 @@ app.post('/api/webhook', function(req, res) {
 
     switch (commandParts[0]) {
         case '/kalja':
+        case '/kippis':
             commander.registerDrink(msg.from.id, commandParts[1])
             .then(function(todaysDrinks) {
                 commander.sendMessage(

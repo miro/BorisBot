@@ -13,6 +13,8 @@ var commander = {};
 
 
 commander.registerDrink = function(drinker, drinkType) {
+    // fallback to 'kalja' if no drinkType is set
+    drinkType = !drinkType ? 'kalja' : drinkType;
 
     return new Promise(function(resolve, reject) {
         var drink = new db.models.Drink({
