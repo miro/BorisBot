@@ -43,7 +43,7 @@ app.post('/api/webhook', function(req, res) {
         case '/kaljoja':
             commander.getDrinksAmount()
             .then(function fetchOk(result) {
-                commander.sendMessage(msg.chat.id, 'Kaljoja juotu: ' + result[0].count);
+                commander.sendMessage(msg.chat.id, 'Kaikenkaikkiaan juotu ' + result[0].count + ' juomaa');
                 res.sendStatus(200);
             });
         break;
@@ -52,9 +52,6 @@ app.post('/api/webhook', function(req, res) {
             console.log('! Unknown command', msg.text);
             res.sendStatus(200);
     }
-
-    
-
 });
 
 // Catch all 404 route (this needs to be last)
