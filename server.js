@@ -3,28 +3,17 @@ var bodyParser  = require('body-parser');
 var request     = require('request');
 var _           = require('lodash');
 
-var db          = require('./database');
+var commander   = require('./commander');
+var cfg         = require('./config');
 
-var app = express();
+var app         = express();
 
-
-// # Config
-var serverPort = process.env.PORT || 3000;
-var apiKey = process.env.BORISBOT_TELEGRAM_APIKEY;
-var apiUrl = 'https://api.telegram.org/bot' + apiKey;
 
 
 // # Express middleware
 app.use(bodyParser.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
 app.use(bodyParser.json()); // parse json
 
-// # Helper functions
-var _sendMessage = function(chatId, text) {
-    request.post(apiUrl + '/sendMessage', { form: {
-        chat_id: chatId,
-        text: text
-    }});
-};
 
 // # Routes
 //
@@ -36,24 +25,32 @@ app.post('/api/webhook', function(req, res) {
 
     switch (commandParts[0]) {
         case '/kalja':
+        case '/kippis':
+            commander.registerDrink(msg.from.id, commandParts[1])
+            .then(function(drinksCollection) {
 
-            var drink = new db.models.Drink({
-                creatorId: msg.from.id,
-                drinkType: 'kalja'
-            });
-            drink.save()
-            .then(function saveOk(newPerson) {
-                _sendMessage(msg.chat.id, 'Kippis!');
+                var drinksToday = drinksCollection.models.length;
+                var drinksTodayForThisUser = _.filter(drinksCollection.models, function(model) {
+                    return model.attributes.creatorId === msg.from.id;
+                }).length;
+
+                commander.sendMessage(
+                    msg.chat.id,
+                    'Kippis!! Se olikin jo Spännin ' + drinksToday + '. tälle päivälle, ja ' +
+                    drinksTodayForThisUser + '. käyttäjälle @' + msg.from.username
+                );
+                res.sendStatus(200);
+            })
+            .error(function(e) {
+                commander.sendMessage(msg.chat.id, 'Kippis failed');
                 res.sendStatus(200);
             });
         break;
 
         case '/kaljoja':
-            db.bookshelf.knex('drinks')
-            .count('id')
+            commander.getDrinksAmount()
             .then(function fetchOk(result) {
-                console.log(result);
-                _sendMessage(msg.chat.id, 'Kaljoja juotu: ' + result[0].count);
+                commander.sendMessage(msg.chat.id, 'Kaikenkaikkiaan juotu ' + result[0].count + ' juomaa');
                 res.sendStatus(200);
             });
         break;
@@ -62,9 +59,6 @@ app.post('/api/webhook', function(req, res) {
             console.log('! Unknown command', msg.text);
             res.sendStatus(200);
     }
-
-    
-
 });
 
 // Catch all 404 route (this needs to be last)
@@ -95,18 +89,20 @@ app.use(function genericErrorHandler(err, req, res, next) { // 500
 
 
 // # Start the server
-app.listen(serverPort, function() {
-    console.log('BorisBot backend started at port', serverPort);
+app.listen(cfg.serverPort, function() {
+    console.log('BorisBot backend started at port', cfg.serverPort);
 });
 
 // Subscribe webhook
-request.post(
-    apiUrl + '/setWebhook', { form: { url: 'https://borisbot.herokuapp.com/api/webhook' }}, 
+request.post(cfg.tgApiUrl + '/setWebhook', { form: { url: cfg.webhookUrl }}, 
     function (error, response, body) {
         console.log('Webhook subscribtion callback:', response.body); 
     }
-)
+);
 
-request(apiUrl + '/getMe', function (error, res, body) {
+// Run test sequence
+request(cfg.tgApiUrl + '/getMe', function (error, res, body) {
     console.log('getme test', body);
 });
+commander.sendMessage(cfg.allowedGroups.testChatId, 'Reboot! ' + Date());
+
