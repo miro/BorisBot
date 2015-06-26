@@ -53,7 +53,7 @@ app.post('/api/webhook', function(req, res) {
             .count('id')
             .then(function fetchOk(result) {
                 console.log(result);
-                _sendMessage(msg.chat.id, 'Kaljoja juotu: ' + result.count);
+                _sendMessage(msg.chat.id, 'Kaljoja juotu: ' + result[0].count);
                 res.sendStatus(200);
             });
         break;
