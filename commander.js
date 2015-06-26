@@ -27,7 +27,6 @@ commander.registerDrink = function(drinker, drinkType) {
             .query('where', 'timestamp', '>=', moment().format('YYYY-MM-DD'))
             .fetch()
             .then(function(collection) {
-                console.log('ole!', collection);
                 resolve(collection);
             })
             .error(function(e) {
@@ -42,7 +41,7 @@ commander.getDrinksAmount = function() {
     return db.bookshelf.knex('drinks').count('id');
 };
 
-commander.sendMessage = function sendMessageToGroup(chatId, text) {
+commander.sendMessage = function(chatId, text) {
     request.post(cfg.tgApiUrl + '/sendMessage', { form: {
         chat_id: chatId,
         text: text
