@@ -49,11 +49,11 @@ app.post('/api/webhook', function(req, res) {
         break;
 
         case '/kaljoja':
-            bookshelf.knex('drinks')
+            db.bookshelf.knex('drinks')
             .count('id')
-            .then(function fetchOk(count) {
-                console.log(count);
-                _sendMessage(msg.chat.id, 'Kaljoja: ' + count);
+            .then(function fetchOk(result) {
+                console.log(result);
+                _sendMessage(msg.chat.id, 'Kaljoja juotu: ' + result.count);
                 res.sendStatus(200);
             });
         break;
