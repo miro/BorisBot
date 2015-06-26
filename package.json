@@ -1,0 +1,34 @@
+{
+  "name": "borisbot",
+  "version": "0.0.1",
+  "description": "Telegram Bot for spinni.org",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/miro/BorisBot.git"
+  },
+  "keywords": [
+    "telegram",
+    "bot"
+  ],
+  "author": "Miro Nieminen",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/miro/BorisBot/issues"
+  },
+  "homepage": "https://github.com/miro/BorisBot",
+  "dependencies": {
+    "express": "~4.13.0",
+    "lodash": "~3.9.3",
+    "body-parser": "~1.13.1",
+    "request": "~2.58.0",
+    "bluebird": "~2.9.30",
+    "bookshelf": "~0.8.1",
+    "knex": "~0.8.6",
+    "pg": "~4.4.0"
+  }
+}
