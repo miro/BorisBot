@@ -21,6 +21,13 @@ app.post('/api/webhook', function(req, res) {
     console.log('webhook event!', req.body);
 
     var msg = req.body.message;
+
+    if (!msg.text) {
+        console.log('no text on event, ignore');
+        res.sendStatus(200);
+        return;
+    }
+
     var commandParts = msg.text.split(' ');
 
     switch (commandParts[0]) {
