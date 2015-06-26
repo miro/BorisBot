@@ -34,6 +34,8 @@ app.post('/api/webhook', function(req, res) {
                 );
                 res.sendStatus(200);
             })
+            .error(function(e) {
+                commander.sendMessage(msg.chat.id, 'Kippis failed');
                 res.sendStatus(200);
             });
         break;

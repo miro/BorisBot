@@ -30,6 +30,10 @@ commander.registerDrink = function(drinker, drinkType) {
                 console.log('ole!', collection);
                 resolve(collection);
             })
+            .error(function(e) {
+                console.log('Error on drink collection fetch', e);
+                reject(e);
+            });
         });
     });
 };
