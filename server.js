@@ -25,9 +25,14 @@ app.post('/api/webhook', function(req, res) {
 
     switch (commandParts[0]) {
         case '/kalja':
-            commander.registerDrink(msg.from.id, 'kalja')
-            .then(function saveOk(newPerson) {
-                commander.sendMessage(msg.chat.id, 'Kippis!');
+            commander.registerDrink(msg.from.id, commandParts[1])
+            .then(function(todaysDrinks) {
+                commander.sendMessage(
+                    msg.chat.id,
+                    'Kippis!! Se olikin jo ' + todaysDrinks.models.length + '. tälle päivälle!'
+                );
+                res.sendStatus(200);
+            })
                 res.sendStatus(200);
             });
         break;
