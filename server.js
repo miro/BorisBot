@@ -49,8 +49,8 @@ app.post('/api/webhook', function(req, res) {
         break;
 
         case '/kaljoja':
-            db.collections.Drinks
-            .fetch()
+            bookshelf.knex('drinks')
+            .count('id')
             .then(function fetchOk(count) {
                 console.log(count);
                 _sendMessage(msg.chat.id, 'Kaljoja: ' + count);
