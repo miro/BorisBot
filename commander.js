@@ -49,11 +49,23 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                     // everyone doesn't have username set - use first_name in that case
                     var username = _.isUndefined(msg.from.username) ? msg.from.first_name : msg.from.username;
 
-                    commander.sendMessage(
-                        msg.chat.id,
-                        'Kippis!! Se olikin jo Spännin ' + drinksToday + '. tälle päivälle, ja ' +
-                        drinksTodayForThisUser + '. käyttäjälle @' + msg.from.username
-                    );
+                    var userPosition = commander.getUserCurrentPosition(drinksCollection, userId);
+
+                    // form the message
+                    var returnMessage = 'Kippis!!';
+
+                    if (drinksTodayForThisUser === 1) {
+                        returnMessage += ' Päivä käyntiin!';
+                    }
+
+                    returnMessage += ' Se olikin jo Spännin ' + drinksToday + '. tälle päivälle, ja ' +
+                    drinksTodayForThisUser + '. käyttäjälle @' + msg.from.username + '.\n';
+
+                    if (!_.isUndefined(userPosition)) {
+                        returnMessage += 'Tällä suorituksella ollaan kiinni tämän päivän ' + userPosition + '. sijassa.';
+                    }
+
+                    commander.sendMessage(msg.chat.id, returnMessage);
                     resolve();
                 })
                 .error(function(e) {
@@ -121,6 +133,23 @@ commander.registerDrink = function(drinker, drinkType) {
 
 commander.getDrinksAmount = function() {
     return db.bookshelf.knex('drinks').count('id');
+};
+
+commander.getUserCurrentPosition = function(collection, userId) {
+    var grouped = _.groupBy(collection.models, function(model) {
+        return model.get('creatorId');
+    });
+
+    var position = 1;
+    for (var id in grouped) {
+        if (parseInt(id, 10) === userId) {
+            return position;
+        }
+        position += 1;
+    }
+
+    // no match found...?
+    return undefined;
 };
 
 commander.sendMessage = function(chatId, text) {
