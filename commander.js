@@ -46,7 +46,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                     }).length;
 
                     // everyone doesn't have username set - use first_name in that case
-                    var username = !msg.from.username ? msg.from.first_name : msg.from.username;
+                    var username = _.isUndefined(msg.from.username) ? msg.from.first_name : msg.from.username;
 
                     commander.sendMessage(
                         msg.chat.id,
