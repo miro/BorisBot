@@ -79,6 +79,7 @@ db.getGroupDrinkTimesSince = function(chatGroupId, timestamp) {
     });
 };
 
+
 db.getTotalDrinksAmount = function() {
     return schema.bookshelf.knex('drinks').count('id');
 };
