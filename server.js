@@ -2,6 +2,7 @@ var express     = require('express');
 var bodyParser  = require('body-parser');
 var request     = require('request');
 var _           = require('lodash');
+var moment      = require('moment');
 
 var commander   = require('./commander');
 var cfg         = require('./config');
@@ -28,18 +29,25 @@ app.post('/api/webhook', function(req, res) {
         return;
     }
 
-    var commandParts = msg.text.split(' ');
+    // parse command & possible parameters
+    var userInput = msg.text.split(' ');
+    var userCommand = userInput.shift();
+    var userCommandParams = userInput.join(' ');
 
-    switch (commandParts[0]) {
+
+    switch (userCommand) {
         case '/kalja':
         case '/kippis':
-            commander.registerDrink(msg.from.id, commandParts[1])
+            commander.registerDrink(msg.from.id, userCommandParams) 
             .then(function(drinksCollection) {
 
                 var drinksToday = drinksCollection.models.length;
                 var drinksTodayForThisUser = _.filter(drinksCollection.models, function(model) {
                     return model.attributes.creatorId === msg.from.id;
                 }).length;
+
+                // everyone doesn't have username set - use first_name in that case
+                var username = !msg.from.username ? msg.from.first_name : msg.from.username;
 
                 commander.sendMessage(
                     msg.chat.id,
@@ -58,6 +66,14 @@ app.post('/api/webhook', function(req, res) {
             commander.getDrinksAmount()
             .then(function fetchOk(result) {
                 commander.sendMessage(msg.chat.id, 'Kaikenkaikkiaan juotu ' + result[0].count + ' juomaa');
+                res.sendStatus(200);
+            });
+        break;
+
+        case '/otinko':
+            commander.getPersonalDrinkLog(msg.from.id)
+            .then(function(logString) {
+                commander.sendMessage(msg.from.id, logString);
                 res.sendStatus(200);
             });
         break;
@@ -83,15 +99,10 @@ app.use(function handle404(err, req, res, next) { // 404
     if (err.status !== 404) return next(err);
     res.send(err.message || '404 Content not found - but such are the mysteries of the Internet sometimes');
 });
-
 app.use(function genericErrorHandler(err, req, res, next) { // 500
-    if (_.isUndefined(err.status)) {
-        err.status = 500;
-    }
-
-    console.log(err); // log the error
-
-    res.status(err.status).send(err); // send response
+    err.status = _.isUndefined(err.status) ? 500 : err.status;
+    console.log('Error catched by genericErrorHandler!', err);
+    res.status(err.status).send(err);
 });
 
 
@@ -109,7 +120,7 @@ request.post(cfg.tgApiUrl + '/setWebhook', { form: { url: cfg.webhookUrl }},
 
 // Run test sequence
 request(cfg.tgApiUrl + '/getMe', function (error, res, body) {
-    console.log('getme test', body);
+    console.log('I Am', body);
 });
-commander.sendMessage(cfg.allowedGroups.testChatId, 'Reboot! ' + Date());
+commander.sendMessage(cfg.allowedGroups.testChatId, 'Reboot! ' + Date() + '\nWebhook set to ' + cfg.webhookUrl);
 
