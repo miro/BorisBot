@@ -11,10 +11,14 @@ var db          = require('./database');
 
 var commander = {};
 
+// "Public" functions
+//
 
 commander.registerDrink = function(drinker, drinkType) {
     // fallback to 'kalja' if no drinkType is set
     drinkType = !drinkType ? 'kalja' : drinkType;
+
+    var tresholdMoment = _getTresholdMoment();
 
     return new Promise(function(resolve, reject) {
         var drink = new db.models.Drink({
@@ -24,7 +28,7 @@ commander.registerDrink = function(drinker, drinkType) {
         .save()
         .then(function() {
             db.collections.Drinks
-            .query('where', 'timestamp', '>=', moment().format('YYYY-MM-DD'))
+            .query('where', 'timestamp', '>=', tresholdMoment.toJSON())
             .fetch()
             .then(function(collection) {
                 resolve(collection);
@@ -47,6 +51,21 @@ commander.sendMessage = function(chatId, text) {
         text: text
     }});
 };
+
+
+// Helper functions
+//
+var _getTresholdMoment = function() {
+    var treshold = moment().hour(9).minute(0);
+
+    var tresholdIsInFuture = treshold.isAfter(moment());
+    if (tresholdIsInFuture) {
+        treshold.subtract(1, 'day');
+    }
+
+    return treshold;
+};
+
 
 
 module.exports = commander;
