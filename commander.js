@@ -74,6 +74,12 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                 commander.getPersonalDrinkLog(msg.from.id)
                 .then(function(logString) {
                     commander.sendMessage(msg.from.id, logString);
+
+                    if (_eventIsFromGroup(msg)) {
+                        commander.sendMessage(msg.from.id, 'PS: anna "' + 
+                            userCommand + '"-komento suoraan minulle, älä spämmää turhaan ryhmächättiä!');
+                    }
+
                     resolve();
                 });
             break;
@@ -159,6 +165,10 @@ var _getTresholdMoment = function() {
     return treshold;
 };
 
+// Returns true, if this event is triggered from group
+var _eventIsFromGroup = function(msg) {
+    return !_.isUndefined(msg.chat.title);
+};
 
 
 module.exports = commander;
