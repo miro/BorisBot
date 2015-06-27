@@ -86,15 +86,10 @@ app.use(function handle404(err, req, res, next) { // 404
     if (err.status !== 404) return next(err);
     res.send(err.message || '404 Content not found - but such are the mysteries of the Internet sometimes');
 });
-
 app.use(function genericErrorHandler(err, req, res, next) { // 500
-    if (_.isUndefined(err.status)) {
-        err.status = 500;
-    }
-
-    console.log(err); // log the error
-
-    res.status(err.status).send(err); // send response
+    err.status = _.isUndefined(err.status) ? 500 : err.status;
+    console.log('Error catched by genericErrorHandler!', err);
+    res.status(err.status).send(err);
 });
 
 
