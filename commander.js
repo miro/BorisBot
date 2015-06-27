@@ -142,8 +142,8 @@ commander.getPersonalDrinkLog = function(userId) {
             var message = 'Juomasi viimeisen 48h ajalta:\n-----------\n';
 
             _.each(collection.models, function(model) {
-                message += model.get('drinkType') + ' - ';
-                message += moment(model.get('timestamp')).tz('Europe/Helsinki').format('HH:mm') + '\n';
+                message += moment(model.get('timestamp')).tz('Europe/Helsinki').format('HH:mm');
+                message += ' - ' + model.get('drinkType') + '\n';
             });
 
             resolve(message);
