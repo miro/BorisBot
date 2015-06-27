@@ -3,7 +3,7 @@
 
 var Promise     = require('bluebird');
 var request     = require('request');
-var moment      = require('moment');
+var moment      = require('moment-timezone');
 var _           = require('lodash');
 
 var cfg         = require('./config');
@@ -66,8 +66,8 @@ commander.getPersonalDrinkLog = function(userId) {
             var message = 'Juomasi viimeisen 24h ajalta:\n-----------\n';
 
             _.each(collection.models, function(model) {
-                message += model.attributes.drinkType + ' - ';
-                message += moment(model.attributes.timestamp).format('HH:mm') + '\n';
+                message += model.get('drinkType') + ' - ';
+                message += moment(model.get('timestamp')).tz('Europe/Helsinki').format('HH:mm') + '\n';
             });
 
             resolve(message);
