@@ -33,16 +33,17 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
         var userCommand = userInput.shift();
         var userCommandParams = userInput.join(' ');
 
+        var userId = msg.from.id;
 
         switch (userCommand) {
             case '/kalja':
             case '/kippis':
-                commander.registerDrink(msg.from.id, userCommandParams) 
+                commander.registerDrink(userId, userCommandParams) 
                 .then(function(drinksCollection) {
 
                     var drinksToday = drinksCollection.models.length;
                     var drinksTodayForThisUser = _.filter(drinksCollection.models, function(model) {
-                        return model.attributes.creatorId === msg.from.id;
+                        return model.attributes.creatorId === userId;
                     }).length;
 
                     // everyone doesn't have username set - use first_name in that case
@@ -71,12 +72,12 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
             break;
 
             case '/otinko':
-                commander.getPersonalDrinkLog(msg.from.id)
+                commander.getPersonalDrinkLog(userId)
                 .then(function(logString) {
-                    commander.sendMessage(msg.from.id, logString);
+                    commander.sendMessage(userId, logString);
 
                     if (_eventIsFromGroup(msg)) {
-                        commander.sendMessage(msg.from.id, 'PS: anna "' + 
+                        commander.sendMessage(userId, 'PS: anna "' + 
                             userCommand + '"-komento suoraan minulle, älä spämmää turhaan ryhmächättiä!');
                     }
 
