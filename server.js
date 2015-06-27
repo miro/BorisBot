@@ -41,6 +41,9 @@ app.post('/api/webhook', function(req, res) {
                     return model.attributes.creatorId === msg.from.id;
                 }).length;
 
+                // everyone doesn't have username set - use first_name in that case
+                var username = !msg.from.username ? msg.from.first_name : msg.from.username;
+
                 commander.sendMessage(
                     msg.chat.id,
                     'Kippis!! Se olikin jo Spännin ' + drinksToday + '. tälle päivälle, ja ' +
