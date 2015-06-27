@@ -2,7 +2,6 @@ var express     = require('express');
 var bodyParser  = require('body-parser');
 var request     = require('request');
 var _           = require('lodash');
-var moment      = require('moment');
 
 var commander   = require('./commander');
 var cfg         = require('./config');
@@ -19,69 +18,13 @@ app.use(bodyParser.json()); // parse json
 // # Routes
 //
 app.post('/api/webhook', function(req, res) {
-    console.log('webhook event!', req.body);
-
-    var msg = req.body.message;
-
-    if (!msg.text) {
-        console.log('no text on event, ignore');
+    commander.handleWebhookEvent(req.body.message)
+    .then(function() {
         res.sendStatus(200);
-        return;
-    }
-
-    // parse command & possible parameters
-    var userInput = msg.text.split(' ');
-    var userCommand = userInput.shift();
-    var userCommandParams = userInput.join(' ');
-
-
-    switch (userCommand) {
-        case '/kalja':
-        case '/kippis':
-            commander.registerDrink(msg.from.id, userCommandParams) 
-            .then(function(drinksCollection) {
-
-                var drinksToday = drinksCollection.models.length;
-                var drinksTodayForThisUser = _.filter(drinksCollection.models, function(model) {
-                    return model.attributes.creatorId === msg.from.id;
-                }).length;
-
-                // everyone doesn't have username set - use first_name in that case
-                var username = !msg.from.username ? msg.from.first_name : msg.from.username;
-
-                commander.sendMessage(
-                    msg.chat.id,
-                    'Kippis!! Se olikin jo Spännin ' + drinksToday + '. tälle päivälle, ja ' +
-                    drinksTodayForThisUser + '. käyttäjälle @' + msg.from.username
-                );
-                res.sendStatus(200);
-            })
-            .error(function(e) {
-                commander.sendMessage(msg.chat.id, 'Kippis failed');
-                res.sendStatus(200);
-            });
-        break;
-
-        case '/kaljoja':
-            commander.getDrinksAmount()
-            .then(function fetchOk(result) {
-                commander.sendMessage(msg.chat.id, 'Kaikenkaikkiaan juotu ' + result[0].count + ' juomaa');
-                res.sendStatus(200);
-            });
-        break;
-
-        case '/otinko':
-            commander.getPersonalDrinkLog(msg.from.id)
-            .then(function(logString) {
-                commander.sendMessage(msg.from.id, logString);
-                res.sendStatus(200);
-            });
-        break;
-
-        default:
-            console.log('! Unknown command', msg.text);
-            res.sendStatus(200);
-    }
+    })
+    .error(function() {
+        res.sendStatus(500);
+    });
 });
 
 // Catch all 404 route (this needs to be last)

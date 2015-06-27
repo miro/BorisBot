@@ -45,14 +45,14 @@ models.Expl = bookshelf.Model.extend({
 
 var collections = {};
 collections.Drinks = bookshelf.Collection.extend({
-	model: models.Drink
+    model: models.Drink
 });
 collections.Expls = bookshelf.Collection.extend({
-	model: models.Expl
+    model: models.Expl
 });
 
 module.exports = {
-	bookshelf: bookshelf,
-	models: models,
-	collections: collections
+    bookshelf: bookshelf,
+    models: models,
+    collections: collections
 };

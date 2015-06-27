@@ -15,6 +15,95 @@ var commander = {};
 // "Public" functions
 //
 
+// This function handle
+commander.handleWebhookEvent = function runUserCommand(msg) {
+    return new Promise(function (resolve, reject) {
+        // TODO check the sender
+        console.log('webhook event!', msg);
+
+
+        if (!msg.text) {
+            console.log('no text on event, ignore');
+            resolve();
+            return;
+        }
+
+        // parse command & possible parameters
+        var userInput = msg.text.split(' ');
+        var userCommand = userInput.shift();
+        var userCommandParams = userInput.join(' ');
+
+        var userId = msg.from.id;
+
+        switch (userCommand) {
+            case '/kalja':
+            case '/kippis':
+                commander.registerDrink(userId, userCommandParams) 
+                .then(function(drinksCollection) {
+
+                    var drinksToday = drinksCollection.models.length;
+                    var drinksTodayForThisUser = _.filter(drinksCollection.models, function(model) {
+                        return model.attributes.creatorId === userId;
+                    }).length;
+
+                    // everyone doesn't have username set - use first_name in that case
+                    var username = _.isUndefined(msg.from.username) ? msg.from.first_name : msg.from.username;
+
+                    var userPosition = commander.getUserCurrentPosition(drinksCollection, userId);
+
+                    // form the message
+                    var returnMessage = 'Kippis!!';
+
+                    if (drinksTodayForThisUser === 1) {
+                        returnMessage += ' Päivä käyntiin!';
+                    }
+
+                    returnMessage += ' Se olikin jo Spännin ' + drinksToday + '. tälle päivälle, ja ' +
+                    drinksTodayForThisUser + '. käyttäjälle @' + msg.from.username + '.\n';
+
+                    if (!_.isUndefined(userPosition)) {
+                        returnMessage += 'Tällä suorituksella ollaan kiinni tämän päivän ' + userPosition + '. sijassa.';
+                    }
+
+                    commander.sendMessage(msg.chat.id, returnMessage);
+                    resolve();
+                })
+                .error(function(e) {
+                    commander.sendMessage(msg.chat.id, 'Kippis failed');
+                    reject();
+                });
+            break;
+
+            case '/kaljoja':
+                // TODO "joista x viimeisen tunnin aikana"?
+                commander.getDrinksAmount()
+                .then(function fetchOk(result) {
+                    commander.sendMessage(msg.chat.id, 'Kaikenkaikkiaan juotu ' + result[0].count + ' juomaa');
+                    resolve();
+                });
+            break;
+
+            case '/otinko':
+                commander.getPersonalDrinkLog(userId)
+                .then(function(logString) {
+                    commander.sendMessage(userId, logString);
+
+                    if (_eventIsFromGroup(msg)) {
+                        commander.sendMessage(userId, 'PS: anna "' + 
+                            userCommand + '"-komento suoraan minulle, älä spämmää turhaan ryhmächättiä!');
+                    }
+
+                    resolve();
+                });
+            break;
+
+            default:
+                console.log('! Unknown command', msg.text);
+                resolve();
+        }
+    });
+};
+
 commander.registerDrink = function(drinker, drinkType) {
     // fallback to 'kalja' if no drinkType is set
     drinkType = !drinkType ? 'kalja' : drinkType;
@@ -46,6 +135,23 @@ commander.getDrinksAmount = function() {
     return db.bookshelf.knex('drinks').count('id');
 };
 
+commander.getUserCurrentPosition = function(collection, userId) {
+    var grouped = _.groupBy(collection.models, function(model) {
+        return model.get('creatorId');
+    });
+
+    var position = 1;
+    for (var id in grouped) {
+        if (parseInt(id, 10) === userId) {
+            return position;
+        }
+        position += 1;
+    }
+
+    // no match found...?
+    return undefined;
+};
+
 commander.sendMessage = function(chatId, text) {
     request.post(cfg.tgApiUrl + '/sendMessage', { form: {
         chat_id: chatId,
@@ -59,15 +165,15 @@ commander.getPersonalDrinkLog = function(userId) {
         db.collections.Drinks
         .query(function(qb) {
             qb.where({ creatorId: userId })
-            .andWhere('timestamp', '>=', moment().subtract(1, 'day').toJSON());
+            .andWhere('timestamp', '>=', moment().subtract(2, 'day').toJSON());
         })
         .fetch()
         .then(function(collection) {
-            var message = 'Juomasi viimeisen 24h ajalta:\n-----------\n';
+            var message = 'Juomasi viimeisen 48h ajalta:\n-----------\n';
 
             _.each(collection.models, function(model) {
-                message += model.get('drinkType') + ' - ';
-                message += moment(model.get('timestamp')).tz('Europe/Helsinki').format('HH:mm') + '\n';
+                message += moment(model.get('timestamp')).tz('Europe/Helsinki').format('HH:mm');
+                message += ' - ' + model.get('drinkType') + '\n';
             });
 
             resolve(message);
@@ -89,6 +195,10 @@ var _getTresholdMoment = function() {
     return treshold;
 };
 
+// Returns true, if this event is triggered from group
+var _eventIsFromGroup = function(msg) {
+    return !_.isUndefined(msg.chat.title);
+};
 
 
 module.exports = commander;
