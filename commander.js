@@ -15,6 +15,76 @@ var commander = {};
 // "Public" functions
 //
 
+// This function handle
+commander.handleWebhookEvent = function runUserCommand(msg) {
+    return new Promise(function (resolve, reject) {
+        // TODO check the sender
+        console.log('webhook event!', msg);
+
+
+        if (!msg.text) {
+            console.log('no text on event, ignore');
+            resolve();
+            return;
+        }
+
+        // parse command & possible parameters
+        var userInput = msg.text.split(' ');
+        var userCommand = userInput.shift();
+        var userCommandParams = userInput.join(' ');
+
+
+        switch (userCommand) {
+            case '/kalja':
+            case '/kippis':
+                commander.registerDrink(msg.from.id, userCommandParams) 
+                .then(function(drinksCollection) {
+
+                    var drinksToday = drinksCollection.models.length;
+                    var drinksTodayForThisUser = _.filter(drinksCollection.models, function(model) {
+                        return model.attributes.creatorId === msg.from.id;
+                    }).length;
+
+                    // everyone doesn't have username set - use first_name in that case
+                    var username = !msg.from.username ? msg.from.first_name : msg.from.username;
+
+                    commander.sendMessage(
+                        msg.chat.id,
+                        'Kippis!! Se olikin jo Spännin ' + drinksToday + '. tälle päivälle, ja ' +
+                        drinksTodayForThisUser + '. käyttäjälle @' + msg.from.username
+                    );
+                    resolve();
+                })
+                .error(function(e) {
+                    commander.sendMessage(msg.chat.id, 'Kippis failed');
+                    reject();
+                });
+            break;
+
+            case '/kaljoja':
+                // TODO "joista x viimeisen tunnin aikana"?
+                commander.getDrinksAmount()
+                .then(function fetchOk(result) {
+                    commander.sendMessage(msg.chat.id, 'Kaikenkaikkiaan juotu ' + result[0].count + ' juomaa');
+                    resolve();
+                });
+            break;
+
+            case '/otinko':
+                commander.getPersonalDrinkLog(msg.from.id)
+                .then(function(logString) {
+                    commander.sendMessage(msg.from.id, logString);
+                    resolve();
+                });
+            break;
+
+            default:
+                console.log('! Unknown command', msg.text);
+                resolve();
+        }
+    });
+};
+
 commander.registerDrink = function(drinker, drinkType) {
     // fallback to 'kalja' if no drinkType is set
     drinkType = !drinkType ? 'kalja' : drinkType;
