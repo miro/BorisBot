@@ -4,6 +4,7 @@
 var Promise     = require('bluebird');
 var request     = require('request');
 var moment      = require('moment');
+var _           = require('lodash');
 
 var cfg         = require('./config');
 var db          = require('./database');
@@ -53,12 +54,25 @@ commander.sendMessage = function(chatId, text) {
 };
 
 commander.getPersonalDrinkLog = function(userId) {
-    return db.collections.Drinks
-    .query(function(qb) {
-        qb.where({ creatorId: userId })
-        .andWhere('timestamp', '>=', moment().subtract(1, 'day').toJSON());
-    })
-    .fetch();
+    return new Promise(function (resolve, reject) {
+        
+        db.collections.Drinks
+        .query(function(qb) {
+            qb.where({ creatorId: userId })
+            .andWhere('timestamp', '>=', moment().subtract(1, 'day').toJSON());
+        })
+        .fetch()
+        .then(function(collection) {
+            var message = 'Juomasi viimeisen 24h ajalta:\n-----------\n';
+
+            _.each(collection.models, function(model) {
+                message += model.attributes.drinkType + ' - ';
+                message += moment(model.attributes.timestamp).format('HH:mm') + '\n';
+            });
+
+            resolve(message);
+        });
+    });
 };
 
 

@@ -72,18 +72,10 @@ app.post('/api/webhook', function(req, res) {
 
         case '/otinko':
             commander.getPersonalDrinkLog(msg.from.id)
-            .then(function (collection) {
-                console.log('get personal drinks', collection.models);
-                var message = 'Juomasi viimeisen 24h ajalta:\n-----------\n';
-
-                _.each(collection.models, function(model) {
-                    message += model.attributes.drinkType + ' - ';
-                    message += moment(model.attributes.timestamp).format('HH:mm') + '\n';
-                });
-
-                commander.sendMessage(msg.from.id, message);
+            .then(function(logString) {
+                commander.sendMessage(msg.from.id, logString);
                 res.sendStatus(200);
-            })
+            });
         break;
 
         default:
