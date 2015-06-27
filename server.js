@@ -28,12 +28,16 @@ app.post('/api/webhook', function(req, res) {
         return;
     }
 
-    var commandParts = msg.text.split(' ');
+    // parse command & possible parameters
+    var userInput = msg.text.split(' ');
+    var userCommand = userInput.shift();
+    var userCommandParams = userInput.join(' ');
 
-    switch (commandParts[0]) {
+
+    switch (userCommand) {
         case '/kalja':
         case '/kippis':
-            commander.registerDrink(msg.from.id, commandParts[1])
+            commander.registerDrink(msg.from.id, userCommandParams) 
             .then(function(drinksCollection) {
 
                 var drinksToday = drinksCollection.models.length;
