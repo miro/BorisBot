@@ -135,11 +135,11 @@ commander.getPersonalDrinkLog = function(userId) {
         db.collections.Drinks
         .query(function(qb) {
             qb.where({ creatorId: userId })
-            .andWhere('timestamp', '>=', moment().subtract(1, 'day').toJSON());
+            .andWhere('timestamp', '>=', moment().subtract(2, 'day').toJSON());
         })
         .fetch()
         .then(function(collection) {
-            var message = 'Juomasi viimeisen 24h ajalta:\n-----------\n';
+            var message = 'Juomasi viimeisen 48h ajalta:\n-----------\n';
 
             _.each(collection.models, function(model) {
                 message += model.get('drinkType') + ' - ';
