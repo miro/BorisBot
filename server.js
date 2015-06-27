@@ -2,6 +2,7 @@ var express     = require('express');
 var bodyParser  = require('body-parser');
 var request     = require('request');
 var _           = require('lodash');
+var moment      = require('moment');
 
 var commander   = require('./commander');
 var cfg         = require('./config');
@@ -67,6 +68,22 @@ app.post('/api/webhook', function(req, res) {
                 commander.sendMessage(msg.chat.id, 'Kaikenkaikkiaan juotu ' + result[0].count + ' juomaa');
                 res.sendStatus(200);
             });
+        break;
+
+        case '/otinko':
+            commander.getPersonalDrinkLog(msg.from.id)
+            .then(function (collection) {
+                console.log('get personal drinks', collection.models);
+                var message = 'Juomasi viimeisen 24h ajalta:\n-----------\n';
+
+                _.each(collection.models, function(model) {
+                    message += model.attributes.drinkType + ' - ';
+                    message += moment(model.attributes.timestamp).format('HH:mm') + '\n';
+                });
+
+                commander.sendMessage(msg.from.id, message);
+                res.sendStatus(200);
+            })
         break;
 
         default:

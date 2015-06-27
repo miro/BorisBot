@@ -52,6 +52,15 @@ commander.sendMessage = function(chatId, text) {
     }});
 };
 
+commander.getPersonalDrinkLog = function(userId) {
+    return db.collections.Drinks
+    .query(function(qb) {
+        qb.where({ creatorId: userId })
+        .andWhere('timestamp', '>=', moment().subtract(1, 'day').toJSON());
+    })
+    .fetch();
+};
+
 
 // Helper functions
 //
