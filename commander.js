@@ -21,20 +21,31 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
         // TODO check the sender
         console.log('webhook event!', msg);
 
-
         if (!msg.text) {
             console.log('no text on event, ignore');
             resolve();
             return;
         }
 
+        var userId = msg.from.id;
+        var chatGroupId = _eventIsFromGroup(msg) ? msg.chat.id : null;
+
+        // check if user is ignored
+        var userIsIgnored = cfg.ignoredUsers.indexOf(userId) >= 0;
+        if (userIsIgnored) {
+            // do nothing
+            console.log('! Ignored user tried to trigger command');
+            resolve();
+            return;
+        }
+
+
         // parse command & possible parameters
         var userInput = msg.text.split(' ');
         var userCommand = userInput.shift();
         var userCommandParams = userInput.join(' ').substring(0,140);
 
-        var userId = msg.from.id;
-        var chatGroupId = _eventIsFromGroup(msg) ? msg.chat.id : null;
+        
 
         switch (userCommand) {
             case '/kalja':
