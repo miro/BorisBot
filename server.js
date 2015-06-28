@@ -18,6 +18,8 @@ app.use(bodyParser.json()); // parse json
 // # Routes
 //
 app.post('/api/webhook', function(req, res) {
+    console.log('host', req.get('host'), 'origin', req.get('origin'));
+
     commander.handleWebhookEvent(req.body.message)
     .then(function() {
         res.sendStatus(200);
