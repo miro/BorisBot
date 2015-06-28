@@ -31,7 +31,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
         // parse command & possible parameters
         var userInput = msg.text.split(' ');
         var userCommand = userInput.shift();
-        var userCommandParams = userInput.join(' ');
+        var userCommandParams = userInput.join(' ').substring(0,140);
 
         var userId = msg.from.id;
         var chatGroupId = _eventIsFromGroup(msg) ? msg.chat.id : null;
