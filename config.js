@@ -40,6 +40,8 @@ cfg.allowedGroups = {
     mainChatId: -8573374, // "SpänniMobi"
 };
 
+cfg.ignoredUsers = [50446519]; // users whom commands are ignored
+
 // Port which the Boris server will listen to
 cfg.serverPort = process.env.PORT || 3000;
 

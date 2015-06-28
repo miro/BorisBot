@@ -14,7 +14,9 @@ bookshelf.knex.schema.hasTable('drinks').then(function(exists) {
             t.integer('creatorId'); // later: reference to user-table?
             t.integer('chatGroupId');
 
-            t.string('drinkType', 50);
+            t.integer('messageId');
+
+            t.string('drinkType', 140);
             t.integer('drinkValue').defaultTo(10);
         });
     }

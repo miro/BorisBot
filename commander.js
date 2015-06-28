@@ -21,25 +21,36 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
         // TODO check the sender
         console.log('webhook event!', msg);
 
-
         if (!msg.text) {
             console.log('no text on event, ignore');
             resolve();
             return;
         }
 
+        var userId = msg.from.id;
+        var chatGroupId = _eventIsFromGroup(msg) ? msg.chat.id : null;
+
+        // check if user is ignored
+        var userIsIgnored = cfg.ignoredUsers.indexOf(userId) >= 0;
+        if (userIsIgnored) {
+            // do nothing
+            console.log('! Ignored user tried to trigger command');
+            resolve();
+            return;
+        }
+
+
         // parse command & possible parameters
         var userInput = msg.text.split(' ');
         var userCommand = userInput.shift();
-        var userCommandParams = userInput.join(' ');
+        var userCommandParams = userInput.join(' ').substring(0,140);
 
-        var userId = msg.from.id;
-        var chatGroupId = _eventIsFromGroup(msg) ? msg.chat.id : null;
+        
 
         switch (userCommand) {
             case '/kalja':
             case '/kippis':
-                commander.registerDrink(chatGroupId, userId, userCommandParams) 
+                commander.registerDrink(msg.message_id, chatGroupId, userId, userCommandParams) 
                 .then(function(drinksCollection) {
 
                     var drinksToday = drinksCollection.models.length;
@@ -49,8 +60,6 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
 
                     // everyone doesn't have username set - use first_name in that case
                     var username = _.isUndefined(msg.from.username) ? msg.from.first_name : ('@' + msg.from.username);
-
-                    var userPosition = commander.getUserCurrentPosition(drinksCollection, userId);
 
                     // form the message
                     var returnMessage = 'Kippis!!';
@@ -73,11 +82,22 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
 
             case '/kaljoja':
                 // TODO "joista x viimeisen tunnin aikana"?
-                db.getTotalDrinksAmount()
-                .then(function fetchOk(result) {
-                    commander.sendMessage(msg.chat.id, 'Kaikenkaikkiaan juotu ' + result[0].count + ' juomaa');
-                    resolve();
-                });
+
+                if (_eventIsFromGroup(msg)) {
+                    db.getTotalDrinksAmountForGroup(msg.chat.id)
+                    .then(function fetchOk(result) {
+                        var output = msg.chat.title + ' on tuhonnut yhteensä ' + result[0].count + ' juomaa!';
+                        commander.sendMessage(msg.chat.id, output);
+                        resolve();
+                    });
+                }
+                else {
+                    db.getTotalDrinksAmount()
+                    .then(function fetchOk(result) {
+                        commander.sendMessage(msg.chat.id, 'Kaikenkaikkiaan juotu ' + result[0].count + ' juomaa');
+                        resolve();
+                    });
+                }
             break;
 
             case '/otinko':
@@ -101,7 +121,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
     });
 };
 
-commander.registerDrink = function(chatGroupId, drinker, drinkType) {
+commander.registerDrink = function(messageId, chatGroupId, drinker, drinkType) {
     // fallback to 'kalja' if no drinkType is set
     drinkType = !drinkType ? 'kalja' : drinkType;
 
@@ -109,7 +129,7 @@ commander.registerDrink = function(chatGroupId, drinker, drinkType) {
 
     return new Promise(function(resolve, reject) {
         // register drink
-        db.registerDrink(chatGroupId, drinker, drinkType)
+        db.registerDrink(messageId, chatGroupId, drinker, drinkType)
         .then(function() {
 
             // fetch drink data
@@ -123,23 +143,6 @@ commander.registerDrink = function(chatGroupId, drinker, drinkType) {
             reject(e);
         });
     });
-};
-
-commander.getUserCurrentPosition = function(collection, userId) {
-    var grouped = _.groupBy(collection.models, function(model) {
-        return model.get('creatorId');
-    });
-
-    var position = 1;
-    for (var id in grouped) {
-        if (parseInt(id, 10) === userId) {
-            return position;
-        }
-        position += 1;
-    }
-
-    // no match found...?
-    return undefined;
 };
 
 commander.sendMessage = function(chatId, text) {
