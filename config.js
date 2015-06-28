@@ -1,7 +1,9 @@
 var _           = require('lodash');
 
-var env         = process.env.NODE_ENV || 'development';
 var cfg = {}; // the cfg object which will be returned
+
+
+cfg.env = process.env.NODE_ENV || 'development';
 
 // Environment specific database configs
 var dbConfigs = {
@@ -25,11 +27,11 @@ var dbConfigs = {
 };
 
 // Determine the correct database config
-if (_.isUndefined(dbConfigs[env])) {
+if (_.isUndefined(dbConfigs[cfg.env])) {
     cfg.db = dbConfigs.development;
 }
 else {
-    cfg.db = dbConfigs[env];
+    cfg.db = dbConfigs[cfg.env];
 }
 
 
