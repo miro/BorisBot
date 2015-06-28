@@ -58,8 +58,8 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                     resolve();
                 })
                 .error(function(e) {
-                    commander.sendMessage(msg.chat.id, 'Kippis failed');
-                    reject();
+                    commander.sendMessage(msg.chat.id, 'Kippistely epäonnistui, yritä myöhemmin uudelleen');
+                    resolve();
                 });
             break;
 
