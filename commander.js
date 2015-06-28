@@ -59,7 +59,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                     }
 
                     returnMessage += ' Se olikin jo Spännin ' + drinksToday + '. tälle päivälle, ja ' +
-                    drinksTodayForThisUser + '. käyttäjälle @' + msg.from.username + '.\n';
+                    drinksTodayForThisUser + '. käyttäjälle ' + username + '.\n';
 
                     if (!_.isUndefined(userPosition)) {
                         returnMessage += 'Tällä suorituksella ollaan kiinni tämän päivän ' + userPosition + '. sijassa.';
