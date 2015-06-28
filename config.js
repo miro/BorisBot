@@ -1,9 +1,37 @@
-var cfg = {};
+var _           = require('lodash');
 
-cfg.db = { // database config
-    client: 'postgresql',
-    connection: process.env.DATABASE_URL
+var env         = process.env.NODE_ENV || 'development';
+var cfg = {}; // the cfg object which will be returned
+
+// Environment specific database configs
+var dbConfigs = {
+    development: {
+        client: 'postgresql',
+        connection: {
+            host: 'localhost',
+            user: 'borisbot',
+            port: 5432,
+            password: 'borisbot',
+            database: 'borisbot',
+            charset: 'utf8'
+        },
+
+        pool: { min: 0, max: 5 }
+    },
+
+    production: {
+        connection: process.env.DATABASE_URL
+    }
 };
+
+// Determine the correct database config
+if (_.isUndefined(dbConfigs[env])) {
+    cfg.db = dbConfigs.development;
+}
+else {
+    cfg.db = dbConfigs[env];
+}
+
 
 cfg.allowedGroups = {
     testChatId: -13232285, // "BorisTest"
