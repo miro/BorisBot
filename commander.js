@@ -73,11 +73,22 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
 
             case '/kaljoja':
                 // TODO "joista x viimeisen tunnin aikana"?
-                db.getTotalDrinksAmount()
-                .then(function fetchOk(result) {
-                    commander.sendMessage(msg.chat.id, 'Kaikenkaikkiaan juotu ' + result[0].count + ' juomaa');
-                    resolve();
-                });
+
+                if (_eventIsFromGroup(msg)) {
+                    db.getTotalDrinksAmountForGroup(msg.chat.id)
+                    .then(function fetchOk(result) {
+                        var output = msg.chat.title + ' on tuhonnut yhteensä ' + result[0].count + ' juomaa!';
+                        commander.sendMessage(msg.chat.id, output);
+                        resolve();
+                    });
+                }
+                else {
+                    db.getTotalDrinksAmount()
+                    .then(function fetchOk(result) {
+                        commander.sendMessage(msg.chat.id, 'Kaikenkaikkiaan juotu ' + result[0].count + ' juomaa');
+                        resolve();
+                    });
+                }
             break;
 
             case '/otinko':
@@ -130,13 +141,25 @@ commander.getUserCurrentPosition = function(collection, userId) {
         return model.get('creatorId');
     });
 
-    var position = 1;
-    for (var id in grouped) {
-        if (parseInt(id, 10) === userId) {
-            return position;
-        }
-        position += 1;
-    }
+    var keke = _.chain(collection.models)
+    .groupBy(function(model) {
+        return model.get('creatorId');
+    })
+    .sortBy(function(item, key) {
+        console.log(key);
+        return key;
+    });
+
+    console.log('keke', keke.value());
+
+    // var position = 1;
+    // for (var id in sorted) {
+    //     console.log(id);
+    //     if (parseInt(id, 10) === userId) {
+    //         return position;
+    //     }
+    //     position += 1;
+    // }
 
     // no match found...?
     return undefined;

@@ -43,6 +43,13 @@ db.getTotalDrinksAmount = function() {
     return schema.bookshelf.knex('drinks').count('id');
 };
 
+db.getTotalDrinksAmountForGroup = function(groupId) {
+    return schema.bookshelf
+    .knex('drinks')
+    .where({ chatGroupId: groupId })
+    .count('id');
+};
+
 
 // proxy stuff from schema 
 db.bookshelf = schema.bookshelf;
