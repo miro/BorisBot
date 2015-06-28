@@ -154,12 +154,15 @@ commander.getPersonalDrinkLog = function(userId) {
         
         db.getDrinksSinceTimestampForUser(moment().subtract(2, 'day'), userId)
         .then(function(collection) {
-            var message = 'Juomasi viimeisen 48h ajalta:\n-----------\n';
+            var message = 'Juomasi viimeisen 48h ajalta:\n\n';
 
             _.each(collection.models, function(model) {
                 message += moment(model.get('timestamp')).tz('Europe/Helsinki').format('HH:mm');
                 message += ' - ' + model.get('drinkType') + '\n';
             });
+
+            message += '______________\n';
+            message += 'Yhteensä ' + collection.models.length + ' kpl';
 
             resolve(message);
         });
