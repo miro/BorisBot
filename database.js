@@ -10,9 +10,10 @@ var db = {};
 //
 
 // Add new drink
-db.registerDrink = function(chatGroupId, drinker, drinkType) {
+db.registerDrink = function(messageId, chatGroupId, drinker, drinkType) {
 
     var drink = new schema.models.Drink({
+        messageId: messageId,
         chatGroupId: chatGroupId,
         creatorId: drinker,
         drinkType: drinkType

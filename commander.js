@@ -39,7 +39,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
         switch (userCommand) {
             case '/kalja':
             case '/kippis':
-                commander.registerDrink(chatGroupId, userId, userCommandParams) 
+                commander.registerDrink(msg.message_id, chatGroupId, userId, userCommandParams) 
                 .then(function(drinksCollection) {
 
                     var drinksToday = drinksCollection.models.length;
@@ -101,7 +101,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
     });
 };
 
-commander.registerDrink = function(chatGroupId, drinker, drinkType) {
+commander.registerDrink = function(messageId, chatGroupId, drinker, drinkType) {
     // fallback to 'kalja' if no drinkType is set
     drinkType = !drinkType ? 'kalja' : drinkType;
 
@@ -109,7 +109,7 @@ commander.registerDrink = function(chatGroupId, drinker, drinkType) {
 
     return new Promise(function(resolve, reject) {
         // register drink
-        db.registerDrink(chatGroupId, drinker, drinkType)
+        db.registerDrink(messageId, chatGroupId, drinker, drinkType)
         .then(function() {
 
             // fetch drink data
