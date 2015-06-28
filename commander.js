@@ -108,33 +108,33 @@ commander.registerDrink = function(messageId, chatGroupId, chatGroupTitle, userI
     // fallback to 'kalja' if no drinkType is set
     drinkType = !drinkType ? 'kalja' : drinkType;
 
-    var tresholdMoment = _getTresholdMoment();
-
     return new Promise(function(resolve, reject) {
-        // register drink
         db.registerDrink(messageId, chatGroupId, userId, drinkType)
         .then(function() {
-
-            // fetch drink data
-            db.getDrinksSinceTimestamp(tresholdMoment)
-            .then(function parseReturnMessageFromCollection(drinksCollection) {
+            db.getDrinksSinceTimestamp(_getTresholdMoment(), chatGroupId)
+            .then(function createReturnMessageFromCollection(drinksCollection) {
 
                 var drinksToday = drinksCollection.models.length;
                 var drinksTodayForThisUser = _.filter(drinksCollection.models, function(model) {
                     return model.attributes.creatorId === userId;
                 }).length;
 
-                // everyone doesn't have username set - use first_name in that case
-
-                // form the message
+                // # Form the message
                 var returnMessage = 'Kippis!!';
 
+                // was this todays first for the user?
                 if (drinksTodayForThisUser === 1) {
                     returnMessage += ' Päivä käyntiin!';
                 }
 
-                returnMessage += ' Se olikin jo Spännin ' + drinksToday + '. tälle päivälle, ja ' +
-                drinksTodayForThisUser + '. käyttäjälle ' + userName + '.\n';
+                // Is there a group title?
+                if (_.isNull(chatGroupTitle)) {
+                    returnMessage += ' Se olikin jo ' + drinksTodayForThisUser + '. tälle päivälle.\n';
+                }
+                else {
+                    returnMessage += ' Se olikin jo ryhmän ' + chatGroupTitle + ' ' + drinksToday + 
+                    '. tälle päivälle, ja ' + drinksTodayForThisUser + '. käyttäjälle ' + userName + '.\n';
+                }
 
                 resolve(returnMessage);
             });
