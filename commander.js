@@ -47,7 +47,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                     }).length;
 
                     // everyone doesn't have username set - use first_name in that case
-                    var username = _.isUndefined(msg.from.username) ? msg.from.first_name : msg.from.username;
+                    var username = _.isUndefined(msg.from.username) ? msg.from.first_name : ('@' + msg.from.username);
 
                     var userPosition = commander.getUserCurrentPosition(drinksCollection, userId);
 
