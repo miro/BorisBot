@@ -1,58 +1,52 @@
-var config = require('./config');
+// Imports
+var schema      = require('./schema');
 
-var Promise = require('bluebird');
-var knex = require('knex')(config.db);
-var bookshelf = require('bookshelf')(knex);
+var Promise     = require('bluebird');
 
-
-// Database definitions
-bookshelf.knex.schema.hasTable('drinks').then(function(exists) {
-    if (!exists) {
-        return bookshelf.knex.schema.createTable('drinks', function(t) {
-            t.increments('id').primary();
-            t.timestamp('timestamp').defaultTo(knex.raw('now()'));
-            t.integer('creatorId'); // later: reference to user-table?
-
-            t.string('drinkType', 50);
-            t.integer('drinkValue').defaultTo(10);
-        });
-    }
-});
-
-bookshelf.knex.schema.hasTable('expls').then(function(exists) {
-    if (!exists) {
-        return bookshelf.knex.schema.createTable('expls', function(t) {
-            t.increments('id').primary();
-            t.timestamp('timestamp').defaultTo(knex.raw('now()'));
-            t.integer('creatorId'); // later: reference to user-table?
-
-            t.string('key', 50);
-            t.string('value', 250);
-        });
-    }
-});
+var db = {};
 
 
-// Model definitions
-var models = {};
-models.Drink = bookshelf.Model.extend({
-    tableName: 'drinks'
-});
-models.Expl = bookshelf.Model.extend({
-    tableName: 'expls'
-});
+// # Drink related stuff
+//
 
+// Add new drink
+db.registerDrink = function(chatGroupId, drinker, drinkType) {
 
-var collections = {};
-collections.Drinks = bookshelf.Collection.extend({
-    model: models.Drink
-});
-collections.Expls = bookshelf.Collection.extend({
-    model: models.Expl
-});
+    var drink = new schema.models.Drink({
+        chatGroupId: chatGroupId,
+        creatorId: drinker,
+        drinkType: drinkType
+    })
+    .save();
 
-module.exports = {
-    bookshelf: bookshelf,
-    models: models,
-    collections: collections
+    return drink;
 };
+
+db.getDrinksSinceTimestamp = function(timestampMoment) {
+    return schema.collections.Drinks
+    .query('where', 'timestamp', '>=', timestampMoment.toJSON())
+    .fetch();
+};
+
+
+db.getDrinksSinceTimestampForUser = function(timestampMoment, userId) {
+    return schema.collections.Drinks
+    .query(function(qb) {
+        qb.where({ creatorId: userId })
+        .andWhere('timestamp', '>=', timestampMoment.toJSON());
+    })
+    .fetch()
+};
+
+db.getTotalDrinksAmount = function() {
+    return schema.bookshelf.knex('drinks').count('id');
+};
+
+
+// proxy stuff from schema 
+db.bookshelf = schema.bookshelf;
+db.models = schema.models;
+db.collections = schema.collections;
+
+
+module.exports = db;
