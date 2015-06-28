@@ -17,11 +17,11 @@ var dbConfigs = {
             database: 'borisbot',
             charset: 'utf8'
         },
-
         pool: { min: 0, max: 5 }
     },
 
     production: {
+        client: 'postgresql',
         connection: process.env.DATABASE_URL
     }
 };
