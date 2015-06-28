@@ -34,11 +34,12 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
         var userCommandParams = userInput.join(' ');
 
         var userId = msg.from.id;
+        var chatGroupId = _eventIsFromGroup(msg) ? msg.chat.id : null;
 
         switch (userCommand) {
             case '/kalja':
             case '/kippis':
-                commander.registerDrink(userId, userCommandParams) 
+                commander.registerDrink(chatGroupId, userId, userCommandParams) 
                 .then(function(drinksCollection) {
 
                     var drinksToday = drinksCollection.models.length;
@@ -100,7 +101,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
     });
 };
 
-commander.registerDrink = function(drinker, drinkType) {
+commander.registerDrink = function(chatGroupId, drinker, drinkType) {
     // fallback to 'kalja' if no drinkType is set
     drinkType = !drinkType ? 'kalja' : drinkType;
 
@@ -108,7 +109,7 @@ commander.registerDrink = function(drinker, drinkType) {
 
     return new Promise(function(resolve, reject) {
         // register drink
-        db.registerDrink(drinker, drinkType)
+        db.registerDrink(chatGroupId, drinker, drinkType)
         .then(function() {
 
             // fetch drink data

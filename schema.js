@@ -12,6 +12,7 @@ bookshelf.knex.schema.hasTable('drinks').then(function(exists) {
             t.increments('id').primary();
             t.timestamp('timestamp').defaultTo(knex.raw('now()'));
             t.integer('creatorId'); // later: reference to user-table?
+            t.integer('chatGroupId');
 
             t.string('drinkType', 50);
             t.integer('drinkValue').defaultTo(10);
