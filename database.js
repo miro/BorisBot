@@ -58,11 +58,4 @@ db.getTotalDrinksAmountForGroup = function(groupId) {
     .count('id');
 };
 
-
-// proxy stuff from schema 
-db.bookshelf = schema.bookshelf;
-db.models = schema.models;
-db.collections = schema.collections;
-
-
 module.exports = db;
