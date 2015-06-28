@@ -50,8 +50,6 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                     // everyone doesn't have username set - use first_name in that case
                     var username = _.isUndefined(msg.from.username) ? msg.from.first_name : ('@' + msg.from.username);
 
-                    var userPosition = commander.getUserCurrentPosition(drinksCollection, userId);
-
                     // form the message
                     var returnMessage = 'Kippis!!';
 
@@ -134,35 +132,6 @@ commander.registerDrink = function(messageId, chatGroupId, drinker, drinkType) {
             reject(e);
         });
     });
-};
-
-commander.getUserCurrentPosition = function(collection, userId) {
-    var grouped = _.groupBy(collection.models, function(model) {
-        return model.get('creatorId');
-    });
-
-    var keke = _.chain(collection.models)
-    .groupBy(function(model) {
-        return model.get('creatorId');
-    })
-    .sortBy(function(item, key) {
-        console.log(key);
-        return key;
-    });
-
-    console.log('keke', keke.value());
-
-    // var position = 1;
-    // for (var id in sorted) {
-    //     console.log(id);
-    //     if (parseInt(id, 10) === userId) {
-    //         return position;
-    //     }
-    //     position += 1;
-    // }
-
-    // no match found...?
-    return undefined;
 };
 
 commander.sendMessage = function(chatId, text) {
