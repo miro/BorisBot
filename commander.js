@@ -72,7 +72,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
 
             case '/kaljoja':
                 // TODO "joista x viimeisen tunnin aikana"?
-                commander.getDrinksAmount()
+                db.getTotalDrinksAmount()
                 .then(function fetchOk(result) {
                     commander.sendMessage(msg.chat.id, 'Kaikenkaikkiaan juotu ' + result[0].count + ' juomaa');
                     resolve();
@@ -107,28 +107,21 @@ commander.registerDrink = function(drinker, drinkType) {
     var tresholdMoment = _getTresholdMoment();
 
     return new Promise(function(resolve, reject) {
-        var drink = new db.models.Drink({
-            creatorId: drinker,
-            drinkType: drinkType
-        })
-        .save()
+        // register drink
+        db.registerDrink(drinker, drinkType)
         .then(function() {
-            db.collections.Drinks
-            .query('where', 'timestamp', '>=', tresholdMoment.toJSON())
-            .fetch()
+
+            // fetch drink data
+            db.getDrinksSinceTimestamp(tresholdMoment)
             .then(function(collection) {
                 resolve(collection);
-            })
-            .error(function(e) {
-                console.log('Error on drink collection fetch', e);
-                reject(e);
             });
+        })
+        .error(function(e) {
+            console.log('Error on registerDrink', e);
+            reject(e);
         });
     });
-};
-
-commander.getDrinksAmount = function() {
-    return db.bookshelf.knex('drinks').count('id');
 };
 
 commander.getUserCurrentPosition = function(collection, userId) {
@@ -158,12 +151,7 @@ commander.sendMessage = function(chatId, text) {
 commander.getPersonalDrinkLog = function(userId) {
     return new Promise(function (resolve, reject) {
         
-        db.collections.Drinks
-        .query(function(qb) {
-            qb.where({ creatorId: userId })
-            .andWhere('timestamp', '>=', moment().subtract(2, 'day').toJSON());
-        })
-        .fetch()
+        db.getDrinksSinceTimestampForUser(moment().subtract(2, 'day'), userId)
         .then(function(collection) {
             var message = 'Juomasi viimeisen 48h ajalta:\n-----------\n';
 
