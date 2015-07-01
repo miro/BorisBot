@@ -2,6 +2,7 @@
 var schema      = require('./schema');
 
 var Promise     = require('bluebird');
+var _           = require('lodash');
 
 var db = {};
 
@@ -23,9 +24,16 @@ db.registerDrink = function(messageId, chatGroupId, drinker, drinkType) {
     return drink;
 };
 
-db.getDrinksSinceTimestamp = function(timestampMoment) {
+db.getDrinksSinceTimestamp = function(timestampMoment, chatGroupId) {
+
     return schema.collections.Drinks
-    .query('where', 'timestamp', '>=', timestampMoment.toJSON())
+    .query(function(qb) {
+        qb.where('timestamp', '>=', timestampMoment.toJSON());
+
+        if (!_.isNull(chatGroupId)) {
+            qb.andWhere({ chatGroupId: chatGroupId });
+        }
+    })
     .fetch();
 };
 
@@ -49,12 +57,5 @@ db.getTotalDrinksAmountForGroup = function(groupId) {
     .where({ chatGroupId: groupId })
     .count('id');
 };
-
-
-// proxy stuff from schema 
-db.bookshelf = schema.bookshelf;
-db.models = schema.models;
-db.collections = schema.collections;
-
 
 module.exports = db;

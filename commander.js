@@ -27,8 +27,11 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
             return;
         }
 
+        // Parse metadata from the message
         var userId = msg.from.id;
+        var userName = _.isUndefined(msg.from.username) ? msg.from.first_name : ('@' + msg.from.username);
         var chatGroupId = _eventIsFromGroup(msg) ? msg.chat.id : null;
+        var chatGroupTitle = _eventIsFromGroup(msg) ? msg.chat.title : null;
 
         // check if user is ignored
         var userIsIgnored = cfg.ignoredUsers.indexOf(userId) >= 0;
@@ -45,38 +48,18 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
         var userCommand = userInput.shift();
         var userCommandParams = userInput.join(' ').substring(0,140);
 
-        
 
-        switch (userCommand) {
+        switch (userCommand.toLowerCase()) {
             case '/kalja':
             case '/kippis':
-                commander.registerDrink(msg.message_id, chatGroupId, userId, userCommandParams) 
-                .then(function(drinksCollection) {
-
-                    var drinksToday = drinksCollection.models.length;
-                    var drinksTodayForThisUser = _.filter(drinksCollection.models, function(model) {
-                        return model.attributes.creatorId === userId;
-                    }).length;
-
-                    // everyone doesn't have username set - use first_name in that case
-                    var username = _.isUndefined(msg.from.username) ? msg.from.first_name : ('@' + msg.from.username);
-
-                    // form the message
-                    var returnMessage = 'Kippis!!';
-
-                    if (drinksTodayForThisUser === 1) {
-                        returnMessage += ' Päivä käyntiin!';
-                    }
-
-                    returnMessage += ' Se olikin jo Spännin ' + drinksToday + '. tälle päivälle, ja ' +
-                    drinksTodayForThisUser + '. käyttäjälle ' + username + '.\n';
-
+                commander.registerDrink(msg.message_id, chatGroupId, chatGroupTitle, userId, userName, userCommandParams) 
+                .then(function(returnMessage) {
                     commander.sendMessage(msg.chat.id, returnMessage);
                     resolve();
                 })
                 .error(function(e) {
-                    commander.sendMessage(msg.chat.id, 'Kippis failed');
-                    reject();
+                    commander.sendMessage(msg.chat.id, 'Kippistely epäonnistui, yritä myöhemmin uudelleen');
+                    resolve();
                 });
             break;
 
@@ -121,26 +104,40 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
     });
 };
 
-commander.registerDrink = function(messageId, chatGroupId, drinker, drinkType) {
+commander.registerDrink = function(messageId, chatGroupId, chatGroupTitle, userId, userName, drinkType) {
     // fallback to 'kalja' if no drinkType is set
     drinkType = !drinkType ? 'kalja' : drinkType;
 
-    var tresholdMoment = _getTresholdMoment();
-
     return new Promise(function(resolve, reject) {
-        // register drink
-        db.registerDrink(messageId, chatGroupId, drinker, drinkType)
+        db.registerDrink(messageId, chatGroupId, userId, drinkType)
         .then(function() {
+            db.getDrinksSinceTimestamp(_getTresholdMoment(), chatGroupId)
+            .then(function createReturnMessageFromCollection(drinksCollection) {
 
-            // fetch drink data
-            db.getDrinksSinceTimestamp(tresholdMoment)
-            .then(function(collection) {
-                resolve(collection);
+                var drinksToday = drinksCollection.models.length;
+                var drinksTodayForThisUser = _.filter(drinksCollection.models, function(model) {
+                    return model.attributes.creatorId === userId;
+                }).length;
+
+                // # Form the message
+                var returnMessage = 'Kippis!!';
+
+                // was this todays first for the user?
+                if (drinksTodayForThisUser === 1) {
+                    returnMessage += ' Päivä käyntiin!';
+                }
+
+                // Is there a group title?
+                if (_.isNull(chatGroupTitle)) {
+                    returnMessage += ' Se olikin jo ' + drinksTodayForThisUser + '. tälle päivälle.\n';
+                }
+                else {
+                    returnMessage += ' Se olikin jo ryhmän ' + chatGroupTitle + ' ' + drinksToday + 
+                    '. tälle päivälle, ja ' + drinksTodayForThisUser + '. käyttäjälle ' + userName + '.\n';
+                }
+
+                resolve(returnMessage);
             });
-        })
-        .error(function(e) {
-            console.log('Error on registerDrink', e);
-            reject(e);
         });
     });
 };
@@ -157,12 +154,15 @@ commander.getPersonalDrinkLog = function(userId) {
         
         db.getDrinksSinceTimestampForUser(moment().subtract(2, 'day'), userId)
         .then(function(collection) {
-            var message = 'Juomasi viimeisen 48h ajalta:\n-----------\n';
+            var message = 'Juomasi viimeisen 48h ajalta:\n\n';
 
             _.each(collection.models, function(model) {
-                message += moment(model.get('timestamp')).tz('Europe/Helsinki').format('HH:mm');
+                message += moment(model.get('timestamp')).tz(cfg.botTimezone).format('HH:mm');
                 message += ' - ' + model.get('drinkType') + '\n';
             });
+
+            message += '______________\n';
+            message += 'Yhteensä ' + collection.models.length + ' kpl';
 
             resolve(message);
         });

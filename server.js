@@ -5,6 +5,7 @@ var _           = require('lodash');
 
 var commander   = require('./commander');
 var cfg         = require('./config');
+var msgHistory  = require('./messageHistory');
 
 var app         = express();
 
@@ -18,10 +19,19 @@ app.use(bodyParser.json()); // parse json
 // # Routes
 //
 app.post('/api/webhook', function(req, res) {
-    console.log('host', req.get('host'), 'origin', req.get('origin'));
+    var msg = req.body.message;
+    
+    if (!msgHistory.startProcessingMsg(msg.message_id)) {
+        // this message is already parsed
+        console.log('Message ignored due to messageHistory state!');
+        res.sendStatus(200);
+        return;
+    }
 
-    commander.handleWebhookEvent(req.body.message)
+    // Send message to the actual bot
+    commander.handleWebhookEvent(msg)
     .then(function() {
+        msgHistory.messageProcessed(msg.message_id);
         res.sendStatus(200);
     })
     .error(function() {
