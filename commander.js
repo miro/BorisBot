@@ -49,7 +49,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
         var userCommandParams = userInput.join(' ').substring(0,140);
 
 
-        switch (userCommand) {
+        switch (userCommand.toLowerCase()) {
             case '/kalja':
             case '/kippis':
                 commander.registerDrink(msg.message_id, chatGroupId, chatGroupTitle, userId, userName, userCommandParams) 
