@@ -9,6 +9,9 @@ var _           = require('lodash');
 var cfg         = require('./config');
 var db          = require('./database');
 
+// set default timezone to bot timezone
+moment.tz.setDefault(cfg.botTimezone);
+
 
 var commander = {};
 
@@ -157,7 +160,7 @@ commander.getPersonalDrinkLog = function(userId) {
             var message = 'Juomasi viimeisen 48h ajalta:\n\n';
 
             _.each(collection.models, function(model) {
-                message += moment(model.get('timestamp')).tz(cfg.botTimezone).format('HH:mm');
+                message += moment(model.get('timestamp')).format('HH:mm');
                 message += ' - ' + model.get('drinkType') + '\n';
             });
 
