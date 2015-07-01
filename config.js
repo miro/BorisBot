@@ -34,6 +34,9 @@ else {
     cfg.db = dbConfigs[cfg.env];
 }
 
+// The timezone in which the bot outputs all the datetimes
+cfg.botTimezone = 'Europe/Helsinki';
+
 
 cfg.allowedGroups = {
     testChatId: -13232285, // "BorisTest"

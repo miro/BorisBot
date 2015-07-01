@@ -27,9 +27,9 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
             return;
         }
 
+        // Parse metadata from the message
         var userId = msg.from.id;
         var userName = _.isUndefined(msg.from.username) ? msg.from.first_name : ('@' + msg.from.username);
-
         var chatGroupId = _eventIsFromGroup(msg) ? msg.chat.id : null;
         var chatGroupTitle = _eventIsFromGroup(msg) ? msg.chat.title : null;
 
@@ -157,7 +157,7 @@ commander.getPersonalDrinkLog = function(userId) {
             var message = 'Juomasi viimeisen 48h ajalta:\n\n';
 
             _.each(collection.models, function(model) {
-                message += moment(model.get('timestamp')).tz('Europe/Helsinki').format('HH:mm');
+                message += moment(model.get('timestamp')).tz(cfg.botTimezone).format('HH:mm');
                 message += ' - ' + model.get('drinkType') + '\n';
             });
 
