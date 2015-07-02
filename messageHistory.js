@@ -25,6 +25,9 @@ module.exports = {
         }
     },
 
+    messageProcessingFailed: function(messageId) {
+        delete this.inProgress[messageId];
+    },
     messageProcessed: function(messageId) {
         this.history.push(messageId);
 

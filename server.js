@@ -36,6 +36,7 @@ app.post('/api/webhook', function(req, res) {
         res.sendStatus(200);
     })
     .error(function() {
+        msgHistory.messageProcessingFailed(msg.message_id);
         res.sendStatus(500);
     });
 });
