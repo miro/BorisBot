@@ -28,15 +28,14 @@ module.exports = {
     messageProcessingFailed: function(messageId) {
         delete this.inProgress[messageId];
     },
+
     messageProcessed: function(messageId) {
-        this.history.push(messageId);
 
         delete this.inProgress[messageId];
 
+        this.history.push(messageId);
         if (this.history.length > this.historySize) {
             this.history.shift();
         }
-
-        console.log(this.history);
     }
 };
