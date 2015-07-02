@@ -21,7 +21,7 @@ app.use(bodyParser.json()); // parse json
 //
 app.post('/api/webhook', function(req, res) {
     var msg = req.body.message;
-    
+
     if (!msgHistory.startProcessingMsg(msg.message_id)) {
         // this message is already parsed
         console.log('Message ignored due to messageHistory state!');
@@ -36,6 +36,7 @@ app.post('/api/webhook', function(req, res) {
         res.sendStatus(200);
     })
     .error(function() {
+        msgHistory.messageProcessingFailed(msg.message_id);
         res.sendStatus(500);
     });
 });
@@ -68,9 +69,9 @@ app.listen(cfg.serverPort, function() {
 });
 
 // Subscribe webhook
-request.post(cfg.tgApiUrl + '/setWebhook', { form: { url: cfg.webhookUrl }}, 
+request.post(cfg.tgApiUrl + '/setWebhook', { form: { url: cfg.webhookUrl }},
     function (error, response, body) {
-        console.log('Webhook subscribtion callback:', response.body); 
+        console.log('Webhook subscribtion callback:', response.body);
     }
 );
 
