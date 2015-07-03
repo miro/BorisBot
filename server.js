@@ -7,6 +7,7 @@ var commander   = require('./commander');
 var cfg         = require('./config');
 var msgHistory  = require('./messageHistory');
 var scheduler   = require('./scheduler');
+var graph		= require('./graph')
 
 var app         = express();
 
@@ -80,6 +81,11 @@ request(cfg.tgApiUrl + '/getMe', function (error, res, body) {
     console.log('I Am', body);
 });
 commander.sendMessage(cfg.allowedGroups.testChatId, 'Reboot! ' + Date() + '\nWebhook set to ' + cfg.webhookUrl);
+
+graph.demo()
+.then(function(arg) {
+	console.log(arg);
+});
 
 // Start scheduler
 scheduler.startJobs();

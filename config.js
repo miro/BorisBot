@@ -55,6 +55,7 @@ cfg.tgApiUrl = 'https://api.telegram.org/bot' + cfg.tgApiKey;
 // URL where the Telegram webhook will send POST requests
 cfg.webhookUrl = process.env.BORISBOT_PUBLIC_URL + '/api/webhook';
 
-
+cfg.plotlyUserName = process.env.BORISBOT_PLOTLY_USERNAME || "BorisBot";
+cfg.plotlyApiKey = process.env.BORISBOT_PLOTLY_APIKEY;
 
 module.exports = cfg;
