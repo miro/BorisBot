@@ -84,7 +84,7 @@ commander.sendMessage(cfg.allowedGroups.testChatId, 'Reboot! ' + Date() + '\nWeb
 
 graph.demo()
 .then(function(arg) {
-	console.log(arg);
+	console.log("Plotly demo-url: " + arg.url + ".png");
 });
 
 // Start scheduler

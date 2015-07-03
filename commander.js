@@ -8,6 +8,7 @@ var _           = require('lodash');
 
 var cfg         = require('./config');
 var db          = require('./database');
+var graph		= require('./graph');
 
 // set default timezone to bot timezone
 moment.tz.setDefault(cfg.botTimezone);
@@ -100,6 +101,25 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                 });
             break;
 
+			case '/histogrammi':
+				var params = userCommandParams.split(" ");
+				var subtractDays = params[0];
+				if (subtractDays <= 0) { subtractDays = 2 };
+				commander.getPersonalDrinkTimesSince(userId, moment().subtract(subtractDays, 'day'))
+				.then(function(date_arr) {
+					graph.makeHistogram(userName, date_arr, subtractDays)
+					.then(function (plotly) {
+						if (_eventIsFromGroup(msg)) {
+							commander.sendMessage(msg.chat.id, plotly.url + ".png");
+						} else {
+							commander.sendMessage(userId, plotly.url + ".png");
+						};
+						resolve();
+					});
+				});
+				
+			break;
+			
             default:
                 console.log('! Unknown command', msg.text);
                 resolve();
@@ -172,6 +192,19 @@ commander.getPersonalDrinkLog = function(userId) {
     });
 };
 
+commander.getPersonalDrinkTimesSince = function(userId, timestamp) {
+	return new Promise(function (resolve, reject) {
+		
+		db.getDrinksSinceTimestampForUser(timestamp, userId)
+		.then(function(collection) {
+			var date_arr = [];
+			_.each(collection.models, function(model) {
+				date_arr.push(moment(model.get('timestamp')).format('YYYY-MM-DD HH'))
+			});
+			resolve(date_arr);
+		});
+	});
+};
 
 // Helper functions
 //

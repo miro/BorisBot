@@ -10,38 +10,51 @@ var graph = {};
 
 graph.demo = function() {
 	return new Promise(function(resolve, reject) {
-		var dates = _getDatesFrom('2014-03-23');
+		var dates = _getHoursFrom('2015-07-01 00');
+		var drinks = _arrayWithOneAndZeroes(dates.length);
 		var data = [{
 			x: dates,
-			y: _arrayWithRandomNumbers(dates.length),
-			type: 'bar'
+			y: drinks,
+			type: 'histogram',
+			histfunc:'sum'
 		}];
 		var layout = {
-			title: "Diagram",
+			title: 'Histogram',
 			xaxis: {
-					title: "X-axis",
+					title: 'X-axis',
 					titlefont: {
-						family: "Arial, sans-serif",
+						family: 'Arial, sans-serif',
 						size: 18,
-						color: "lightgrey"
+						color: 'lightgrey'
 					},
 					type: "date",
-					autorange: true
+					autorange: true,
+					tickangle: 45,
+					ticks: "outside",
 			},
 			yaxis: {
-					title: "Y-axis",
+					title: 'Y-axis',
 					titlefont: {
-						family: "Arial, sans-serif",
+						family: 'Arial, sans-serif',
 						size: 18,
-						color: "lightgrey"
+						color: 'lightgrey'
 					},
-					type: "linear",
-					autorange: true
+					type: 'linear',
+					autorange: true,
+					showline: false,
+					showgrid: true,
+					zeroline: true,
+					gridwidth: 1.5,
+					autotick: true
 			},
-			fileopt: "overwrite",
-			filename: "testGraph",
+			bargap: 0.2,
 		};
-		plotly.plot(data, layout, function (err, msg) {
+		var graphOptions = {
+			layout: layout,
+			fileopt: 'new',
+			filename: 'testGraphs/testGraph'
+		};
+		plotly.plot(data, graphOptions, function (err, msg) {
 			if (err) return reject(err);
 			return resolve(msg);
 		});
@@ -49,15 +62,56 @@ graph.demo = function() {
 };
 
 //Work In Progress
-graph.totalConsumption = function(userId) {
+graph.makeHistogram = function(userName, date_arr, since) {
 	return new Promise(function(resolve, reject) {
+	
+		var dates = [];
+		_.each(date_arr, function(date) {
+			dates.push(date);
+		});
 		var data = [{
-			x: 2,
-			y: 2,
-			type: "bar"
+			x: dates,
+			y: _.fill(Array(dates.length),1),
+			type: "histogram",
+			histfunc: "sum"
 		}];
-		var graphOptions = {filename: "totalConsumption", fileopt: "overwrite"};
-		plotly.plot(data, graphOptions, function(err, msg) {
+		var layout = {
+			title: userName + "'s histogram since " + moment().subtract(since,'day').format("DD.MM.YY"),
+			xaxis: {
+					title: 'Time',
+					titlefont: {
+						family: 'Arial, sans-serif',
+						size: 18,
+						color: 'lightgrey'
+					},
+					type: "date",
+					range: [moment().subtract(since,'day').format('x'), moment().format('x')],
+					autorange: false,
+					tickangle: 45,
+					ticks: "outside",
+			},
+			yaxis: {
+					title: 'Number of drinks',
+					titlefont: {
+						family: 'Arial, sans-serif',
+						size: 18,
+						color: 'lightgrey'
+					},
+					type: 'linear',
+					autorange: true,
+					showline: false,
+					showgrid: true,
+					zeroline: true,
+					gridwidth: 1.5,
+					autotick: true
+			},
+		};
+		var graphOptions = {
+			layout: layout,
+			fileopt: 'new',
+			filename: 'users/' + userName + '/histogram/'
+		};
+		plotly.plot(data, graphOptions, function (err, msg) {
 			if (err) return reject(err);
 			return resolve(msg);
 		});
@@ -69,12 +123,26 @@ graph.totalConsumption = function(userId) {
 
 var _getDatesFrom = function(date) {
 	var dates = [];
-	if (!moment(date).isValid()) {return dates};
-	var iteratorDate = moment(date);
+	var iteratorDate = moment(date, "YYYY-MM-DD");
+	if (!iteratorDate.isValid()) {return dates};	
+	if (iteratorDate.isAfter(moment())) {return dates};	
 	var stopDate = moment();
 	while (iteratorDate <= stopDate) {
-		dates.push(iteratorDate.format("YYYY-MM-DD"));
+		dates.push(iteratorDate.format('YYYY-MM-DD'));
 		iteratorDate.add(1,"days");
+	}
+	return dates;
+};
+
+var _getHoursFrom = function(date) {
+	var dates = [];
+	var iteratorDate = moment(date, "YYYY-MM-DD HH");
+	if (!iteratorDate.isValid()) {return dates};	
+	if (iteratorDate.isAfter(moment())) {return dates};	
+	var stopDate = moment();
+	while (iteratorDate <= stopDate) {
+		dates.push(iteratorDate.format('YYYY-MM-DD HH'));
+		iteratorDate.add(1,"hours");
 	}
 	return dates;
 };
@@ -83,6 +151,14 @@ var _arrayWithRandomNumbers = function(size) {
 	var arr = [];
 	for (var i=0, t=size; i<t; i++) {
 		arr.push(Math.floor(Math.random() * 16));
+	}
+	return arr;
+};
+
+var _arrayWithOneAndZeroes = function(size) {
+	var arr = [];
+	for (var i=0, t=size; i<t; i++) {
+		arr.push(Math.floor(Math.random()*2));
 	}
 	return arr;
 };
