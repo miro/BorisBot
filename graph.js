@@ -55,8 +55,8 @@ graph.makeHistogram = function(userName, date_arr, since) {
 		};
 		var graphOptions = {
 			layout: layout,
-			fileopt: 'new',
-			filename: 'users/' + userName + '/histogram/'
+			fileopt: 'overwrite',
+			filename: 'users/histograms/' + userName
 		};
 		plotly.plot(data, graphOptions, function (err, msg) {
 			if (err) return reject(err);
@@ -85,7 +85,6 @@ graph.demo = function() {
 						color: 'lightgrey'
 					},
 					type: "date",
-					autorange: true,
 					tickangle: 45,
 					ticks: "outside",
 			},
@@ -97,14 +96,7 @@ graph.demo = function() {
 						color: 'lightgrey'
 					},
 					type: 'linear',
-					autorange: true,
-					showline: false,
-					showgrid: true,
-					zeroline: true,
-					gridwidth: 1.5,
-					autotick: true
 			},
-			bargap: 0.2,
 		};
 		var graphOptions = {
 			layout: layout,

@@ -2,6 +2,8 @@ var express     = require('express');
 var bodyParser  = require('body-parser');
 var request     = require('request');
 var _           = require('lodash');
+var fs			= require('fs');
+var exec		= require('child_process').exec;
 
 var commander   = require('./commander');
 var cfg         = require('./config');
@@ -63,7 +65,20 @@ app.use(function genericErrorHandler(err, req, res, next) { // 500
     res.status(err.status).send(err);
 });
 
-
+// # Make required directories
+_.each(cfg.requiredDirectories, function(dir) {
+	var directory = dir;
+	fs.lstat(directory, function(err, stats) {
+		if (err && err['code']=='ENOENT') {
+			var mkdir = 'mkdir -p ' + directory;
+			var child = exec(mkdir, function(err,stdout,stderr) {
+				if (err) throw err;
+			console.log('Created folder: ' + directory);
+			})
+		};
+	});
+});
+	
 // # Start the server
 app.listen(cfg.serverPort, function() {
     console.log('BorisBot backend started at port', cfg.serverPort);

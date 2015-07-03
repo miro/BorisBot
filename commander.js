@@ -1,5 +1,9 @@
 // ### Handles all the bot commands
 
+var stream		= require('stream');
+var path		= require('path');
+var fs			= require('fs');
+var mime		= require('mime');
 
 var Promise     = require('bluebird');
 var request     = require('request');
@@ -119,7 +123,10 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
 					.then(function(timestamp_arr) {
 						graph.makeHistogram(chatGroupTitle, timestamp_arr, subtractDays)
 						.then(function (plotly) {
-							commander.sendMessage(chatGroupId, plotly.url + ".png");
+							var filename = cfg.plotlyDirectory + chatGroupTitle + ".png";
+							_downloadFile(plotly.url + ".png", filename, function() {
+								commander.sendPhoto(msg.chat.id, filename);
+							});
 							resolve();
 						});
 					});
@@ -129,12 +136,15 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
 					.then(function(date_arr) {
 						graph.makeHistogram(userName, date_arr, subtractDays)
 						.then(function (plotly) {
-							if (_eventIsFromGroup(msg)) {
-								commander.sendMessage(msg.chat.id, plotly.url + ".png");
-							} else {
-								commander.sendMessage(userId, plotly.url + ".png");
-							};
-							resolve();
+							var filename = cfg.plotlyDirectory + userName + ".png";
+							_downloadFile(plotly.url + ".png", filename, function() {
+								if (_eventIsFromGroup(msg)) {
+									commander.sendPhoto(msg.chat.id, filename);
+								} else {
+									commander.sendPhoto(userId, filename);
+								};
+								resolve();
+							});
 						});
 					});
 				};
@@ -183,6 +193,17 @@ commander.registerDrink = function(messageId, chatGroupId, chatGroupTitle, userI
             });
         });
     });
+};
+
+commander.sendPhoto = function (chatId, photo, options) {
+	var opts = {
+		qs: options || {}
+	};
+	opts.qs.chat_id = chatId;
+	var content = _formatSendData('photo', photo);
+	opts.formData = content[0];
+	opts.qs.photo = content[1];
+	request.post(cfg.tgApiUrl + '/sendPhoto', opts);
 };
 
 commander.sendMessage = function(chatId, text) {
@@ -258,5 +279,40 @@ var _eventIsFromGroup = function(msg) {
     return !_.isUndefined(msg.chat.title);
 };
 
+var _formatSendData = function (type, data) {
+  var formData;
+  var fileName;
+  var fileId;
+  if (data instanceof stream.Stream) {
+    fileName = path.basename(data.path);
+    formData = {};
+    formData[type] = {
+      value: data,
+      options: {
+        filename: fileName,
+        contentType: mime.lookup(fileName)
+      }
+    };
+  } else if (fs.existsSync(data)) {
+    fileName = path.basename(data);
+    formData = {};
+    formData[type] = {
+      value: fs.createReadStream(data),
+      options: {
+        filename: fileName,
+        contentType: mime.lookup(fileName)
+      }
+    };
+  } else {
+    fileId = data;
+  }
+  return [formData, fileId];
+};
+
+var _downloadFile = function(uri, filename, callback){
+	request.head(uri, function(err, res, body){
+    request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
+  });
+};
 
 module.exports = commander;
