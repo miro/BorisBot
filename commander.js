@@ -103,21 +103,41 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
 
 			case '/histogrammi':
 				var params = userCommandParams.split(" ");
-				var subtractDays = params[0];
-				if (subtractDays <= 0) { subtractDays = 2 };
-				commander.getPersonalDrinkTimesSince(userId, moment().subtract(subtractDays, 'day'))
-				.then(function(date_arr) {
-					graph.makeHistogram(userName, date_arr, subtractDays)
-					.then(function (plotly) {
-						if (_eventIsFromGroup(msg)) {
-							commander.sendMessage(msg.chat.id, plotly.url + ".png");
-						} else {
-							commander.sendMessage(userId, plotly.url + ".png");
-						};
-						resolve();
-					});
-				});
+				var subtractDays = 2
+				var userOrGroup = "user"
 				
+				if (params.length >= 1) {
+					if (params[0] > 0) { subtractDays = params[0] }
+					else if (params[0].toLowerCase() == "group" && _eventIsFromGroup(msg)) { userOrGroup = "group" };
+				};
+				if (params.length >= 2) {
+					if (params[1].toLowerCase() == "group" && _eventIsFromGroup(msg)) { userOrGroup = "group" };
+				};
+				
+				if (userOrGroup == "group") {
+					commander.getGroupDrinkTimesSince(chatGroupId, moment().subtract(subtractDays, 'day'))
+					.then(function(timestamp_arr) {
+						graph.makeHistogram(chatGroupTitle, timestamp_arr, subtractDays)
+						.then(function (plotly) {
+							commander.sendMessage(chatGroupId, plotly.url + ".png");
+							resolve();
+						});
+					});
+					resolve();
+				} else {	
+					commander.getPersonalDrinkTimesSince(userId, moment().subtract(subtractDays, 'day'))
+					.then(function(date_arr) {
+						graph.makeHistogram(userName, date_arr, subtractDays)
+						.then(function (plotly) {
+							if (_eventIsFromGroup(msg)) {
+								commander.sendMessage(msg.chat.id, plotly.url + ".png");
+							} else {
+								commander.sendMessage(userId, plotly.url + ".png");
+							};
+							resolve();
+						});
+					});
+				};
 			break;
 			
             default:
@@ -197,11 +217,25 @@ commander.getPersonalDrinkTimesSince = function(userId, timestamp) {
 		
 		db.getDrinksSinceTimestampForUser(timestamp, userId)
 		.then(function(collection) {
-			var date_arr = [];
+			var timestamp_arr = [];
 			_.each(collection.models, function(model) {
-				date_arr.push(moment(model.get('timestamp')).format('YYYY-MM-DD HH'))
+				timestamp_arr.push(moment(model.get('timestamp')))
 			});
-			resolve(date_arr);
+			resolve(timestamp_arr);
+		});
+	});
+};
+
+commander.getGroupDrinkTimesSince = function(chatGroupId, timestamp) {
+	return new Promise(function (resolve, reject) {
+		
+		db.getDrinksSinceTimestamp(timestamp, chatGroupId)
+		.then(function(collection) {
+			var timestamp_arr = [];
+			_.each(collection.models, function(model) {
+				timestamp_arr.push(moment(model.get('timestamp')))
+			});
+			resolve(timestamp_arr);
 		});
 	});
 };

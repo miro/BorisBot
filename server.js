@@ -82,11 +82,6 @@ request(cfg.tgApiUrl + '/getMe', function (error, res, body) {
 });
 commander.sendMessage(cfg.allowedGroups.testChatId, 'Reboot! ' + Date() + '\nWebhook set to ' + cfg.webhookUrl);
 
-graph.demo()
-.then(function(arg) {
-	console.log("Plotly demo-url: " + arg.url + ".png");
-});
-
 // Start scheduler
 scheduler.startJobs();
 

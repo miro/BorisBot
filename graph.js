@@ -8,6 +8,63 @@ var moment	= require('moment-timezone');
 
 var graph = {};
 
+graph.makeHistogram = function(userName, date_arr, since) {
+	return new Promise(function(resolve, reject) {
+		var dates = [];
+		_.each(date_arr, function(date){
+			dates.push(date.format("YYYY-MM-DD HH:mm:ss"))
+		});
+		var data = [{
+			x: dates,
+			y: _.fill(Array(dates.length),1),
+			type: "histogram",
+			histfunc: "sum"
+		}];
+		var sinceDay = moment().subtract(since,'day');
+		var layout = {
+			title: userName + "'s histogram since " + sinceDay.format("DD.MM.YY"),
+			xaxis: {
+					title: 'Time',
+					titlefont: {
+						family: 'Arial, sans-serif',
+						size: 18,
+						color: 'lightgrey'
+					},
+					type: "date",
+					range: [sinceDay.format('x'), moment().format('x')],
+					autorange: false,
+					tickangle: 45,
+					ticks: "outside",
+			},
+			yaxis: {
+					title: 'Number of drinks',
+					titlefont: {
+						family: 'Arial, sans-serif',
+						size: 18,
+						color: 'lightgrey'
+					},
+					type: 'linear',
+					autorange: true,
+					showline: false,
+					showgrid: true,
+					zeroline: true,
+					gridwidth: 1.5,
+					autotick: true
+			},
+			bargap: 0.15
+		};
+		var graphOptions = {
+			layout: layout,
+			fileopt: 'new',
+			filename: 'users/' + userName + '/histogram/'
+		};
+		plotly.plot(data, graphOptions, function (err, msg) {
+			if (err) return reject(err);
+			return resolve(msg);
+		});
+	});
+};
+
 graph.demo = function() {
 	return new Promise(function(resolve, reject) {
 		var dates = _getHoursFrom('2015-07-01 00');
@@ -61,65 +118,8 @@ graph.demo = function() {
 	});
 };
 
-//Work In Progress
-graph.makeHistogram = function(userName, date_arr, since) {
-	return new Promise(function(resolve, reject) {
-	
-		var dates = [];
-		_.each(date_arr, function(date) {
-			dates.push(date);
-		});
-		var data = [{
-			x: dates,
-			y: _.fill(Array(dates.length),1),
-			type: "histogram",
-			histfunc: "sum"
-		}];
-		var layout = {
-			title: userName + "'s histogram since " + moment().subtract(since,'day').format("DD.MM.YY"),
-			xaxis: {
-					title: 'Time',
-					titlefont: {
-						family: 'Arial, sans-serif',
-						size: 18,
-						color: 'lightgrey'
-					},
-					type: "date",
-					range: [moment().subtract(since,'day').format('x'), moment().format('x')],
-					autorange: false,
-					tickangle: 45,
-					ticks: "outside",
-			},
-			yaxis: {
-					title: 'Number of drinks',
-					titlefont: {
-						family: 'Arial, sans-serif',
-						size: 18,
-						color: 'lightgrey'
-					},
-					type: 'linear',
-					autorange: true,
-					showline: false,
-					showgrid: true,
-					zeroline: true,
-					gridwidth: 1.5,
-					autotick: true
-			},
-		};
-		var graphOptions = {
-			layout: layout,
-			fileopt: 'new',
-			filename: 'users/' + userName + '/histogram/'
-		};
-		plotly.plot(data, graphOptions, function (err, msg) {
-			if (err) return reject(err);
-			return resolve(msg);
-		});
-	});
-};
-
 //Helper functions
-//
+//(used to simulate database)
 
 var _getDatesFrom = function(date) {
 	var dates = [];
