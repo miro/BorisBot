@@ -1,10 +1,9 @@
 // ### Handles all the bot commands
 
-var stream		= require('stream');
-var path		= require('path');
-var fs			= require('fs');
-var mime		= require('mime');
-
+var stream      = require('stream');
+var path        = require('path');
+var fs          = require('fs');
+var mime        = require('mime');
 var Promise     = require('bluebird');
 var request     = require('request');
 var moment      = require('moment-timezone');
@@ -12,7 +11,7 @@ var _           = require('lodash');
 
 var cfg         = require('./config');
 var db          = require('./database');
-var graph		= require('./graph');
+var graph       = require('./graph');
 
 // set default timezone to bot timezone
 moment.tz.setDefault(cfg.botTimezone);
@@ -60,7 +59,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
         switch (userCommand.toLowerCase()) {
             case '/kalja':
             case '/kippis':
-                commander.registerDrink(msg.message_id, chatGroupId, chatGroupTitle, userId, userName, userCommandParams) 
+                commander.registerDrink(msg.message_id, chatGroupId, chatGroupTitle, userId, userName, userCommandParams)
                 .then(function(returnMessage) {
                     commander.sendMessage(msg.chat.id, returnMessage);
                     resolve();
@@ -97,7 +96,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                     commander.sendMessage(userId, logString);
 
                     if (_eventIsFromGroup(msg)) {
-                        commander.sendMessage(userId, 'PS: anna "' + 
+                        commander.sendMessage(userId, 'PS: anna "' +
                             userCommand + '"-komento suoraan minulle, älä spämmää turhaan ryhmächättiä!');
                     }
 
@@ -105,62 +104,62 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                 });
             break;
 
-			case '/histogrammi':
-				var params = userCommandParams.split(" ");
-				var subtractDays = 2
-				var userOrGroup = "user"
-				
-				if (params.length >= 1) {
-					if (params[0] > 0) { subtractDays = params[0] }
-					else if (params[0].toLowerCase() == "group" && _eventIsFromGroup(msg)) { userOrGroup = "group" };
-				};
-				if (params.length >= 2) {
-					if (params[1].toLowerCase() == "group" && _eventIsFromGroup(msg)) { userOrGroup = "group" };
-				};
-				
-				if (userOrGroup == "group") {
-					commander.getGroupDrinkTimesSince(chatGroupId, moment().subtract(subtractDays, 'day'))
-					.then(function(timestamp_arr) {
-						graph.makeHistogram(chatGroupTitle, timestamp_arr, subtractDays)
-						.then(function (plotly) {
-							var filename = cfg.plotlyDirectory + chatGroupTitle + ".png";
-							_downloadFile(plotly.url + ".png", filename, function() {
-								commander.sendPhoto(msg.chat.id, filename);
-							});
-							resolve();
-						});
-					});
-					resolve();
-				} else {	
-					commander.getPersonalDrinkTimesSince(userId, moment().subtract(subtractDays, 'day'))
-					.then(function(date_arr) {
-						graph.makeHistogram(userName, date_arr, subtractDays)
-						.then(function (plotly) {
-							var filename = cfg.plotlyDirectory + userName + ".png";
-							_downloadFile(plotly.url + ".png", filename, function() {
-								if (_eventIsFromGroup(msg)) {
-									commander.sendPhoto(msg.chat.id, filename);
-								} else {
-									commander.sendPhoto(userId, filename);
-								};
-								resolve();
-							});
-						});
-					});
-				};
-			break;
-			
-			case '/webcam':
-				_downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg', function() {
-					if (_eventIsFromGroup(msg)) {
-						commander.sendPhoto(msg.chat.id, cfg.webcamDirectory + 'webcam.jpg');
-					} else {
-						commander.sendPhoto(userId, cfg.webcamDirectory + 'webcam.jpg');
-					};
-					resolve();
-				});
-			break;
-			
+            case '/histogrammi':
+                var params = userCommandParams.split(' ');
+                var subtractDays = 2
+                var userOrGroup = 'user'
+
+                if (params.length >= 1) {
+                    if (params[0] > 0) { subtractDays = params[0] }
+                    else if (params[0].toLowerCase() == 'group' && _eventIsFromGroup(msg)) { userOrGroup = 'group' };
+                };
+                if (params.length >= 2) {
+                    if (params[1].toLowerCase() == 'group' && _eventIsFromGroup(msg)) { userOrGroup = 'group' };
+                };
+
+                if (userOrGroup == 'group') {
+                    commander.getGroupDrinkTimesSince(chatGroupId, moment().subtract(subtractDays, 'day'))
+                    .then(function(timestamp_arr) {
+                        graph.makeHistogram(chatGroupTitle, timestamp_arr, subtractDays)
+                        .then(function (plotly) {
+                            var filename = cfg.plotlyDirectory + chatGroupTitle + '.png';
+                            _downloadFile(plotly.url + '.png', filename, function() {
+                                commander.sendPhoto(msg.chat.id, filename);
+                            });
+                            resolve();
+                        });
+                    });
+                    resolve();
+                } else {
+                    commander.getPersonalDrinkTimesSince(userId, moment().subtract(subtractDays, 'day'))
+                    .then(function(date_arr) {
+                        graph.makeHistogram(userName, date_arr, subtractDays)
+                        .then(function (plotly) {
+                            var filename = cfg.plotlyDirectory + userName + '.png';
+                            _downloadFile(plotly.url + '.png', filename, function() {
+                                if (_eventIsFromGroup(msg)) {
+                                    commander.sendPhoto(msg.chat.id, filename);
+                                } else {
+                                    commander.sendPhoto(userId, filename);
+                                };
+                                resolve();
+                            });
+                        });
+                    });
+                };
+            break;
+
+            case '/webcam':
+                _downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg', function() {
+                    if (_eventIsFromGroup(msg)) {
+                        commander.sendPhoto(msg.chat.id, cfg.webcamDirectory + 'webcam.jpg');
+                    } else {
+                        commander.sendPhoto(userId, cfg.webcamDirectory + 'webcam.jpg');
+                    };
+                    resolve();
+                });
+            break;
+
             default:
                 console.log('! Unknown command', msg.text);
                 resolve();
@@ -196,7 +195,7 @@ commander.registerDrink = function(messageId, chatGroupId, chatGroupTitle, userI
                     returnMessage += ' Se olikin jo ' + drinksTodayForThisUser + '. tälle päivälle.\n';
                 }
                 else {
-                    returnMessage += ' Se olikin jo ryhmän ' + chatGroupTitle + ' ' + drinksToday + 
+                    returnMessage += ' Se olikin jo ryhmän ' + chatGroupTitle + ' ' + drinksToday +
                     '. tälle päivälle, ja ' + drinksTodayForThisUser + '. käyttäjälle ' + userName + '.\n';
                 }
 
@@ -207,14 +206,14 @@ commander.registerDrink = function(messageId, chatGroupId, chatGroupTitle, userI
 };
 
 commander.sendPhoto = function (chatId, photo, options) {
-	var opts = {
-		qs: options || {}
-	};
-	opts.qs.chat_id = chatId;
-	var content = _formatSendData('photo', photo);
-	opts.formData = content[0];
-	opts.qs.photo = content[1];
-	request.post(cfg.tgApiUrl + '/sendPhoto', opts);
+    var opts = {
+        qs: options || {}
+    };
+    opts.qs.chat_id = chatId;
+    var content = _formatSendData('photo', photo);
+    opts.formData = content[0];
+    opts.qs.photo = content[1];
+    request.post(cfg.tgApiUrl + '/sendPhoto', opts);
 };
 
 commander.sendMessage = function(chatId, text) {
@@ -226,7 +225,7 @@ commander.sendMessage = function(chatId, text) {
 
 commander.getPersonalDrinkLog = function(userId) {
     return new Promise(function (resolve, reject) {
-        
+
         db.getDrinksSinceTimestampForUser(moment().subtract(2, 'day'), userId)
         .then(function(collection) {
             var message = 'Juomasi viimeisen 48h ajalta:\n\n';
@@ -245,31 +244,31 @@ commander.getPersonalDrinkLog = function(userId) {
 };
 
 commander.getPersonalDrinkTimesSince = function(userId, timestamp) {
-	return new Promise(function (resolve, reject) {
-		
-		db.getDrinksSinceTimestampForUser(timestamp, userId)
-		.then(function(collection) {
-			var timestamp_arr = [];
-			_.each(collection.models, function(model) {
-				timestamp_arr.push(moment(model.get('timestamp')))
-			});
-			resolve(timestamp_arr);
-		});
-	});
+    return new Promise(function (resolve, reject) {
+
+        db.getDrinksSinceTimestampForUser(timestamp, userId)
+        .then(function(collection) {
+            var timestamp_arr = [];
+            _.each(collection.models, function(model) {
+                timestamp_arr.push(moment(model.get('timestamp')))
+            });
+            resolve(timestamp_arr);
+        });
+    });
 };
 
 commander.getGroupDrinkTimesSince = function(chatGroupId, timestamp) {
-	return new Promise(function (resolve, reject) {
-		
-		db.getDrinksSinceTimestamp(timestamp, chatGroupId)
-		.then(function(collection) {
-			var timestamp_arr = [];
-			_.each(collection.models, function(model) {
-				timestamp_arr.push(moment(model.get('timestamp')))
-			});
-			resolve(timestamp_arr);
-		});
-	});
+    return new Promise(function (resolve, reject) {
+
+        db.getDrinksSinceTimestamp(timestamp, chatGroupId)
+        .then(function(collection) {
+            var timestamp_arr = [];
+            _.each(collection.models, function(model) {
+                timestamp_arr.push(moment(model.get('timestamp')))
+            });
+            resolve(timestamp_arr);
+        });
+    });
 };
 
 // Helper functions
@@ -291,39 +290,44 @@ var _eventIsFromGroup = function(msg) {
 };
 
 var _formatSendData = function (type, data) {
-  var formData;
-  var fileName;
-  var fileId;
-  if (data instanceof stream.Stream) {
-    fileName = path.basename(data.path);
-    formData = {};
-    formData[type] = {
-      value: data,
-      options: {
-        filename: fileName,
-        contentType: mime.lookup(fileName)
-      }
-    };
-  } else if (fs.existsSync(data)) {
-    fileName = path.basename(data);
-    formData = {};
-    formData[type] = {
-      value: fs.createReadStream(data),
-      options: {
-        filename: fileName,
-        contentType: mime.lookup(fileName)
-      }
-    };
-  } else {
-    fileId = data;
-  }
-  return [formData, fileId];
+    var formData;
+    var fileName;
+    var fileId;
+
+    if (data instanceof stream.Stream) {
+        fileName = path.basename(data.path);
+        formData = {};
+
+        formData[type] = {
+            value: data,
+            options: {
+                filename: fileName,
+                contentType: mime.lookup(fileName)
+            }
+        };
+    }
+    else if (fs.existsSync(data)) {
+        fileName = path.basename(data);
+        formData = {};
+        formData[type] = {
+            value: fs.createReadStream(data),
+            options: {
+                filename: fileName,
+                contentType: mime.lookup(fileName)
+            }
+        };
+    }
+    else {
+        fileId = data;
+    }
+
+    return [formData, fileId];
 };
 
 var _downloadFile = function(uri, filename, callback){
-	request.head(uri, function(err, res, body){
-    request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
-  });
+    request.head(uri, function(err, res, body) {
+        request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
+    });
 };
 
 module.exports = commander;
