@@ -291,13 +291,12 @@ var _eventIsFromGroup = function(msg) {
 };
 
 var _formatSendData = function (type, data) {
-    var formData;
+    var formData = {};
     var fileName;
-    var fileId;
+    var fileId = data;
 
     if (data instanceof stream.Stream) {
         fileName = path.basename(data.path);
-        formData = {};
 
         formData[type] = {
             value: data,
@@ -309,7 +308,7 @@ var _formatSendData = function (type, data) {
     }
     else if (fs.existsSync(data)) {
         fileName = path.basename(data);
-        formData = {};
+
         formData[type] = {
             value: fs.createReadStream(data),
             options: {
@@ -318,11 +317,7 @@ var _formatSendData = function (type, data) {
             }
         };
     }
-    else {
-        fileId = data;
-    }
 
-    return [formData, fileId];
 };
 
 var _downloadFile = function(uri, filename, callback){
