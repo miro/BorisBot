@@ -150,6 +150,17 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
 				};
 			break;
 			
+			case '/webcam':
+				_downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg', function() {
+					if (_eventIsFromGroup(msg)) {
+						commander.sendPhoto(msg.chat.id, cfg.webcamDirectory + 'webcam.jpg');
+					} else {
+						commander.sendPhoto(userId, cfg.webcamDirectory + 'webcam.jpg');
+					};
+					resolve();
+				});
+			break;
+			
             default:
                 console.log('! Unknown command', msg.text);
                 resolve();

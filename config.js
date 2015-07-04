@@ -55,10 +55,17 @@ cfg.tgApiUrl = 'https://api.telegram.org/bot' + cfg.tgApiKey;
 // URL where the Telegram webhook will send POST requests
 cfg.webhookUrl = process.env.BORISBOT_PUBLIC_URL + '/api/webhook';
 
+// Plotly API configs
 cfg.plotlyUserName = process.env.BORISBOT_PLOTLY_USERNAME || "BorisBot";
 cfg.plotlyApiKey = process.env.BORISBOT_PLOTLY_APIKEY;
-cfg.plotlyDirectory = './plotly/';
 
-cfg.requiredDirectories = [cfg.plotlyDirectory];
+// Local directories for data storage
+cfg.plotlyDirectory = './plotly/';
+cfg.webcamDirectory = './webcam/';
+cfg.requiredDirectories = [cfg.plotlyDirectory, cfg.webcamDirectory]; // these folders will be made with mkdir
+
+// URL where webcam image will be downloaded
+cfg.webcamURL = process.env.BORISBOT_WEBCAM_URL;
+
 
 module.exports = cfg;
