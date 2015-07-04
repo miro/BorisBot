@@ -104,6 +104,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                 });
             break;
 
+            case '/graafi':
             case '/histogrammi':
                 var params = userCommandParams.split(' ');
                 var subtractDays = 2;
