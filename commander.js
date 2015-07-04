@@ -106,18 +106,18 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
 
             case '/histogrammi':
                 var params = userCommandParams.split(' ');
-                var subtractDays = 2
-                var userOrGroup = 'user'
+                var subtractDays = 2;
+                var histogramForGroup = false;
 
                 if (params.length >= 1) {
                     if (params[0] > 0) { subtractDays = params[0] }
-                    else if (params[0].toLowerCase() == 'group' && _eventIsFromGroup(msg)) { userOrGroup = 'group' };
+                    else if (params[0].toLowerCase() == 'group' && _eventIsFromGroup(msg)) { histogramForGroup = true };
                 };
                 if (params.length >= 2) {
-                    if (params[1].toLowerCase() == 'group' && _eventIsFromGroup(msg)) { userOrGroup = 'group' };
+                    if (params[1].toLowerCase() == 'group' && _eventIsFromGroup(msg)) { histogramForGroup = true };
                 };
 
-                if (userOrGroup == 'group') {
+                if (histogramForGroup) {
                     commander.getGroupDrinkTimesSince(chatGroupId, moment().subtract(subtractDays, 'day'))
                     .then(function(timestamp_arr) {
                         graph.makeHistogram(chatGroupTitle, timestamp_arr, subtractDays)
