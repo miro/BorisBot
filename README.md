@@ -7,6 +7,8 @@ for-the-lulz -based Telegram Bot for spinni.org. Better get started -documentati
 * DATABASE_URL - connection string to database (when the `$NODE_ENV` is production)
 * BORISBOT_TELEGRAM_APIKEY - API-key for your borisbot
 * BORISBOT_PUBLIC_URL - URL, where this bot is located. Example `https://foo.com`
+* BORISBOT_PLOTLY_USERNAME - your username to Plot.ly, used by graph generating functions
+* BORISBOT_PLOTLY_APIKEY - ^
 
 
 
