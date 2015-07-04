@@ -212,8 +212,9 @@ commander.sendPhoto = function (chatId, photo, options) {
     };
     opts.qs.chat_id = chatId;
     var content = _formatSendData('photo', photo);
-    opts.formData = content[0];
-    opts.qs.photo = content[1];
+
+    opts.formData = content.formData;
+    opts.qs.photo = content.file;
     request.post(cfg.tgApiUrl + '/sendPhoto', opts);
 };
 
@@ -318,6 +319,10 @@ var _formatSendData = function (type, data) {
         };
     }
 
+    return {
+        formData: formData,
+        file: fileId
+    };
 };
 
 var _downloadFile = function(uri, filename, callback){
