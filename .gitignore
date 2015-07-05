@@ -28,3 +28,9 @@ node_modules
 
 # Sublime stuff
 *.sublime-*
+
+# Plotly work dir
+plotly
+
+# Webcam dir
+webcam

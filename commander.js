@@ -1,6 +1,9 @@
 // ### Handles all the bot commands
 
-
+var stream      = require('stream');
+var path        = require('path');
+var fs          = require('fs');
+var mime        = require('mime');
 var Promise     = require('bluebird');
 var request     = require('request');
 var moment      = require('moment-timezone');
@@ -8,6 +11,7 @@ var _           = require('lodash');
 
 var cfg         = require('./config');
 var db          = require('./database');
+var graph       = require('./graph');
 
 // set default timezone to bot timezone
 moment.tz.setDefault(cfg.botTimezone);
@@ -55,7 +59,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
         switch (userCommand.toLowerCase()) {
             case '/kalja':
             case '/kippis':
-                commander.registerDrink(msg.message_id, chatGroupId, chatGroupTitle, userId, userName, userCommandParams) 
+                commander.registerDrink(msg.message_id, chatGroupId, chatGroupTitle, userId, userName, userCommandParams)
                 .then(function(returnMessage) {
                     commander.sendMessage(msg.chat.id, returnMessage);
                     resolve();
@@ -92,10 +96,84 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                     commander.sendMessage(userId, logString);
 
                     if (_eventIsFromGroup(msg)) {
-                        commander.sendMessage(userId, 'PS: anna "' + 
+                        commander.sendMessage(userId, 'PS: anna "' +
                             userCommand + '"-komento suoraan minulle, älä spämmää turhaan ryhmächättiä!');
                     }
 
+                    resolve();
+                });
+            break;
+
+            // # "Histogram" - returns visualization from drink log data.
+            // If triggered from a group, returns a graph from that group's data
+            // If triggered from a 1on1 chat, returns a graph from the requester's data
+            // Takes one parameter, which changes the length of the graph
+            case '/graafi':
+            case '/histogrammi':
+
+                // If no valid number is given as a parameter, fallback to 5
+                var dateRangeParameter = parseInt(userCommandParams.split(' ')[0], 10);
+                var rangeInDays = _.isNaN(dateRangeParameter) ? 5 : dateRangeParameter;
+
+                if (_eventIsFromGroup(msg)) {
+                    db.getGroupDrinkTimesSince(chatGroupId, moment().subtract(rangeInDays, 'day'))
+                    .then(function createHistogramFromData(timestamp_arr) {
+                        graph.makeHistogram(chatGroupTitle, timestamp_arr, rangeInDays)
+                        .then(function histogramCreatedHandler(plotly) {
+                            var filename = cfg.plotlyDirectory + chatGroupTitle + '.png';
+                            _downloadFile(plotly.url + '.png', filename, function fileDownloadCallback() {
+                                commander.sendPhoto(msg.chat.id, filename);
+                                resolve();
+                            });
+                        });
+                    });
+                }
+
+                else {
+                    db.getPersonalDrinkTimesSince(userId, moment().subtract(rangeInDays, 'day'))
+                    .then(function(date_arr) {
+                        graph.makeHistogram(userName, date_arr, rangeInDays)
+                        .then(function (plotly) {
+                            var filename = cfg.plotlyDirectory + userName + '.png';
+                            _downloadFile(plotly.url + '.png', filename, function fileDownloadCallback() {
+                                commander.sendPhoto(userId, filename);
+                                resolve();
+                            });
+                        });
+                    });
+                }
+            break;
+
+            // Sends image of current state of Spänni's webcam
+            // Triggering of this is only possible from the spännimobi group
+            case '/webcam':
+                if (!_eventIsFromGroup(msg)) {
+                    // this command can only be triggered from a group, since this command is
+                    // limited to a certain users only, and for now we have no means of finding
+                    // out if the person belongs to one of those groups -> calling this personally from
+                    // the bot must be denied
+                    resolve();
+                    return;
+
+                }
+
+                // check if the command came from an allowedGroup
+                var msgFromAllowedGroup = false;
+                for (var group in cfg.allowedGroups) {
+                    if (chatGroupId === cfg.allowedGroups[group]) {
+                        msgFromAllowedGroup = true;
+                    }
+                }
+
+                if (!msgFromAllowedGroup) {
+                    // unauthorized
+                    resolve();
+                    return;
+                }
+
+                // -> If we get here, we are good to go!
+                _downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg', function() {
+                    commander.sendPhoto(chatGroupId, cfg.webcamDirectory + 'webcam.jpg');
                     resolve();
                 });
             break;
@@ -135,7 +213,7 @@ commander.registerDrink = function(messageId, chatGroupId, chatGroupTitle, userI
                     returnMessage += ' Se olikin jo ' + drinksTodayForThisUser + '. tälle päivälle.\n';
                 }
                 else {
-                    returnMessage += ' Se olikin jo ryhmän ' + chatGroupTitle + ' ' + drinksToday + 
+                    returnMessage += ' Se olikin jo ryhmän ' + chatGroupTitle + ' ' + drinksToday +
                     '. tälle päivälle, ja ' + drinksTodayForThisUser + '. käyttäjälle ' + userName + '.\n';
                 }
 
@@ -143,6 +221,18 @@ commander.registerDrink = function(messageId, chatGroupId, chatGroupTitle, userI
             });
         });
     });
+};
+
+commander.sendPhoto = function (chatId, photo, options) {
+    var opts = {
+        qs: options || {}
+    };
+    opts.qs.chat_id = chatId;
+    var content = _formatSendData('photo', photo);
+
+    opts.formData = content.formData;
+    opts.qs.photo = content.file;
+    request.post(cfg.tgApiUrl + '/sendPhoto', opts);
 };
 
 commander.sendMessage = function(chatId, text) {
@@ -153,8 +243,9 @@ commander.sendMessage = function(chatId, text) {
 };
 
 commander.getPersonalDrinkLog = function(userId) {
+    // TODO sort by timestamp, better
     return new Promise(function (resolve, reject) {
-        
+
         db.getDrinksSinceTimestampForUser(moment().subtract(2, 'day'), userId)
         .then(function(collection) {
             var message = 'Juomasi viimeisen 48h ajalta:\n\n';
@@ -191,5 +282,44 @@ var _eventIsFromGroup = function(msg) {
     return !_.isUndefined(msg.chat.title);
 };
 
+var _formatSendData = function (type, data) {
+    var formData = {};
+    var fileName;
+    var fileId = data;
+
+    if (data instanceof stream.Stream) {
+        fileName = path.basename(data.path);
+
+        formData[type] = {
+            value: data,
+            options: {
+                filename: fileName,
+                contentType: mime.lookup(fileName)
+            }
+        };
+    }
+    else if (fs.existsSync(data)) {
+        fileName = path.basename(data);
+
+        formData[type] = {
+            value: fs.createReadStream(data),
+            options: {
+                filename: fileName,
+                contentType: mime.lookup(fileName)
+            }
+        };
+    }
+
+    return {
+        formData: formData,
+        file: fileId
+    };
+};
+
+var _downloadFile = function(uri, filename, callback){
+    request.head(uri, function(err, res, body) {
+        request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
+    });
+};
 
 module.exports = commander;
