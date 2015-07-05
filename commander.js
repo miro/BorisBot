@@ -107,11 +107,11 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
             case '/graafi':
             case '/histogrammi':
                 var params = userCommandParams.split(' ');
-                var subtractDays = 2;
+                var rangeInDays = 2;
                 var histogramForGroup = false;
 
                 if (params.length >= 1) {
-                    if (params[0] > 0) { subtractDays = params[0] }
+                    if (params[0] > 0) { rangeInDays = params[0] }
                     else if (params[0].toLowerCase() == 'group' && _eventIsFromGroup(msg)) { histogramForGroup = true };
                 };
                 if (params.length >= 2) {
@@ -119,9 +119,9 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                 };
 
                 if (histogramForGroup) {
-                    commander.getGroupDrinkTimesSince(chatGroupId, moment().subtract(subtractDays, 'day'))
+                    commander.getGroupDrinkTimesSince(chatGroupId, moment().subtract(rangeInDays, 'day'))
                     .then(function(timestamp_arr) {
-                        graph.makeHistogram(chatGroupTitle, timestamp_arr, subtractDays)
+                        graph.makeHistogram(chatGroupTitle, timestamp_arr, rangeInDays)
                         .then(function (plotly) {
                             var filename = cfg.plotlyDirectory + chatGroupTitle + '.png';
                             _downloadFile(plotly.url + '.png', filename, function() {
@@ -131,10 +131,12 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                         });
                     });
                     resolve();
-                } else {
-                    commander.getPersonalDrinkTimesSince(userId, moment().subtract(subtractDays, 'day'))
+                }
+
+                else {
+                    commander.getPersonalDrinkTimesSince(userId, moment().subtract(rangeInDays, 'day'))
                     .then(function(date_arr) {
-                        graph.makeHistogram(userName, date_arr, subtractDays)
+                        graph.makeHistogram(userName, date_arr, rangeInDays)
                         .then(function (plotly) {
                             var filename = cfg.plotlyDirectory + userName + '.png';
                             _downloadFile(plotly.url + '.png', filename, function() {
