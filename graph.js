@@ -8,7 +8,7 @@ var moment  = require('moment-timezone');
 
 var graph = {};
 
-graph.makeHistogram = function(userName, dates, since) {
+graph.makeHistogram = function(momentObjects, since) {
     return new Promise(function(resolve, reject) {
         _.each(dates, function(date) {
             date = date.hour(0).minutes(0).format('YYYY-MM-DD HH:MM');

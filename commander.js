@@ -128,8 +128,8 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                 }
 
                 dbFetchFunction(targetId, moment().subtract(rangeInDays, 'day'))
-                .then(function createHistogramFromData(timestamp_arr) {
-                    graph.makeHistogram(chatGroupTitle, timestamp_arr, rangeInDays)
+                .then(function createHistogramFromData(drinkTimestamps) {
+                    graph.makeHistogram(drinkTimestamps, rangeInDays)
                     .then(function histogramCreatedHandler(plotly) {
                         var destinationFilePath = cfg.plotlyDirectory + 'latestGraph.png';
                         _downloadFile(plotly.url + '.png', destinationFilePath, function fileDownloadCallback() {
