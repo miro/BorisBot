@@ -23,7 +23,7 @@ graph.makeHistogram = function(userName, dates, since) {
 
         var sinceDay = moment().subtract(since,'day');
         var layout = {
-            title: userName + '-graafi alkaen ' + sinceDay.format('DD.MM.YY'),
+            title:  'Kippikset alkaen ' + sinceDay.format('DD.MM.YY'),
             xaxis: {
                 title: 'Aika',
                 titlefont: {
