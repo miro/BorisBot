@@ -8,10 +8,11 @@ var moment  = require('moment-timezone');
 
 var graph = {};
 
-graph.makeHistogram = function(userName, dates, since) {
+graph.makeHistogram = function(momentObjects, since) {
     return new Promise(function(resolve, reject) {
-        _.each(dates, function(date) {
-            date = date.hour(0).minutes(0).format('YYYY-MM-DD HH:MM');
+        var dates = [];
+        _.each(momentObjects, function(date) {
+            dates.push(date.hour(0).minutes(0).format('YYYY-MM-DD HH:mm'));
         });
 
         var data = [{
@@ -23,7 +24,7 @@ graph.makeHistogram = function(userName, dates, since) {
 
         var sinceDay = moment().subtract(since,'day');
         var layout = {
-            title: userName + '-graafi alkaen ' + sinceDay.format('DD.MM.YY'),
+            title:  'Kippikset alkaen ' + sinceDay.format('DD.MM.YY'),
             xaxis: {
                 title: 'Aika',
                 titlefont: {
@@ -52,13 +53,13 @@ graph.makeHistogram = function(userName, dates, since) {
                 gridwidth: 1.5,
                 autotick: true
             },
-            bargap: 0.15
+            bargap: 0.5
         };
 
         var graphOptions = {
             layout: layout,
             fileopt: 'overwrite',
-            filename: 'users/histograms/' + userName
+            filename: 'latestBorisGraph'
         };
 
         plotly.plot(data, graphOptions, function (err, msg) {
