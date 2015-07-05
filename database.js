@@ -1,8 +1,13 @@
 // Imports
+var cfg         = require('./config');
 var schema      = require('./schema');
 
 var Promise     = require('bluebird');
+var moment      = require('moment-timezone');
 var _           = require('lodash');
+
+// set default timezone to bot timezone
+moment.tz.setDefault(cfg.botTimezone);
 
 var db = {};
 
@@ -37,7 +42,6 @@ db.getDrinksSinceTimestamp = function(timestampMoment, chatGroupId) {
     .fetch();
 };
 
-
 db.getDrinksSinceTimestampForUser = function(timestampMoment, userId) {
     return schema.collections.Drinks
     .query(function(qb) {
@@ -45,6 +49,34 @@ db.getDrinksSinceTimestampForUser = function(timestampMoment, userId) {
         .andWhere('timestamp', '>=', timestampMoment.toJSON());
     })
     .fetch()
+};
+
+db.getPersonalDrinkTimesSince = function(userId, timestamp) {
+    return new Promise(function (resolve, reject) {
+
+        db.getDrinksSinceTimestampForUser(timestamp, userId)
+        .then(function(collection) {
+            var timestamp_arr = [];
+            _.each(collection.models, function(model) {
+                timestamp_arr.push(moment(model.get('timestamp')))
+            });
+            resolve(timestamp_arr);
+        });
+    });
+};
+
+db.getGroupDrinkTimesSince = function(chatGroupId, timestamp) {
+    return new Promise(function (resolve, reject) {
+
+        db.getDrinksSinceTimestamp(timestamp, chatGroupId)
+        .then(function(collection) {
+            var timestamp_arr = [];
+            _.each(collection.models, function(model) {
+                timestamp_arr.push(moment(model.get('timestamp')))
+            });
+            resolve(timestamp_arr);
+        });
+    });
 };
 
 db.getTotalDrinksAmount = function() {

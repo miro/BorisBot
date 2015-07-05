@@ -116,7 +116,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                 var rangeInDays = _.isNaN(dateRangeParameter) ? 5 : dateRangeParameter;
 
                 if (_eventIsFromGroup(msg)) {
-                    commander.getGroupDrinkTimesSince(chatGroupId, moment().subtract(rangeInDays, 'day'))
+                    db.getGroupDrinkTimesSince(chatGroupId, moment().subtract(rangeInDays, 'day'))
                     .then(function createHistogramFromData(timestamp_arr) {
                         graph.makeHistogram(chatGroupTitle, timestamp_arr, rangeInDays)
                         .then(function histogramCreatedHandler(plotly) {
@@ -130,7 +130,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                 }
 
                 else {
-                    commander.getPersonalDrinkTimesSince(userId, moment().subtract(rangeInDays, 'day'))
+                    db.getPersonalDrinkTimesSince(userId, moment().subtract(rangeInDays, 'day'))
                     .then(function(date_arr) {
                         graph.makeHistogram(userName, date_arr, rangeInDays)
                         .then(function (plotly) {
@@ -220,6 +220,7 @@ commander.sendMessage = function(chatId, text) {
 };
 
 commander.getPersonalDrinkLog = function(userId) {
+    // TODO sort by timestamp, better
     return new Promise(function (resolve, reject) {
 
         db.getDrinksSinceTimestampForUser(moment().subtract(2, 'day'), userId)
@@ -239,33 +240,6 @@ commander.getPersonalDrinkLog = function(userId) {
     });
 };
 
-commander.getPersonalDrinkTimesSince = function(userId, timestamp) {
-    return new Promise(function (resolve, reject) {
-
-        db.getDrinksSinceTimestampForUser(timestamp, userId)
-        .then(function(collection) {
-            var timestamp_arr = [];
-            _.each(collection.models, function(model) {
-                timestamp_arr.push(moment(model.get('timestamp')))
-            });
-            resolve(timestamp_arr);
-        });
-    });
-};
-
-commander.getGroupDrinkTimesSince = function(chatGroupId, timestamp) {
-    return new Promise(function (resolve, reject) {
-
-        db.getDrinksSinceTimestamp(timestamp, chatGroupId)
-        .then(function(collection) {
-            var timestamp_arr = [];
-            _.each(collection.models, function(model) {
-                timestamp_arr.push(moment(model.get('timestamp')))
-            });
-            resolve(timestamp_arr);
-        });
-    });
-};
 
 // Helper functions
 //
