@@ -104,33 +104,29 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                 });
             break;
 
+            // # "Histogram" - returns visualization from drink log data.
+            // If triggered from a group, returns a graph from that group's data
+            // If triggered from a 1on1 chat, returns a graph from the requester's data
+            // Takes one parameter, which changes the length of the graph
             case '/graafi':
             case '/histogrammi':
-                var params = userCommandParams.split(' ');
-                var rangeInDays = 2;
-                var histogramForGroup = false;
 
-                if (params.length >= 1) {
-                    if (params[0] > 0) { rangeInDays = params[0] }
-                    else if (params[0].toLowerCase() == 'group' && _eventIsFromGroup(msg)) { histogramForGroup = true };
-                };
-                if (params.length >= 2) {
-                    if (params[1].toLowerCase() == 'group' && _eventIsFromGroup(msg)) { histogramForGroup = true };
-                };
+                // If no valid number is given as a parameter, fallback to 5
+                var dateRangeParameter = parseInt(userCommandParams.split(' ')[0], 10);
+                var rangeInDays = _.isNaN(dateRangeParameter) ? 5 : dateRangeParameter;
 
-                if (histogramForGroup) {
+                if (_eventIsFromGroup(msg)) {
                     commander.getGroupDrinkTimesSince(chatGroupId, moment().subtract(rangeInDays, 'day'))
-                    .then(function(timestamp_arr) {
+                    .then(function createHistogramFromData(timestamp_arr) {
                         graph.makeHistogram(chatGroupTitle, timestamp_arr, rangeInDays)
-                        .then(function (plotly) {
+                        .then(function histogramCreatedHandler(plotly) {
                             var filename = cfg.plotlyDirectory + chatGroupTitle + '.png';
-                            _downloadFile(plotly.url + '.png', filename, function() {
+                            _downloadFile(plotly.url + '.png', filename, function fileDownloadCallback() {
                                 commander.sendPhoto(msg.chat.id, filename);
+                                resolve();
                             });
-                            resolve();
                         });
                     });
-                    resolve();
                 }
 
                 else {
@@ -139,17 +135,13 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                         graph.makeHistogram(userName, date_arr, rangeInDays)
                         .then(function (plotly) {
                             var filename = cfg.plotlyDirectory + userName + '.png';
-                            _downloadFile(plotly.url + '.png', filename, function() {
-                                if (_eventIsFromGroup(msg)) {
-                                    commander.sendPhoto(msg.chat.id, filename);
-                                } else {
-                                    commander.sendPhoto(userId, filename);
-                                };
+                            _downloadFile(plotly.url + '.png', filename, function fileDownloadCallback() {
+                                commander.sendPhoto(userId, filename);
                                 resolve();
                             });
                         });
                     });
-                };
+                }
             break;
 
             case '/webcam':
