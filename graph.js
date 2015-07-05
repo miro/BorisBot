@@ -12,7 +12,7 @@ graph.makeHistogram = function(momentObjects, since) {
     return new Promise(function(resolve, reject) {
         var dates = [];
         _.each(momentObjects, function(date) {
-            dates.push(date.hour(0).minutes(0).format('YYYY-MM-DD HH:mm'));
+            dates.push(date.format('YYYY-MM-DD HH:mm'));
         });
 
         var data = [{
