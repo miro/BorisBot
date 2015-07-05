@@ -14,17 +14,19 @@ graph.makeHistogram = function(userName, date_arr, since) {
         _.each(date_arr, function(date) {
             dates.push(date.hour(0).minutes(0).format('YYYY-MM-DD HH:MM'));
         });
+
         var data = [{
             x: dates,
             y: _.fill(Array(dates.length),1),
             type: 'histogram',
             histfunc: 'sum'
         }];
+
         var sinceDay = moment().subtract(since,'day');
         var layout = {
-            title: userName + '\'s histogram since ' + sinceDay.format('DD.MM.YY'),
+            title: userName + '-graafi alkaen ' + sinceDay.format('DD.MM.YY'),
             xaxis: {
-                title: 'Time',
+                title: 'Aika',
                 titlefont: {
                     family: 'Arial, sans-serif',
                     size: 18,
@@ -37,7 +39,7 @@ graph.makeHistogram = function(userName, date_arr, since) {
                 ticks: 'outside',
             },
             yaxis: {
-                title: 'Number of drinks',
+                title: 'Kippisten lkm', // NOTE: "ä" in here breaks the plotly library
                 titlefont: {
                     family: 'Arial, sans-serif',
                     size: 18,
@@ -53,6 +55,7 @@ graph.makeHistogram = function(userName, date_arr, since) {
             },
             bargap: 0.15
         };
+
         var graphOptions = {
             layout: layout,
             fileopt: 'overwrite',
