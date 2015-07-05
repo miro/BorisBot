@@ -58,7 +58,7 @@ graph.makeHistogram = function(momentObjects, since) {
         var graphOptions = {
             layout: layout,
             fileopt: 'overwrite',
-            filename: 'users/histograms/' + userName
+            filename: 'latestBorisGraph'
         };
 
         plotly.plot(data, graphOptions, function (err, msg) {
