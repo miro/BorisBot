@@ -33,7 +33,7 @@ graph.makeHistogram = function(momentObjects, since) {
                     color: 'lightgrey'
                 },
                 type: 'date',
-                range: [sinceDay.format('x'), moment().format('x')],
+                range: [sinceDay.format('x'), moment().add(12,'hour').format('x')],
                 autorange: false,
                 tickangle: 45,
                 ticks: 'outside',
