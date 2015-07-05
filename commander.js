@@ -144,13 +144,36 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                 }
             break;
 
+            // Sends image of current state of Spänni's webcam
+            // Triggering of this is only possible from the spännimobi group
             case '/webcam':
+                if (!_eventIsFromGroup(msg)) {
+                    // this command can only be triggered from a group, since this command is
+                    // limited to a certain users only, and for now we have no means of finding
+                    // out if the person belongs to one of those groups -> calling this personally from
+                    // the bot must be denied
+                    resolve();
+                    return;
+
+                }
+
+                // check if the command came from an allowedGroup
+                var msgFromAllowedGroup = false;
+                for (var group in cfg.allowedGroups) {
+                    if (chatGroupId === cfg.allowedGroups[group]) {
+                        msgFromAllowedGroup = true;
+                    }
+                }
+
+                if (!msgFromAllowedGroup) {
+                    // unauthorized
+                    resolve();
+                    return;
+                }
+
+                // -> If we get here, we are good to go!
                 _downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg', function() {
-                    if (_eventIsFromGroup(msg)) {
-                        commander.sendPhoto(msg.chat.id, cfg.webcamDirectory + 'webcam.jpg');
-                    } else {
-                        commander.sendPhoto(userId, cfg.webcamDirectory + 'webcam.jpg');
-                    };
+                    commander.sendPhoto(chatGroupId, cfg.webcamDirectory + 'webcam.jpg');
                     resolve();
                 });
             break;
