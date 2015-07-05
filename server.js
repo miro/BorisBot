@@ -93,7 +93,11 @@ request.post(cfg.tgApiUrl + '/setWebhook', { form: { url: cfg.webhookUrl }},
 
 // Run test sequence
 request(cfg.tgApiUrl + '/getMe', function (error, res, body) {
-    console.log('I Am', body);
+    var response = JSON.parse(body);
+    var botName = response.result.first_name;
+    var botUserName = response.result.username;
+
+    console.log('I Am', botName + ' / @' + botUserName);
 });
 commander.sendMessage(cfg.allowedGroups.testChatId, 'Reboot! ' + Date() + '\nWebhook set to ' + cfg.webhookUrl);
 
