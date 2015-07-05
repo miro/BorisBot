@@ -52,7 +52,7 @@ graph.makeHistogram = function(momentObjects, since) {
                 gridwidth: 1.5,
                 autotick: true
             },
-            bargap: 0.15
+            bargap: 0.5
         };
 
         var graphOptions = {
