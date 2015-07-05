@@ -177,7 +177,11 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                     resolve();
                 });
             break;
-
+            
+            case '/promille':
+                //Work in progress
+            break;
+            
             default:
                 console.log('! Unknown command', msg.text);
                 resolve();
