@@ -12,6 +12,7 @@ var _           = require('lodash');
 var cfg         = require('./config');
 var db          = require('./database');
 var graph       = require('./graph');
+var botApi      = require('./botApi');
 
 // set default timezone to bot timezone
 moment.tz.setDefault(cfg.botTimezone);
@@ -25,7 +26,6 @@ var commander = {};
 // This function handle
 commander.handleWebhookEvent = function runUserCommand(msg) {
     return new Promise(function (resolve, reject) {
-        // TODO check the sender
         console.log('webhook event!', msg);
 
         if (!msg.text) {
@@ -77,14 +77,14 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                     db.getTotalDrinksAmountForGroup(msg.chat.id)
                     .then(function fetchOk(result) {
                         var output = msg.chat.title + ' on tuhonnut yhteensä ' + result[0].count + ' juomaa!';
-                        commander.sendMessage(msg.chat.id, output);
+                        botApi.sendMessage(msg.chat.id, output);
                         resolve();
                     });
                 }
                 else {
                     db.getTotalDrinksAmount()
                     .then(function fetchOk(result) {
-                        commander.sendMessage(msg.chat.id, 'Kaikenkaikkiaan juotu ' + result[0].count + ' juomaa');
+                        botApi.sendMessage(msg.chat.id, 'Kaikenkaikkiaan juotu ' + result[0].count + ' juomaa');
                         resolve();
                     });
                 }
@@ -93,10 +93,10 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
             case '/otinko':
                 commander.getPersonalDrinkLog(userId)
                 .then(function(logString) {
-                    commander.sendMessage(userId, logString);
+                    botApi.sendMessage(userId, logString);
 
                     if (_eventIsFromGroup(msg)) {
-                        commander.sendMessage(userId, 'PS: anna "' +
+                        botApi.sendMessage(userId, 'PS: anna "' +
                             userCommand + '"-komento suoraan minulle, älä spämmää turhaan ryhmächättiä!');
                     }
 
@@ -133,7 +133,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                     .then(function histogramCreatedHandler(plotly) {
                         var destinationFilePath = cfg.plotlyDirectory + 'latestGraph.png';
                         _downloadFile(plotly.url + '.png', destinationFilePath, function fileDownloadCallback() {
-                            commander.sendPhoto(targetId, destinationFilePath);
+                            botApi.sendPhoto(targetId, destinationFilePath);
                             resolve();
                         });
                     });
@@ -169,7 +169,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
 
                 // -> If we get here, we are good to go!
                 _downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg', function() {
-                    commander.sendPhoto(chatGroupId, cfg.webcamDirectory + 'webcam.jpg');
+                    botApi.sendPhoto(chatGroupId, cfg.webcamDirectory + 'webcam.jpg');
                     resolve();
                 });
             break;
@@ -179,8 +179,8 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
             // Takes two parameters, weight of the person and gender
             case '/addme':
                 if (_eventIsFromGroup(msg)) {
-                    commander.sendMessage(msg.chat.id, 'Keskustellaan aiheesta lisää kahden kesken..');
-                    commander.sendMessage(userId, 'Rekisteröi käyttäjä komennolla /addme <paino> <sukupuoli>');
+                    botApi.sendMessage(msg.chat.id, 'Keskustellaan aiheesta lisää kahden kesken..');
+                    botApi.sendMessage(userId, 'Rekisteröi käyttäjä komennolla /addme <paino> <sukupuoli>');
                     resolve();
                 } else {
                     db.checkIfIdInUsers(userId)
@@ -242,25 +242,25 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
             // Can be called from any group which have this bot in it
             case '/setgroup':
                 if (!_eventIsFromGroup(msg)) {
-                    commander.sendMessage(userId, 'Sinun täytyy lähettää tämä komento jostain ryhmästä määrittääksesi ensisijaisen ryhmäsi!');
+                    botApi.sendMessage(userId, 'Sinun täytyy lähettää tämä komento jostain ryhmästä määrittääksesi ensisijaisen ryhmäsi!');
                     resolve();
                 } else {
                     db.checkIfIdInUsers(userId)
                     .then(function checkOk(exists) {
                         if (!exists) {
-                            commander.sendMessage(chatGroupId, 'Käyttäjääsi ei ole vielä luotu botille!\nLuo sellainen komennolla /addme');
+                            botApi.sendMessage(chatGroupId, 'Käyttäjääsi ei ole vielä luotu botille!\nLuo sellainen komennolla /addme');
                             resolve();
                         } else {
                             db.updatePrimaryGroupIdToUser(userId, chatGroupId)
                             .then( function updateOk() {
-                                commander.sendMessage(chatGroupId, 'Ensisijaisen Boris-ryhmä päivitetty!');
+                                botApi.sendMessage(chatGroupId, 'Ensisijaisen Boris-ryhmä päivitetty!');
                                 resolve();
                             });
                         }
                     });
                 }
             break;
-            
+
             default:
                 console.log('! Unknown command', msg.text);
                 resolve();
@@ -269,6 +269,8 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
 };
 
 commander.registerDrink = function(messageId, chatGroupId, chatGroupTitle, userId, userName, drinkType) {
+    // TODO create drinkController,move this to there
+
     // fallback to 'kalja' if no drinkType is set
     drinkType = !drinkType ? 'kalja' : drinkType;
 
@@ -316,25 +318,6 @@ commander.registerUser = function(id, userName, firstName, lastName, primaryGrou
     });
 };
 
-commander.sendPhoto = function (chatId, photo, options) {
-    var opts = {
-        qs: options || {}
-    };
-    opts.qs.chat_id = chatId;
-    var content = _formatSendData('photo', photo);
-
-    opts.formData = content.formData;
-    opts.qs.photo = content.file;
-    request.post(cfg.tgApiUrl + '/sendPhoto', opts);
-};
-
-commander.sendMessage = function(chatId, text) {
-    request.post(cfg.tgApiUrl + '/sendMessage', { form: {
-        chat_id: chatId,
-        text: text
-    }});
-};
-
 commander.getPersonalDrinkLog = function(userId) {
     // TODO sort by timestamp, better
     return new Promise(function (resolve, reject) {
@@ -375,39 +358,7 @@ var _eventIsFromGroup = function(msg) {
     return !_.isUndefined(msg.chat.title);
 };
 
-var _formatSendData = function (type, data) {
-    var formData = {};
-    var fileName;
-    var fileId = data;
 
-    if (data instanceof stream.Stream) {
-        fileName = path.basename(data.path);
-
-        formData[type] = {
-            value: data,
-            options: {
-                filename: fileName,
-                contentType: mime.lookup(fileName)
-            }
-        };
-    }
-    else if (fs.existsSync(data)) {
-        fileName = path.basename(data);
-
-        formData[type] = {
-            value: fs.createReadStream(data),
-            options: {
-                filename: fileName,
-                contentType: mime.lookup(fileName)
-            }
-        };
-    }
-
-    return {
-        formData: formData,
-        file: fileId
-    };
-};
 
 var _downloadFile = function(uri, filename, callback) {
     request.head(uri, function(err, res, body) {
