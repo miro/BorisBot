@@ -14,6 +14,8 @@ var db          = require('./database');
 var graph       = require('./graph');
 var botApi      = require('./botApi');
 
+var userController      = require('./controllers/userController');
+
 // set default timezone to bot timezone
 moment.tz.setDefault(cfg.botTimezone);
 
@@ -177,7 +179,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                     resolve();
                 });
             break;
-            
+
             // Add new user to 'user'-table
             // This function doesn't assign primaryGroupId for user, this can be done from /setgroup- function
             // Takes two parameters, weight of the person and gender
@@ -186,62 +188,20 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                     botApi.sendMessage(msg.chat.id, 'Keskustellaan aiheesta lisää kahden kesken..');
                     botApi.sendMessage(userId, 'Rekisteröi käyttäjä komennolla /addme <paino> <sukupuoli>');
                     resolve();
-                } else {
-                    db.checkIfIdInUsers(userId)
-                    .then(function checkOk(exists) {
-                        if (exists) {
-                            commander.sendMessage(userId, 'Käyttäjä ' + msg.chat.username + ' on jo rekisteröity!\n' +
-                                'Jos haluat päivittää tietojasi, poista vanha käyttäjä komennolla\n/removeme ja komenna /addme uudelleen.');
-                            resolve();
-                        } else {
-                            
-                            var weight = parseInt(userCommandParams.split(' ')[0],10);
-                            var isMale = userCommandParams.split(' ')[1];
-                            
-                            if (userCommandParams.split(' ').length != 2) {
-                                commander.sendMessage(userId, 'Rekisteröi käyttäjä komennolla /addme <paino> <sukupuoli>');
-                                resolve();
-                                
-                            } else if (_.isNaN(weight) || weight < 0) {
-                                commander.sendMessage(userId, 'Paino ei ollut positiivinen kokonaisluku!');
-                                resolve();
-                                
-                            } else if (isMale !== 'mies' && isMale !== 'nainen' ) {
-                                if (_.isUndefined(isMale)) { isMale = ' '; };
-                                commander.sendMessage(userId, 'Parametri "' + isMale + '" ei ollut "mies" tai "nainen"!');
-                                resolve();
-                                
-                            } else {
-                                isMale = (isMale === 'mies') ? true : false;
-                                
-                                commander.registerUser(userId, msg.chat.username, msg.chat.first_name, msg.chat.last_name, weight, isMale)
-                                .then( function registerOk() {
-                                    commander.sendMessage(userId, 'Käyttäjän ' + msg.chat.username + ' rekisteröinti onnistui!');
-                                    resolve();
-                                });
-                            };
-                        };
-                    });
-                };
+                }
+                else {
+                    userController.newUserProcess(userId, userName, userFirstName, userLastName, userCommandParams)
+                    .then(resolve);
+                }
             break;
-            
+
             // Removes existing user from the database
             case '/removeme':
-                db.checkIfIdInUsers(userId)
-                .then(function checkOk(exists) {
-                    if(!exists) {
-                        commander.sendMessage(userId, 'Käyttäjää ' + msg.chat.username + ' ei löytynyt tietokannasta!');
-                        resolve();
-                    } else {
-                        db.removeUser(userId)
-                        .then(function deleteOk() {
-                            commander.sendMessage(userId, 'Käyttäjän ' + msg.chat.username + ' poistaminen onnistui!');
-                            resolve();
-                        });
-                    };
-                });
+                userController.removeUser(userId, userName)
+                .then(resolve);
             break;
-            
+
+
             // Set primaryGroupId for user
             // Can be called from any group which have this bot in it
             case '/setgroup':
@@ -312,15 +272,6 @@ commander.registerDrink = function(messageId, chatGroupId, chatGroupTitle, userI
     });
 };
 
-commander.registerUser = function(id, userName, firstName, lastName, primaryGroupId, weight, isMale) {
-    return new Promise(function (resolve, reject) {
-        
-        db.registerUser(id, userName, firstName, lastName, primaryGroupId, weight, isMale)
-        .then( function registerOk() {
-            resolve();
-        });
-    });
-};
 
 commander.getPersonalDrinkLog = function(userId) {
     // TODO sort by timestamp, better
