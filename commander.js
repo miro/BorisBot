@@ -36,7 +36,11 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
 
         // Parse metadata from the message
         var userId = msg.from.id;
-        var userName = _.isUndefined(msg.from.username) ? msg.from.first_name : ('@' + msg.from.username);
+        var userName = msg.from.username;
+        var userFirstName = msg.from.first_name;
+        var userLastName = msg.from.last_name;
+        var userCallName = _.isUndefined(userName) ? userFirstName : ('@' + userName); // this can be used on messages
+
         var chatGroupId = _eventIsFromGroup(msg) ? msg.chat.id : null;
         var chatGroupTitle = _eventIsFromGroup(msg) ? msg.chat.title : null;
 
@@ -53,7 +57,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
         // parse command & possible parameters
         var userInput = msg.text.split(' ');
         var userCommand = userInput.shift();
-        var userCommandParams = userInput.join(' ').substring(0,140);
+        var userCommandParams = userInput.join(' ').substring(0,140); // TODO this limit should be done only for /kippis commands
 
 
         switch (userCommand.toLowerCase()) {
