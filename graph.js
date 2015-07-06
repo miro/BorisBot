@@ -19,7 +19,7 @@ graph.makeHistogram = function(momentObjects, startTimestamp) {
             x: dates,
             y: _.fill(Array(dates.length),1),
             type: 'histogram',
-            histfunc: 'sum'
+            histfunc: 'sum',
         }];
 
         var layout = {
@@ -50,9 +50,11 @@ graph.makeHistogram = function(momentObjects, startTimestamp) {
                 showgrid: true,
                 zeroline: true,
                 gridwidth: 1.5,
-                autotick: true
+                tickmode:"auto",
+                ticks:"",
+                nticks:20,
             },
-            bargap: 0.5
+            bargap: 0.3
         };
 
         var graphOptions = {
