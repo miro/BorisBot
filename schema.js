@@ -49,8 +49,8 @@ bookshelf.knex.schema.hasTable('users').then(function(exists) {
 
             t.integer('primaryGroupId');
 
-            t.integer('weight');
-            t.boolean('isMale');
+            t.integer('weight').defaultTo(65);
+            t.boolean('isMale').defaultTo(true);
         });
     }
 });
