@@ -16,17 +16,17 @@ var db = {};
 
 // Register new user without primaryGroupId
 db.registerUser = function(id, userName, firstName, lastName, weight, isMale) {
-    
+
     var user = new schema.models.User({
         telegramId: id,
-        username: userName,
+        userName: userName,
         firstName: firstName,
         lastName: lastName,
         weight: weight,
         isMale: isMale
     })
     .save();
-    
+
     return user;
 };
 
