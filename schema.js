@@ -44,8 +44,8 @@ bookshelf.knex.schema.hasTable('users').then(function(exists) {
 
             t.integer('telegramId');
             t.string('username', 50);
-            t.string('firstName', 50);
-            t.string('lastName', 50);
+            t.string('firstName', 100);
+            t.string('lastName', 100);
 
             t.integer('primaryGroupId');
 
