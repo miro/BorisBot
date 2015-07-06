@@ -11,24 +11,10 @@ moment.tz.setDefault(cfg.botTimezone);
 
 var db = {};
 
-
-// # Drink related stuff
+// # User related stuff
 //
 
-// Add new drink
-db.registerDrink = function(messageId, chatGroupId, drinker, drinkType) {
-
-    var drink = new schema.models.Drink({
-        messageId: messageId,
-        chatGroupId: chatGroupId,
-        creatorId: drinker,
-        drinkType: drinkType
-    })
-    .save();
-
-    return drink;
-};
-
+// Register new user without primaryGroupId
 db.registerUser = function(id, userName, firstName, lastName, weight, isMale) {
     
     var user = new schema.models.User({
@@ -51,6 +37,7 @@ db.removeUser = function(id) {
     .del();
 };
 
+// Update primaryGroupId for existing user
 db.updatePrimaryGroupIdToUser = function(userId, groupId) {
     return schema.bookshelf
     .knex('users')
@@ -71,6 +58,24 @@ db.checkIfIdInUsers = function(id) {
             };
         });
     });
+};
+
+
+// # Drink related stuff
+//
+
+// Add new drink
+db.registerDrink = function(messageId, chatGroupId, drinker, drinkType) {
+
+    var drink = new schema.models.Drink({
+        messageId: messageId,
+        chatGroupId: chatGroupId,
+        creatorId: drinker,
+        drinkType: drinkType
+    })
+    .save();
+
+    return drink;
 };
 
 db.getDrinksSinceTimestamp = function(timestampMoment, chatGroupId) {

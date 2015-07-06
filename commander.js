@@ -173,7 +173,10 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                     resolve();
                 });
             break;
-
+            
+            // Add new user to 'user'-table
+            // This function doesn't assign primaryGroupId for user, this can be done from /setgroup- function
+            // Takes two parameters, weight of the person and gender
             case '/addme':
                 if (_eventIsFromGroup(msg)) {
                     commander.sendMessage(msg.chat.id, 'Keskustellaan aiheesta lisää kahden kesken..');
@@ -218,6 +221,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                 };
             break;
             
+            // Removes existing user from the database
             case '/removeme':
                 db.checkIfIdInUsers(userId)
                 .then(function checkOk(exists) {
@@ -234,6 +238,8 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                 });
             break;
             
+            // Set primaryGroupId for user
+            // Can be called from any group which have this bot in it
             case '/setgroup':
                 if (!_eventIsFromGroup(msg)) {
                     commander.sendMessage(userId, 'Sinun täytyy lähettää tämä komento jostain ryhmästä määrittääksesi ensisijaisen ryhmäsi!');
