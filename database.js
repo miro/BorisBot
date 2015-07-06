@@ -29,6 +29,35 @@ db.registerDrink = function(messageId, chatGroupId, drinker, drinkType) {
     return drink;
 };
 
+db.registerUser = function(id, userName, firstName, lastName, primaryGroupId, weight, isMale) {
+    
+    var user = new schema.models.User({
+        telegramId: id,
+        username: userName,
+        firstName: firstName,
+        lastName: lastName,
+        primaryGroupId: primaryGroupId,
+        weight: weight,
+        isMale: isMale
+    })
+    .save();
+    
+    return user;
+};
+
+db.checkIfIdInUsers = function(id) {
+    return new Promise(function (resolve, reject) {
+        schema.bookshelf.knex('users').where({ telegramId: id }).count('id')
+        .then( function fetchOk(result) {
+            if (result[0].count > 0) {
+                resolve(true);
+            } else {
+                resolve(false);
+            };
+        });
+    });
+};
+
 db.getDrinksSinceTimestamp = function(timestampMoment, chatGroupId) {
 
     return schema.collections.Drinks
