@@ -199,13 +199,13 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                                 commander.sendMessage(userId, 'Paino ei ollut positiivinen kokonaisluku!');
                                 resolve();
                                 
-                            } else if (isMale != 'mies' && isMale != 'nainen' ) {
+                            } else if (isMale !== 'mies' && isMale !== 'nainen' ) {
                                 if (_.isUndefined(isMale)) { isMale = ' '; };
                                 commander.sendMessage(userId, 'Parametri "' + isMale + '" ei ollut "mies" tai "nainen"!');
                                 resolve();
                                 
                             } else {
-                                isMale = (isMale == 'mies') ? true : false;
+                                isMale = (isMale === 'mies') ? true : false;
                                 
                                 commander.registerUser(userId, msg.chat.username, msg.chat.first_name, msg.chat.last_name, weight, isMale)
                                 .then( function registerOk() {
@@ -232,6 +232,27 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                         });
                     };
                 });
+            break;
+            
+            case '/setgroup':
+                if (!_eventIsFromGroup(msg)) {
+                    commander.sendMessage(userId, 'Sinun täytyy lähettää tämä komento jostain ryhmästä määrittääksesi ensisijaisen ryhmäsi!');
+                    resolve();
+                } else {
+                    db.checkIfIdInUsers(userId)
+                    .then(function checkOk(exists) {
+                        if (!exists) {
+                            commander.sendMessage(chatGroupId, 'Käyttäjääsi ei ole vielä luotu botille!\nLuo sellainen komennolla /addme');
+                            resolve();
+                        } else {
+                            db.updatePrimaryGroupIdToUser(userId, chatGroupId)
+                            .then( function updateOk() {
+                                commander.sendMessage(chatGroupId, 'Ensisijaisen Boris-ryhmä päivitetty!');
+                                resolve();
+                            });
+                        }
+                    });
+                }
             break;
             
             default:

@@ -51,6 +51,15 @@ db.removeUser = function(id) {
     .del();
 };
 
+db.updatePrimaryGroupIdToUser = function(userId, groupId) {
+    return schema.bookshelf
+    .knex('users')
+    .where({ telegramId: userId })
+    .update({
+        primaryGroupId: groupId
+    });
+};
+
 db.checkIfIdInUsers = function(id) {
     return new Promise(function (resolve, reject) {
         schema.bookshelf.knex('users').where({ telegramId: id }).count('id')
