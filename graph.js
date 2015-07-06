@@ -8,22 +8,22 @@ var moment  = require('moment-timezone');
 
 var graph = {};
 
-graph.makeHistogram = function(userName, dates, since) {
+graph.makeHistogram = function(momentObjects, startTimestamp) {
     return new Promise(function(resolve, reject) {
-        _.each(dates, function(date) {
-            date = date.hour(0).minutes(0).format('YYYY-MM-DD HH:MM');
+        var dates = [];
+        _.each(momentObjects, function(date) {
+            dates.push(date.format('YYYY-MM-DD HH:mm'));
         });
 
         var data = [{
             x: dates,
             y: _.fill(Array(dates.length),1),
             type: 'histogram',
-            histfunc: 'sum'
+            histfunc: 'sum',
         }];
 
-        var sinceDay = moment().subtract(since,'day');
         var layout = {
-            title:  'Kippikset alkaen ' + sinceDay.format('DD.MM.YY'),
+            title:  'Kippikset alkaen ' + startTimestamp.format('DD.MM.YY'),
             xaxis: {
                 title: 'Aika',
                 titlefont: {
@@ -32,7 +32,7 @@ graph.makeHistogram = function(userName, dates, since) {
                     color: 'lightgrey'
                 },
                 type: 'date',
-                range: [sinceDay.format('x'), moment().format('x')],
+                range: [startTimestamp.subtract(6,'hour').format('x'), moment().add(6,'hour').format('x')],
                 autorange: false,
                 tickangle: 45,
                 ticks: 'outside',
@@ -50,15 +50,17 @@ graph.makeHistogram = function(userName, dates, since) {
                 showgrid: true,
                 zeroline: true,
                 gridwidth: 1.5,
-                autotick: true
+                tickmode:"auto",
+                ticks:"",
+                nticks:20,
             },
-            bargap: 0.15
+            bargap: 0.3
         };
 
         var graphOptions = {
             layout: layout,
             fileopt: 'overwrite',
-            filename: 'users/histograms/' + userName
+            filename: 'latestBorisGraph'
         };
 
         plotly.plot(data, graphOptions, function (err, msg) {

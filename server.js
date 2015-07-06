@@ -87,13 +87,18 @@ app.listen(cfg.serverPort, function() {
 // Subscribe webhook
 request.post(cfg.tgApiUrl + '/setWebhook', { form: { url: cfg.webhookUrl }},
     function (error, response, body) {
-        console.log('Webhook subscribtion callback:', response.body);
+        if (error) console.log('ERROR when trying to reach Telegram API', error);
+        else console.log('Webhook updated successfully!');
     }
 );
 
 // Run test sequence
 request(cfg.tgApiUrl + '/getMe', function (error, res, body) {
-    console.log('I Am', body);
+    var response = JSON.parse(body);
+    var botName = response.result.first_name;
+    var botUserName = response.result.username;
+
+    console.log('I Am', botName + ' / @' + botUserName);
 });
 commander.sendMessage(cfg.allowedGroups.testChatId, 'Reboot! ' + Date() + '\nWebhook set to ' + cfg.webhookUrl);
 

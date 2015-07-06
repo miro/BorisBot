@@ -110,38 +110,37 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
             // Takes one parameter, which changes the length of the graph
             case '/graafi':
             case '/histogrammi':
-
-                // If no valid number is given as a parameter, fallback to 5
-                var dateRangeParameter = parseInt(userCommandParams.split(' ')[0], 10);
-                var rangeInDays = _.isNaN(dateRangeParameter) ? 5 : dateRangeParameter;
+            
+                var dbFetchFunction = null;
+                var targetId = null;
 
                 if (_eventIsFromGroup(msg)) {
-                    db.getGroupDrinkTimesSince(chatGroupId, moment().subtract(rangeInDays, 'day'))
-                    .then(function createHistogramFromData(timestamp_arr) {
-                        graph.makeHistogram(chatGroupTitle, timestamp_arr, rangeInDays)
-                        .then(function histogramCreatedHandler(plotly) {
-                            var filename = cfg.plotlyDirectory + chatGroupTitle + '.png';
-                            _downloadFile(plotly.url + '.png', filename, function fileDownloadCallback() {
-                                commander.sendPhoto(msg.chat.id, filename);
-                                resolve();
-                            });
-                        });
-                    });
+                    dbFetchTimestampFunction = db.getFirstTimestampForGroup;
+                    dbFetchDrinksFunction = db.getGroupDrinkTimesSince;
+                    targetId = chatGroupId;
                 }
-
                 else {
-                    db.getPersonalDrinkTimesSince(userId, moment().subtract(rangeInDays, 'day'))
-                    .then(function(date_arr) {
-                        graph.makeHistogram(userName, date_arr, rangeInDays)
-                        .then(function (plotly) {
-                            var filename = cfg.plotlyDirectory + userName + '.png';
-                            _downloadFile(plotly.url + '.png', filename, function fileDownloadCallback() {
-                                commander.sendPhoto(userId, filename);
+                    dbFetchTimestampFunction = db.getFirstTimestampForUser;
+                    dbFetchDrinksFunction = db.getPersonalDrinkTimesSince;
+                    targetId = userId;
+                }
+                dbFetchTimestampFunction(targetId)
+                .then(function setRange(result) {
+                    var startRangeMoment = moment(result[0]['min']);
+                    var dateRangeParameter = parseInt(userCommandParams.split(' ')[0], 10);
+                    if (!_.isNaN(dateRangeParameter)) {startRangeMoment = moment().subtract(dateRangeParameter,'days')};
+                    dbFetchDrinksFunction(targetId, startRangeMoment)
+                    .then(function createHistogramFromData(drinkTimestamps) {
+                        graph.makeHistogram(drinkTimestamps, startRangeMoment)
+                        .then(function histogramCreatedHandler(plotly) {
+                            var destinationFilePath = cfg.plotlyDirectory + 'latestGraph.png';
+                            _downloadFile(plotly.url + '.png', destinationFilePath, function fileDownloadCallback() {
+                                commander.sendPhoto(targetId, destinationFilePath);
                                 resolve();
-                            });
+                            });                   
                         });
                     });
-                }
+                });
             break;
 
             // Sends image of current state of Spänni's webcam
@@ -152,6 +151,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                     // limited to a certain users only, and for now we have no means of finding
                     // out if the person belongs to one of those groups -> calling this personally from
                     // the bot must be denied
+                    commander.sendMessage(userId, 'Komento /webcam on käytössä vain valtuutetuissa ryhmäkeskusteluissa!');
                     resolve();
                     return;
 
@@ -320,8 +320,11 @@ var _formatSendData = function (type, data) {
     };
 };
 
-var _downloadFile = function(uri, filename, callback){
+var _downloadFile = function(uri, filename, callback) {
     request.head(uri, function(err, res, body) {
+        if (err) {
+            console.log('Error on file download!', err);
+        }
         request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
     });
 };
