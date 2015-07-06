@@ -10,7 +10,6 @@ var cfg         = require('./config');
 var msgHistory  = require('./messageHistory');
 var scheduler   = require('./scheduler');
 var graph       = require('./graph')
-var db          = require('./database')
 
 var app         = express();
 
