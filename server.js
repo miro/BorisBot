@@ -6,6 +6,7 @@ var fs          = require('fs');
 var exec        = require('child_process').exec;
 
 var commander   = require('./commander');
+var botApi      = require('./botApi');
 var cfg         = require('./config');
 var msgHistory  = require('./messageHistory');
 var scheduler   = require('./scheduler');
@@ -100,7 +101,7 @@ request(cfg.tgApiUrl + '/getMe', function (error, res, body) {
 
     console.log('I Am', botName + ' / @' + botUserName);
 });
-commander.sendMessage(cfg.allowedGroups.testChatId, 'Reboot! ' + Date() + '\nWebhook set to ' + cfg.webhookUrl);
+botApi.sendMessage(cfg.allowedGroups.testChatId, 'Reboot! ' + Date() + '\nWebhook set to ' + cfg.webhookUrl);
 
 // Start scheduler
 scheduler.startJobs();
