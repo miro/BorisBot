@@ -8,7 +8,7 @@ var moment  = require('moment-timezone');
 
 var graph = {};
 
-graph.makeHistogram = function(momentObjects, since) {
+graph.makeHistogram = function(momentObjects, startTimestamp) {
     return new Promise(function(resolve, reject) {
         var dates = [];
         _.each(momentObjects, function(date) {
@@ -22,9 +22,8 @@ graph.makeHistogram = function(momentObjects, since) {
             histfunc: 'sum'
         }];
 
-        var sinceDay = moment().subtract(since,'day');
         var layout = {
-            title:  'Kippikset alkaen ' + sinceDay.format('DD.MM.YY'),
+            title:  'Kippikset alkaen ' + startTimestamp.format('DD.MM.YY'),
             xaxis: {
                 title: 'Aika',
                 titlefont: {
@@ -33,7 +32,7 @@ graph.makeHistogram = function(momentObjects, since) {
                     color: 'lightgrey'
                 },
                 type: 'date',
-                range: [sinceDay.format('x'), moment().add(12,'hour').format('x')],
+                range: [startTimestamp.subtract(6,'hour').format('x'), moment().add(6,'hour').format('x')],
                 autorange: false,
                 tickangle: 45,
                 ticks: 'outside',

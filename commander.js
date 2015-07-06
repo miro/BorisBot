@@ -110,31 +110,34 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
             // Takes one parameter, which changes the length of the graph
             case '/graafi':
             case '/histogrammi':
-
-                // If no valid number is given as a parameter, fallback to 5
-                var dateRangeParameter = parseInt(userCommandParams.split(' ')[0], 10);
-                var rangeInDays = _.isNaN(dateRangeParameter) ? 5 : dateRangeParameter;
-
+            
                 var dbFetchFunction = null;
                 var targetId = null;
 
                 if (_eventIsFromGroup(msg)) {
-                    dbFetchFunction = db.getGroupDrinkTimesSince;
+                    dbFetchTimestampFunction = db.getFirstTimestampForGroup;
+                    dbFetchDrinksFunction = db.getGroupDrinkTimesSince;
                     targetId = chatGroupId;
                 }
                 else {
-                    dbFetchFunction = db.getPersonalDrinkTimesSince;
+                    dbFetchTimestampFunction = db.getFirstTimestampForUser;
+                    dbFetchDrinksFunction = db.getPersonalDrinkTimesSince;
                     targetId = userId;
                 }
-
-                dbFetchFunction(targetId, moment().subtract(rangeInDays, 'day'))
-                .then(function createHistogramFromData(drinkTimestamps) {
-                    graph.makeHistogram(drinkTimestamps, rangeInDays)
-                    .then(function histogramCreatedHandler(plotly) {
-                        var destinationFilePath = cfg.plotlyDirectory + 'latestGraph.png';
-                        _downloadFile(plotly.url + '.png', destinationFilePath, function fileDownloadCallback() {
-                            commander.sendPhoto(targetId, destinationFilePath);
-                            resolve();
+                dbFetchTimestampFunction(targetId)
+                .then(function setRange(result) {
+                    var startRangeMoment = moment(result[0]['min']);
+                    var dateRangeParameter = parseInt(userCommandParams.split(' ')[0], 10);
+                    if (!_.isNaN(dateRangeParameter)) {startRangeMoment = moment().subtract(dateRangeParameter,'days')};
+                    dbFetchDrinksFunction(targetId, startRangeMoment)
+                    .then(function createHistogramFromData(drinkTimestamps) {
+                        graph.makeHistogram(drinkTimestamps, startRangeMoment)
+                        .then(function histogramCreatedHandler(plotly) {
+                            var destinationFilePath = cfg.plotlyDirectory + 'latestGraph.png';
+                            _downloadFile(plotly.url + '.png', destinationFilePath, function fileDownloadCallback() {
+                                commander.sendPhoto(targetId, destinationFilePath);
+                                resolve();
+                            });                   
                         });
                     });
                 });

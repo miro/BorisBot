@@ -90,4 +90,18 @@ db.getTotalDrinksAmountForGroup = function(groupId) {
     .count('id');
 };
 
+db.getFirstTimestampForUser = function(userId) {
+    return schema.bookshelf
+    .knex('drinks')
+    .where( {creatorId: userId} )
+    .min('timestamp')
+};
+
+db.getFirstTimestampForGroup = function(groupId) {
+    return schema.bookshelf
+    .knex('drinks')
+    .where( {chatGroupId: groupId} )
+    .min('timestamp')
+};
+
 module.exports = db;
