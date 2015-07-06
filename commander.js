@@ -151,6 +151,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                     // limited to a certain users only, and for now we have no means of finding
                     // out if the person belongs to one of those groups -> calling this personally from
                     // the bot must be denied
+                    commander.sendMessage(userId, 'Komento /webcam on käytössä vain valtuutetuissa ryhmäkeskusteluissa!');
                     resolve();
                     return;
 
