@@ -174,48 +174,64 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                 });
             break;
 
-            case '/user':
+            case '/addme':
                 if (_eventIsFromGroup(msg)) {
                     commander.sendMessage(msg.chat.id, 'Keskustellaan aiheesta lisää kahden kesken..');
-                    commander.sendMessage(userId, 'Rekisteröi käyttäjä komennolla /user <paino> <sukupuoli>');
+                    commander.sendMessage(userId, 'Rekisteröi käyttäjä komennolla /addme <paino> <sukupuoli>');
                     resolve();
                 } else {
                     db.checkIfIdInUsers(userId)
                     .then(function checkOk(exists) {
                         if (exists) {
-                            commander.sendMessage(userId, 'Käyttäjä ' + msg.chat.username + ' on jo rekisteröity!');
+                            commander.sendMessage(userId, 'Käyttäjä ' + msg.chat.username + ' on jo rekisteröity!\n' +
+                                'Jos haluat päivittää tietojasi, poista vanha käyttäjä komennolla\n/removeme ja komenna /addme uudelleen.');
                             resolve();
                         } else {
                             
-                            if (userCommandParams.split(' ').length != 2) {
-                                commander.sendMessage(userId, 'Rekisteröi käyttäjä komennolla /user <paino> <sukupuoli>');
-                                resolve();
-                            };
                             var weight = parseInt(userCommandParams.split(' ')[0],10);
-                            if (_.isNaN(weight) || weight < 0) {
+                            var isMale = userCommandParams.split(' ')[1];
+                            
+                            if (userCommandParams.split(' ').length != 2) {
+                                commander.sendMessage(userId, 'Rekisteröi käyttäjä komennolla /addme <paino> <sukupuoli>');
+                                resolve();
+                                
+                            } else if (_.isNaN(weight) || weight < 0) {
                                 commander.sendMessage(userId, 'Paino ei ollut positiivinen kokonaisluku!');
                                 resolve();
-                            };
-                            
-                            var isMale = userCommandParams.split(' ')[1].toLowerCase()
-                            if ( isMale != 'mies' && isMale != 'nainen' ) {
-                                commander.sendMessage(userId, 'Parametri ' + isMale + ' ei ollut "mies" tai "nainen"!');
+                                
+                            } else if (isMale != 'mies' && isMale != 'nainen' ) {
+                                if (_.isUndefined(isMale)) { isMale = ' '; };
+                                commander.sendMessage(userId, 'Parametri "' + isMale + '" ei ollut "mies" tai "nainen"!');
                                 resolve();
+                                
+                            } else {
+                                isMale = (isMale == 'mies') ? true : false;
+                                
+                                commander.registerUser(userId, msg.chat.username, msg.chat.first_name, msg.chat.last_name, weight, isMale)
+                                .then( function registerOk() {
+                                    commander.sendMessage(userId, 'Käyttäjän ' + msg.chat.username + ' rekisteröinti onnistui!');
+                                    resolve();
+                                });
                             };
-                            isMale = (isMale == 'mies') ? true : false;
-                            
-                            var primaryGroupId = cfg.allowedGroups.mainChatId; //later: ask user for groupId
-                            
-                            commander.registerUser(userId, msg.chat.username, msg.chat.first_name, msg.chat.last_name, primaryGroupId, weight, isMale)
-                            .then( function registerOk() {
-                                commander.sendMessage(userId, 'Käyttäjän ' + msg.chat.username + ' rekisteröinti onnistui!');
-                                resolve();
-                            });
                         };
                     });
                 };
-                
-                
+            break;
+            
+            case '/removeme':
+                db.checkIfIdInUsers(userId)
+                .then(function checkOk(exists) {
+                    if(!exists) {
+                        commander.sendMessage(userId, 'Käyttäjää ' + msg.chat.username + ' ei löytynyt tietokannasta!');
+                        resolve();
+                    } else {
+                        db.removeUser(userId)
+                        .then(function deleteOk() {
+                            commander.sendMessage(userId, 'Käyttäjän ' + msg.chat.username + ' poistaminen onnistui!');
+                            resolve();
+                        });
+                    };
+                });
             break;
             
             default:

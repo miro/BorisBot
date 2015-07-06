@@ -29,20 +29,26 @@ db.registerDrink = function(messageId, chatGroupId, drinker, drinkType) {
     return drink;
 };
 
-db.registerUser = function(id, userName, firstName, lastName, primaryGroupId, weight, isMale) {
+db.registerUser = function(id, userName, firstName, lastName, weight, isMale) {
     
     var user = new schema.models.User({
         telegramId: id,
         username: userName,
         firstName: firstName,
         lastName: lastName,
-        primaryGroupId: primaryGroupId,
         weight: weight,
         isMale: isMale
     })
     .save();
     
     return user;
+};
+
+db.removeUser = function(id) {
+    return schema.bookshelf
+    .knex('users')
+    .where({ telegramId: id })
+    .del();
 };
 
 db.checkIfIdInUsers = function(id) {
