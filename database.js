@@ -11,55 +11,6 @@ moment.tz.setDefault(cfg.botTimezone);
 
 var db = {};
 
-// # User related stuff
-//
-
-// Register new user without primaryGroupId
-db.registerUser = function(id, userName, firstName, lastName, weight, isMale) {
-
-    var user = new schema.models.User({
-        telegramId: id,
-        userName: userName,
-        firstName: firstName,
-        lastName: lastName,
-        weight: weight,
-        isMale: isMale
-    })
-    .save();
-
-    return user;
-};
-
-db.removeUser = function(id) {
-    return schema.bookshelf
-    .knex('users')
-    .where({ telegramId: id })
-    .del();
-};
-
-// Update primaryGroupId for existing user
-db.updatePrimaryGroupIdToUser = function(userId, groupId) {
-    return schema.bookshelf
-    .knex('users')
-    .where({ telegramId: userId })
-    .update({
-        primaryGroupId: groupId
-    });
-};
-
-db.checkIfIdInUsers = function(id) {
-    return new Promise(function (resolve, reject) {
-        schema.bookshelf.knex('users').where({ telegramId: id }).count('id')
-        .then( function fetchOk(result) {
-            if (result[0].count > 0) {
-                resolve(true);
-            } else {
-                resolve(false);
-            };
-        });
-    });
-};
-
 
 // # Drink related stuff
 //
@@ -139,5 +90,58 @@ db.getTotalDrinksAmountForGroup = function(groupId) {
     .where({ chatGroupId: groupId })
     .count('id');
 };
+
+
+
+
+
+// ## Users related stuff
+//
+
+// Register new user without primaryGroupId
+db.registerUser = function(id, userName, firstName, lastName, weight, isMale) {
+    var user = new schema.models.User({
+        telegramId: id,
+        userName: userName,
+        firstName: firstName,
+        lastName: lastName,
+        weight: weight,
+        isMale: isMale
+    })
+    .save();
+
+    return user;
+};
+
+db.removeUser = function(id) {
+    return schema.bookshelf
+    .knex('users')
+    .where({ telegramId: id })
+    .del();
+};
+
+// Update primaryGroupId for existing user
+db.updatePrimaryGroupIdToUser = function(userId, groupId) {
+    return schema.bookshelf
+    .knex('users')
+    .where({ telegramId: userId })
+    .update({
+        primaryGroupId: groupId
+    });
+};
+
+db.checkIfIdInUsers = function(id) {
+    return new Promise(function (resolve, reject) {
+        schema.bookshelf.knex('users').where({ telegramId: id }).count('id')
+        .then( function fetchOk(result) {
+            if (result[0].count > 0) {
+                resolve(true);
+            } else {
+                resolve(false);
+            };
+        });
+    });
+};
+
 
 module.exports = db;
