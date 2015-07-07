@@ -154,6 +154,11 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
             // Sends image of current state of Spänni's webcam
             // Triggering of this is only possible from the spännimobi group
             case '/webcam':
+                if (_.isUndefined(cfg.webcamURL)) {
+                    botApi.sendMessage(userId, 'Botille ei ole määritetty webcamin osoitetta!');
+                    resolve();
+                }
+            
                 if (!_eventIsFromGroup(msg)) {
                     // this command can only be triggered from a group, since this command is
                     // limited to a certain users only, and for now we have no means of finding
