@@ -64,11 +64,11 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
             case '/kippis':
                 commander.registerDrink(msg.message_id, chatGroupId, chatGroupTitle, userId, userName, userCommandParams)
                 .then(function(returnMessage) {
-                    commander.sendMessage(msg.chat.id, returnMessage);
+                    botApi.sendMessage(msg.chat.id, returnMessage);
                     resolve();
                 })
                 .error(function(e) {
-                    commander.sendMessage(msg.chat.id, 'Kippistely epäonnistui, yritä myöhemmin uudelleen');
+                    botApi.sendMessage(msg.chat.id, 'Kippistely epäonnistui, yritä myöhemmin uudelleen');
                     resolve();
                 });
             break;
@@ -114,30 +114,38 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
             case '/graafi':
             case '/histogrammi':
 
-                // If no valid number is given as a parameter, fallback to 5
-                var dateRangeParameter = parseInt(userCommandParams.split(' ')[0], 10);
-                var rangeInDays = _.isNaN(dateRangeParameter) ? 5 : dateRangeParameter;
-
                 var dbFetchFunction = null;
                 var targetId = null;
 
                 if (_eventIsFromGroup(msg)) {
-                    dbFetchFunction = db.getGroupDrinkTimesSince;
+                    dbFetchTimestampFunction = db.getFirstTimestampForGroup;
+                    dbFetchDrinksFunction = db.getGroupDrinkTimesSince;
                     targetId = chatGroupId;
                 }
                 else {
-                    dbFetchFunction = db.getPersonalDrinkTimesSince;
+                    dbFetchTimestampFunction = db.getFirstTimestampForUser;
+                    dbFetchDrinksFunction = db.getPersonalDrinkTimesSince;
                     targetId = userId;
                 }
 
-                dbFetchFunction(targetId, moment().subtract(rangeInDays, 'day'))
-                .then(function createHistogramFromData(drinkTimestamps) {
-                    graph.makeHistogram(drinkTimestamps, rangeInDays)
-                    .then(function histogramCreatedHandler(plotly) {
-                        var destinationFilePath = cfg.plotlyDirectory + 'latestGraph.png';
-                        _downloadFile(plotly.url + '.png', destinationFilePath, function fileDownloadCallback() {
-                            botApi.sendPhoto(targetId, destinationFilePath);
-                            resolve();
+                dbFetchTimestampFunction(targetId)
+                .then(function setRange(result) {
+                    var startRangeMoment = moment(result[0]['min']);
+                    var dateRangeParameter = parseInt(userCommandParams.split(' ')[0], 10);
+
+                    if (!_.isNaN(dateRangeParameter)) {
+                        startRangeMoment = moment().subtract(dateRangeParameter,'days')
+                    }
+
+                    dbFetchDrinksFunction(targetId, startRangeMoment)
+                    .then(function createHistogramFromData(drinkTimestamps) {
+                        graph.makeHistogram(drinkTimestamps, startRangeMoment)
+                        .then(function histogramCreatedHandler(plotly) {
+                            var destinationFilePath = cfg.plotlyDirectory + 'latestGraph.png';
+                            _downloadFile(plotly.url + '.png', destinationFilePath, function () {
+                                botApi.sendPhoto(targetId, destinationFilePath);
+                                resolve();
+                            });
                         });
                     });
                 });
@@ -151,6 +159,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                     // limited to a certain users only, and for now we have no means of finding
                     // out if the person belongs to one of those groups -> calling this personally from
                     // the bot must be denied
+                    botApi.sendMessage(userId, 'Komento /webcam on käytössä vain valtuutetuissa ryhmäkeskusteluissa!');
                     resolve();
                     return;
 
