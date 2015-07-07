@@ -208,16 +208,18 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                 if (!_eventIsFromGroup(msg)) {
                     botApi.sendMessage(userId, 'Sinun täytyy lähettää tämä komento jostain ryhmästä määrittääksesi ensisijaisen ryhmäsi!');
                     resolve();
-                } else {
+                }
+                else {
                     db.checkIfIdInUsers(userId)
                     .then(function checkOk(exists) {
                         if (!exists) {
                             botApi.sendMessage(chatGroupId, 'Käyttäjääsi ei ole vielä luotu botille!\nLuo sellainen komennolla /addme');
                             resolve();
-                        } else {
+                        }
+                        else {
                             db.updatePrimaryGroupIdToUser(userId, chatGroupId)
-                            .then( function updateOk() {
-                                botApi.sendMessage(chatGroupId, 'Ensisijaisen Boris-ryhmä päivitetty!');
+                            .then(function updateOk() {
+                                botApi.sendMessage(chatGroupId, 'Käyttäjätunnuksesi on asetettu kuulumaan tähän ryhmään!');
                                 resolve();
                             });
                         }
