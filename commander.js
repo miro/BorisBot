@@ -181,6 +181,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
             // This function doesn't assign primaryGroupId for user, this can be done from /setgroup- function
             // Takes two parameters, weight of the person and gender
             case '/addme':
+            case '/luotunnus':
                 if (_eventIsFromGroup(msg)) {
                     botApi.sendMessage(msg.chat.id, 'Keskustellaan aiheesta lisää kahden kesken..');
                     botApi.sendMessage(userId, 'Rekisteröi käyttäjä komennolla /addme <paino> <sukupuoli>');
@@ -194,6 +195,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
 
             // Removes existing user from the database
             case '/removeme':
+            case '/poistatunnus':
                 userController.removeUser(userId, userName)
                 .then(resolve);
             break;
@@ -202,6 +204,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
             // Set primaryGroupId for user
             // Can be called from any group which have this bot in it
             case '/setgroup':
+            case '/asetaryhmä':
                 if (!_eventIsFromGroup(msg)) {
                     botApi.sendMessage(userId, 'Sinun täytyy lähettää tämä komento jostain ryhmästä määrittääksesi ensisijaisen ryhmäsi!');
                     resolve();
