@@ -154,41 +154,43 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
             // Sends image of current state of Spänni's webcam
             // Triggering of this is only possible from the spännimobi group
             case '/webcam':
+            
                 if (_.isUndefined(cfg.webcamURL)) {
                     botApi.sendMessage(userId, 'Botille ei ole määritetty webcamin osoitetta!');
                     resolve();
-                }
+                } else {
             
-                if (!_eventIsFromGroup(msg)) {
-                    // this command can only be triggered from a group, since this command is
-                    // limited to a certain users only, and for now we have no means of finding
-                    // out if the person belongs to one of those groups -> calling this personally from
-                    // the bot must be denied
-                    botApi.sendMessage(userId, 'Komento /webcam on käytössä vain valtuutetuissa ryhmäkeskusteluissa!');
-                    resolve();
-                    return;
+                    if (!_eventIsFromGroup(msg)) {
+                        // this command can only be triggered from a group, since this command is
+                        // limited to a certain users only, and for now we have no means of finding
+                        // out if the person belongs to one of those groups -> calling this personally from
+                        // the bot must be denied
+                        botApi.sendMessage(userId, 'Komento /webcam on käytössä vain valtuutetuissa ryhmäkeskusteluissa!');
+                        resolve();
+                        return;
 
-                }
-
-                // check if the command came from an allowedGroup
-                var msgFromAllowedGroup = false;
-                for (var group in cfg.allowedGroups) {
-                    if (chatGroupId === cfg.allowedGroups[group]) {
-                        msgFromAllowedGroup = true;
                     }
-                }
 
-                if (!msgFromAllowedGroup) {
-                    // unauthorized
-                    resolve();
-                    return;
-                }
+                    // check if the command came from an allowedGroup
+                    var msgFromAllowedGroup = false;
+                    for (var group in cfg.allowedGroups) {
+                        if (chatGroupId === cfg.allowedGroups[group]) {
+                            msgFromAllowedGroup = true;
+                        }
+                    }
 
-                // -> If we get here, we are good to go!
-                _downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg', function() {
-                    botApi.sendPhoto(chatGroupId, cfg.webcamDirectory + 'webcam.jpg');
-                    resolve();
-                });
+                    if (!msgFromAllowedGroup) {
+                        // unauthorized
+                        resolve();
+                        return;
+                    }
+
+                    // -> If we get here, we are good to go!
+                    _downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg', function() {
+                        botApi.sendPhoto(chatGroupId, cfg.webcamDirectory + 'webcam.jpg');
+                        resolve();
+                    });
+                }
             break;
 
             // Add new user to 'user'-table
