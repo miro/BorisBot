@@ -1,9 +1,6 @@
 // ### Handles all the bot commands
 
-var stream      = require('stream');
-var path        = require('path');
 var fs          = require('fs');
-var mime        = require('mime');
 var Promise     = require('bluebird');
 var request     = require('request');
 var moment      = require('moment-timezone');
