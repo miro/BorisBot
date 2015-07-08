@@ -30,7 +30,7 @@ controller.newUserProcess = function(userId, userName, userFirstName, userLastNa
                     botApi.sendMessage(userId, 'Rekisteröi käyttäjä komennolla /addme <paino> <sukupuoli>');
                     resolve();
 
-                } else if (_.isNaN(weight) || weight < 0) {
+                } else if (_.isNaN(weight) || weight <= 0) {
                     botApi.sendMessage(userId, 'Paino ei ollut positiivinen kokonaisluku!');
                     resolve();
 
