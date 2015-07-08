@@ -175,7 +175,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                     ethanolController.display(userId, chatGroupId);
                     resolve();
                 } else {
-                    ethanolController.display(userId, NULL);
+                    ethanolController.display(userId, null);
                     resolve();
                 }
             break;
