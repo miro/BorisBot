@@ -72,4 +72,30 @@ controller.removeUser = function(userId, userName) {
 };
 
 
+controller.setGroup = function(userId, chatGroupId, chatGroupTitle, messageIsFromGroup) {
+    return new Promise(function (resolve, reject) {
+        if (!messageIsFromGroup) {
+            botApi.sendMessage(userId, 'Sinun täytyy lähettää tämä komento jostain ryhmästä määrittääksesi ensisijaisen ryhmäsi!');
+            resolve();
+        }
+        else {
+            db.checkIfIdInUsers(userId)
+            .then(function checkOk(exists) {
+                if (!exists) {
+                    botApi.sendMessage(chatGroupId, 'Käyttäjääsi ei ole vielä luotu botille!\nLuo sellainen komennolla /addme');
+                    resolve();
+                }
+                else {
+                    db.updatePrimaryGroupIdToUser(userId, chatGroupId)
+                    .then(function updateOk() {
+                        botApi.sendMessage(chatGroupId, 'Käyttäjätunnuksesi on asetettu kuulumaan tähän ryhmään!');
+                        resolve();
+                    });
+                }
+            });
+        }
+    });
+};
+
+
 module.exports = controller;

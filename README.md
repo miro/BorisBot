@@ -9,6 +9,7 @@ for-the-lulz -based Telegram Bot for spinni.org. Better get started -documentati
 * BORISBOT_PUBLIC_URL - URL, where this bot is located. Example `https://foo.com`
 * BORISBOT_PLOTLY_USERNAME - your username to Plot.ly, used by graph generating functions
 * BORISBOT_PLOTLY_APIKEY - ^
+* BORISBOT_WEBCAM_URL - URL, where a photo from a webcam is located
 
 
 
