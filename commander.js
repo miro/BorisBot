@@ -12,6 +12,7 @@ var utils       = require('./utils');
 
 var userController      = require('./controllers/userController');
 var drinkController     = require('./controllers/drinkController');
+var ethanolController   = require('./controllers/ethanolController');
 
 // set default timezone to bot timezone
 moment.tz.setDefault(cfg.botTimezone);
@@ -170,7 +171,13 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
             break;
 
             case '/promille':
-                //Work in progress
+                if (_eventIsFromGroup(msg)) {
+                    ethanolController.display(userId, chatGroupId);
+                    resolve();
+                } else {
+                    ethanolController.display(userId, NULL);
+                    resolve();
+                }
             break;
             
             default:

@@ -131,6 +131,14 @@ db.getNextDrinkAfterTimestamp = function(userId, timestampMoment) {
     })
     .fetchOne();
 };
+
+db.getDrinksSinceTimestampSortedForUser = function(userId, timestampMoment) {
+    return schema.bookshelf
+    .knex('drinks')
+    .where( {creatorId: userId} )
+    .andWhere('timestamp','>', timestampMoment.toJSON())
+    .orderBy('timestamp', 'asc');
+};
 // ## Users related stuff
 //
 

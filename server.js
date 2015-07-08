@@ -11,7 +11,6 @@ var cfg         = require('./config');
 var msgHistory  = require('./messageHistory');
 var scheduler   = require('./scheduler');
 var graph       = require('./graph')
-var eth         = require('./ethanol')
 
 var app         = express();
 

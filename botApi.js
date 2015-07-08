@@ -1,5 +1,9 @@
 var cfg             = require('./config');
 var request         = require('request');
+var stream          = require('stream');
+var fs              = require('fs');
+var mime            = require('mime');
+var path            = require('path');
 
 var botApi = {};
 
