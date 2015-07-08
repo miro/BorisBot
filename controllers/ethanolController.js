@@ -44,12 +44,16 @@ controller.calculateDrunkLevel = function(userId) {
                 _.each(collection, function(model) {
                     differenceInHours = moment(model['timestamp']).diff(startMoment,'hours', true);
                     alchLevel = _drunklevel(drinkEthGrams, differenceInHours, weight, isMale);
+                    
+                    // If user was sober before this drink, reset startMoment to this drinks timestamp
                     if (alchLevel == 0.00) {
                         startMoment = moment(model['timestamp']);
                         drinkEthGrams = 0;
                     }
                     drinkEthGrams += model['drinkValue'];
                 });
+                
+                // Calculate effect of the last drink to current time
                 differenceInHours = moment().diff(startMoment,'hours', true);
                 alchLevel = _drunklevel(drinkEthGrams, differenceInHours, weight, isMale);
                 return resolve(alchLevel);
