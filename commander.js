@@ -40,6 +40,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
         var userLastName = msg.from.last_name;
         var userCallName = _.isUndefined(userName) ? userFirstName : ('@' + userName); // this can be used on messages
 
+        var messageIsFromGroup = _eventIsFromGroup(msg);
         var chatGroupId = _eventIsFromGroup(msg) ? msg.chat.id : null;
         var chatGroupTitle = _eventIsFromGroup(msg) ? msg.chat.title : null;
 
@@ -162,26 +163,8 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
             // Can be called from any group which have this bot in it
             case '/setgroup':
             case '/asetaryhmä':
-                if (!_eventIsFromGroup(msg)) {
-                    botApi.sendMessage(userId, 'Sinun täytyy lähettää tämä komento jostain ryhmästä määrittääksesi ensisijaisen ryhmäsi!');
-                    resolve();
-                }
-                else {
-                    db.checkIfIdInUsers(userId)
-                    .then(function checkOk(exists) {
-                        if (!exists) {
-                            botApi.sendMessage(chatGroupId, 'Käyttäjääsi ei ole vielä luotu botille!\nLuo sellainen komennolla /addme');
-                            resolve();
-                        }
-                        else {
-                            db.updatePrimaryGroupIdToUser(userId, chatGroupId)
-                            .then(function updateOk() {
-                                botApi.sendMessage(chatGroupId, 'Käyttäjätunnuksesi on asetettu kuulumaan tähän ryhmään!');
-                                resolve();
-                            });
-                        }
-                    });
-                }
+                userController.setGroup(userId, chatGroupId, chatGroupTitle, messageIsFromGroup)
+                .then(resolve);
             break;
 
             default:
