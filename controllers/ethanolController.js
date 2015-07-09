@@ -34,6 +34,7 @@ controller.calculateDrunkLevel = function(userId, startDaysBefore) {
     return new Promise( function(resolve,reject) {
         db.getUserById(userId)
         .then( function UserFetchOk(user) {
+            
             var weight = user.get('weight');
             var isMale = user.get('isMale');
             var startMoment = moment().subtract(startDaysBefore,'days');
@@ -41,7 +42,7 @@ controller.calculateDrunkLevel = function(userId, startDaysBefore) {
             db.getDrinksSinceTimestampSortedForUser(userId, startMoment) 
             .then(function drinkFetchOk(collection) {
                 
-                var startMomentReset = false;
+                var startMomentReset = 0;
                 var alchLevel = 0.00;
                 var drinkEthGrams = 0;
                 var differenceInHours = 0;
@@ -54,20 +55,21 @@ controller.calculateDrunkLevel = function(userId, startDaysBefore) {
                     if (alchLevel == 0.00) {
                         startMoment = moment(model['timestamp']);
                         drinkEthGrams = 0;
-                        startMomentReset = true;
+                        startMomentReset += 1;
                     }
                     drinkEthGrams += model['drinkValue'];
                 });
                 
-                // If this is true, user have been drunk through the whole processing range,
-                // need to do this function again with wider range
-                if (!startMomentReset) {
-                    reject('rangeError');
-                    
-                } else {                
-                    // Calculate effect of the last drink to current time
+                // Calculate effect of the last drink to current time
                     differenceInHours = moment().diff(startMoment,'hours', true);
                     alchLevel = _drunklevel(drinkEthGrams, differenceInHours, weight, isMale);
+                
+                // If this is true, user have been drunk 70% of the whole processing range,
+                // need to do this function again with wider range
+                if (startMomentReset == 1 && differenceInHours > (moment.duration(startDaysBefore, 'hours', true) * 0.7)) {
+                    reject('rangeError');
+                    
+                } else {                                   
                     resolve(alchLevel);
                 }
             });
