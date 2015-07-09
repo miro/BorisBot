@@ -5,7 +5,7 @@ var _           = require('lodash');
 var fs          = require('fs');
 var exec        = require('child_process').exec;
 
-var commander   = require('./commander');
+var dispatcher  = require('./dispatcher');
 var botApi      = require('./botApi');
 var cfg         = require('./config');
 var msgHistory  = require('./messageHistory');
@@ -34,7 +34,7 @@ app.post('/api/webhook', function(req, res) {
     }
 
     // Send message to the actual bot
-    commander.handleWebhookEvent(msg)
+    dispatcher(msg)
     .then(function() {
         msgHistory.messageProcessed(msg.message_id);
         res.sendStatus(200);

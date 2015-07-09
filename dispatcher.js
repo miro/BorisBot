@@ -1,4 +1,4 @@
-// ### Handles all the bot commands
+// ### Parses messages coming from Telegram webhook, dispatches them to bot commands
 
 var Promise     = require('bluebird');
 var request     = require('request');
@@ -18,13 +18,8 @@ var ethanolController   = require('./controllers/ethanolController');
 moment.tz.setDefault(cfg.botTimezone);
 
 
-var commander = {};
-
-// "Public" functions
-//
-
 // This function handle
-commander.handleWebhookEvent = function runUserCommand(msg) {
+module.exports = function dispatchUserCommand(msg) {
     return new Promise(function (resolve, reject) {
         console.log('webhook event!', msg);
 
@@ -186,5 +181,3 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
         }
     });
 };
-
-module.exports = commander;
