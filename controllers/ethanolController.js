@@ -15,11 +15,13 @@ controller.display = function(userId, groupId) {
             botApi.sendMessage(targetId, 'Promillesi: ' + alchLevel);
             resolve();
         })
-        .catch( function(err) {
-            if (err == 'userError') {
+        .catch(function(err) {
+            // TODO: use Error-objects in here? https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error
+            if (err === 'userError') {
                 botApi.sendMessage(userId, 'Käyttäjäsi täytyy olla rekisteröity laskeaksesi promillet!\nVoit tehdä tämän komennolla /addme');
                 resolve();
-            } else if (err == 'rangeError') {
+            }
+            else if (err === 'rangeError') {
                 controller.calculateDrunkLevel(userId, 5)
                 .then( function secondCalculateOk(alchLevel) {
                     botApi.sendMessage(targetId, 'Promillesi: ' + alchLevel);
