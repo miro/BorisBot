@@ -42,7 +42,6 @@ controller.calculateDrunkLevel = function(userId, startDaysBefore) {
             db.getDrinksSinceTimestampSortedForUser(userId, startMoment) 
             .then(function drinkFetchOk(collection) {
                 
-                var startMomentReset = 0;
                 var alchLevel = 0.00;
                 var drinkEthGrams = 0;
                 var differenceInHours = 0;
@@ -55,7 +54,6 @@ controller.calculateDrunkLevel = function(userId, startDaysBefore) {
                     if (alchLevel == 0.00) {
                         startMoment = moment(model['timestamp']);
                         drinkEthGrams = 0;
-                        startMomentReset += 1;
                     }
                     drinkEthGrams += model['drinkValue'];
                 });
@@ -64,9 +62,10 @@ controller.calculateDrunkLevel = function(userId, startDaysBefore) {
                     differenceInHours = moment().diff(startMoment,'hours', true);
                     alchLevel = _drunklevel(drinkEthGrams, differenceInHours, weight, isMale);
                 
-                // If this is true, user have been drunk 70% of the whole processing range,
-                // need to do this function again with wider range
-                if (startMomentReset == 1 && differenceInHours > (moment.duration(startDaysBefore, 'hours', true) * 0.7)) {
+                // If this is true, user have taken his first drink in the first 30% of the range
+                // and there is no other calculated "soberpoints", so this function needs to be called
+                // again with wider range
+                if (differenceInHours > (moment.duration(startDaysBefore, 'hours', true) * 0.7)) {
                     reject('rangeError');
                     
                 } else {                                   
@@ -101,8 +100,5 @@ var _drunklevel = function(ethGrams, hours, weight, male) {
     var burnedEthGrams = _burnRate(weight) * hours;
     return _perMil(ethGrams-burnedEthGrams, weight, male).toFixed(2);
 };
-
-function userError() {};
-function rangeError() {};
 
 module.exports = controller;
