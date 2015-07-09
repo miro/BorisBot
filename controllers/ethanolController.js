@@ -65,7 +65,8 @@ controller.calculateDrunkLevel = function(userId, startDaysBefore) {
                 // If this is true, user have taken his first drink in the first 30% of the range
                 // and there is no other calculated "soberpoints", so this function needs to be called
                 // again with wider range
-                if (differenceInHours > (moment.duration(startDaysBefore, 'hours', true) * 0.7)) {
+                var rangeAsHours = moment(moment()).diff(moment().subtract(startDaysBefore,'days'), 'hours', true);
+                if ( differenceInHours > rangeAsHours * 0.7 && differenceInHours < rangeAsHours ) {
                     reject('rangeError');
                     
                 } else {                                   
