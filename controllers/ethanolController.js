@@ -100,11 +100,10 @@ var _burnRate = function(weight) {
     return (liverBurnRate + otherOrgansBurnRate) * weight // grams per hour
 };
 
-var _perMil = function(ethGrams, weight, male) {
-    var waterConsentration = 0.75; // Mens water to bodymass ratio
-    if (!male) { waterConsentration=0.66 }; // Womens water to bodymass ratio
-    if (ethGrams < 0) { return 0 }
-    else { return ethGrams / (waterConsentration*weight) };
+var _perMil = function(ethGrams, weight, isMale) {
+    var waterConsentration = isMale ? 0.75 : 0.66; // use gender-specific water/bodymass -ratio
+
+    return (ethGrams < 0) ? 0 : (ethGrams / (waterConsentration * weight));
 };
 
 var _drunklevel = function(ethGrams, hours, weight, male) {
@@ -113,3 +112,4 @@ var _drunklevel = function(ethGrams, hours, weight, male) {
 };
 
 module.exports = controller;
+
