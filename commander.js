@@ -123,7 +123,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                             msgFromAllowedGroup = true;
                         }
                     }
-  
+
                     if (!msgFromAllowedGroup) {
                         // unauthorized
                         resolve();
@@ -172,14 +172,14 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
 
             case '/promille':
                 if (_eventIsFromGroup(msg)) {
-                    ethanolController.display(userId, chatGroupId);
-                    resolve();
+                    ethanolController.display(userId, chatGroupId)
+                    .then(resolve);
                 } else {
-                    ethanolController.display(userId, null);
-                    resolve();
+                    ethanolController.display(userId, null)
+                    .then(resolve);
                 }
             break;
-            
+
             default:
                 console.log('! Unknown command', msg.text);
                 resolve();
