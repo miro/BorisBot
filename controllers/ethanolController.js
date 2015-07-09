@@ -9,34 +9,39 @@ var controller = {};
 
 controller.display = function(userId, groupId) {
     return new Promise( function(resolve,reject) {
-        controller.calculateDrunkLevel(userId)
+        var targetId = _.isNull(groupId) ? userId : groupId;
+        controller.calculateDrunkLevel(userId, 1)
         .then( function calculateOk(alchLevel) {
-            var messageString = 'Promillesi: ' + alchLevel;
-            if (_.isNull(groupId)) {
-                botApi.sendMessage(userId, messageString);
-                resolve();
-            } else {
-                botApi.sendMessage(groupId, messageString);
-                resolve();
-            }
-        })
-        .catch( function(errorMessage) {
-            botApi.sendMessage(userId, errorMessage);
+            botApi.sendMessage(targetId, 'Promillesi: ' + alchLevel);
             resolve();
+        })
+        .catch( function(err) {
+            if (err == 'userError') {
+                botApi.sendMessage(userId, 'Käyttäjäsi täytyy olla rekisteröity laskeaksesi promillet!\nVoit tehdä tämän komennolla /addme');
+                resolve();
+            } else if (err == 'rangeError') {
+                controller.calculateDrunkLevel(userId, 5)
+                .then( function secondCalculateOk(alchLevel) {
+                    botApi.sendMessage(targetId, 'Promillesi: ' + alchLevel);
+                    resolve();
+                });
+            }
         });
     });
 };
 
-controller.calculateDrunkLevel = function(userId) {
+controller.calculateDrunkLevel = function(userId, startDaysBefore) {
     return new Promise( function(resolve,reject) {
         db.getUserById(userId)
         .then( function UserFetchOk(user) {
             var weight = user.get('weight');
             var isMale = user.get('isMale');
-            var startMoment = moment().subtract(2,'days'); //Assuming that user have been once sober in two days
+            var startMoment = moment().subtract(startDaysBefore,'days');
             
             db.getDrinksSinceTimestampSortedForUser(userId, startMoment) 
             .then(function drinkFetchOk(collection) {
+                
+                var startMomentReset = false;
                 var alchLevel = 0.00;
                 var drinkEthGrams = 0;
                 var differenceInHours = 0;
@@ -49,18 +54,26 @@ controller.calculateDrunkLevel = function(userId) {
                     if (alchLevel == 0.00) {
                         startMoment = moment(model['timestamp']);
                         drinkEthGrams = 0;
+                        startMomentReset = true;
                     }
                     drinkEthGrams += model['drinkValue'];
                 });
                 
-                // Calculate effect of the last drink to current time
-                differenceInHours = moment().diff(startMoment,'hours', true);
-                alchLevel = _drunklevel(drinkEthGrams, differenceInHours, weight, isMale);
-                return resolve(alchLevel);
+                // If this is true, user have been drunk through the whole processing range,
+                // need to do this function again with wider range
+                if (!startMomentReset) {
+                    reject('rangeError');
+                    
+                } else {                
+                    // Calculate effect of the last drink to current time
+                    differenceInHours = moment().diff(startMoment,'hours', true);
+                    alchLevel = _drunklevel(drinkEthGrams, differenceInHours, weight, isMale);
+                    resolve(alchLevel);
+                }
             });
         })
         .catch( function noUserFound() {
-            reject('Käyttäjäsi täytyy olla rekisteröity laskeaksesi promillet!');
+            reject('userError');
         });
     });
 };
@@ -87,6 +100,7 @@ var _drunklevel = function(ethGrams, hours, weight, male) {
     return _perMil(ethGrams-burnedEthGrams, weight, male).toFixed(2);
 };
 
-
+function userError() {};
+function rangeError() {};
 
 module.exports = controller;
