@@ -51,6 +51,15 @@ db.getDrinksSinceTimestampForUser = function(timestampMoment, userId) {
     .fetch()
 };
 
+db.getDrinkOnTimestampForUser = function(userId, timestampMoment) {
+    return schema.collections.Drinks
+    .query(function(qb) {
+        qb.where('timestamp', '=', timestampMoment.toJSON())
+        .andWhere( {creatorId: userId} );
+    })
+    .fetchOne()
+};
+
 db.getPersonalDrinkTimesSince = function(userId, timestamp) {
     return new Promise(function (resolve, reject) {
 
@@ -105,8 +114,31 @@ db.getFirstTimestampForGroup = function(groupId) {
     .min('timestamp')
 };
 
+db.getLastDrinkBeforeTimestamp = function(userId, timestampMoment) {
+    return schema.collections.Drinks
+    .query(function(qb) {
+        qb.where({ creatorId: userId })
+        .andWhere('timestamp', '<', timestampMoment.toJSON());
+    })
+    .fetchOne();
+};
 
+db.getNextDrinkAfterTimestamp = function(userId, timestampMoment) {
+    return schema.collections.Drinks
+    .query(function(qb) {
+        qb.where({ creatorId: userId })
+        .andWhere('timestamp', '>', timestampMoment.toJSON());
+    })
+    .fetchOne();
+};
 
+db.getDrinksSinceTimestampSortedForUser = function(userId, timestampMoment) {
+    return schema.bookshelf
+    .knex('drinks')
+    .where( {creatorId: userId} )
+    .andWhere('timestamp','>', timestampMoment.toJSON())
+    .orderBy('timestamp', 'asc');
+};
 // ## Users related stuff
 //
 
@@ -153,6 +185,15 @@ db.checkIfIdInUsers = function(id) {
             };
         });
     });
+};
+
+db.getUserById = function(userId) {
+    
+    return schema.collections.Users
+    .query(function(qb) {
+        qb.where({ telegramId: userId })
+    })
+    .fetchOne();
 };
 
 

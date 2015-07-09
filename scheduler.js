@@ -4,7 +4,7 @@ var moment      = require('moment-timezone');
 var _           = require('lodash');
 var CronJob     = require('cron').CronJob;
 
-var botApi      = require('./botApi');
+var commander   = require('./botApi');
 var cfg         = require('./config');
 
 // set default timezone to bot timezone

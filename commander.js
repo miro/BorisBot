@@ -12,6 +12,7 @@ var utils       = require('./utils');
 
 var userController      = require('./controllers/userController');
 var drinkController     = require('./controllers/drinkController');
+var ethanolController   = require('./controllers/ethanolController');
 
 // set default timezone to bot timezone
 moment.tz.setDefault(cfg.botTimezone);
@@ -89,8 +90,10 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
             // Takes one parameter, which changes the length of the graph
             case '/graafi':
             case '/histogrammi':
+
                 drinkController.drawGraph(userId, chatGroupId, _eventIsFromGroup(msg), userCommandParams)
                 .then(resolve);
+
             break;
 
             // Sends image of current state of Spänni's webcam
@@ -165,6 +168,16 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
             case '/asetaryhmä':
                 userController.setGroup(userId, chatGroupId, chatGroupTitle, messageIsFromGroup)
                 .then(resolve);
+            break;
+
+            case '/promille':
+                if (_eventIsFromGroup(msg)) {
+                    ethanolController.display(userId, chatGroupId)
+                    .then(resolve);
+                } else {
+                    ethanolController.display(userId, null)
+                    .then(resolve);
+                }
             break;
 
             default:
