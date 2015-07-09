@@ -41,9 +41,9 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
         var userLastName = msg.from.last_name;
         var userCallName = _.isUndefined(userName) ? userFirstName : ('@' + userName); // this can be used on messages
 
-        var messageIsFromGroup = _eventIsFromGroup(msg);
-        var chatGroupId = _eventIsFromGroup(msg) ? msg.chat.id : null;
-        var chatGroupTitle = _eventIsFromGroup(msg) ? msg.chat.title : null;
+        var eventIsFromGroup = !_.isUndefined(msg.chat.title);
+        var chatGroupId = eventIsFromGroup ? msg.chat.id : null;
+        var chatGroupTitle = eventIsFromGroup ? msg.chat.title : null;
 
         // check if user is ignored
         var userIsIgnored = cfg.ignoredUsers.indexOf(userId) >= 0;
@@ -69,14 +69,14 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
             break;
 
             case '/kaljoja':
-                drinkController.getDrinksAmount(userId, chatGroupId, chatGroupTitle, _eventIsFromGroup(msg))
+                drinkController.getDrinksAmount(userId, chatGroupId, chatGroupTitle, eventIsFromGroup)
                 .then(resolve);
             break;
 
             case '/otinko':
                 drinkController.getPersonalDrinkLog(userId)
                 .then(function() {
-                    if (_eventIsFromGroup(msg)) {
+                    if (eventIsFromGroup) {
                         botApi.sendMessage(userId, 'PS: anna "' +
                             userCommand + '"-komento suoraan minulle, älä spämmää turhaan ryhmächättiä!');
                     }
@@ -91,7 +91,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
             case '/graafi':
             case '/histogrammi':
 
-                drinkController.drawGraph(userId, chatGroupId, _eventIsFromGroup(msg), userCommandParams)
+                drinkController.drawGraph(userId, chatGroupId, eventIsFromGroup, userCommandParams)
                 .then(resolve);
 
             break;
@@ -105,7 +105,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
                     resolve();
                 } else {
 
-                    if (!_eventIsFromGroup(msg)) {
+                    if (!eventIsFromGroup) {
                         // this command can only be triggered from a group, since this command is
                         // limited to a certain users only, and for now we have no means of finding
                         // out if the person belongs to one of those groups -> calling this personally from
@@ -143,7 +143,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
             // Takes two parameters, weight of the person and gender
             case '/addme':
             case '/luotunnus':
-                if (_eventIsFromGroup(msg)) {
+                if (eventIsFromGroup) {
                     botApi.sendMessage(msg.chat.id, 'Keskustellaan aiheesta lisää kahden kesken..');
                     botApi.sendMessage(userId, 'Rekisteröi käyttäjä komennolla /addme <paino> <sukupuoli>');
                     resolve();
@@ -171,7 +171,7 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
             break;
 
             case '/promille':
-                if (_eventIsFromGroup(msg)) {
+                if (eventIsFromGroup) {
                     ethanolController.display(userId, chatGroupId)
                     .then(resolve);
                 } else {
@@ -186,16 +186,5 @@ commander.handleWebhookEvent = function runUserCommand(msg) {
         }
     });
 };
-
-
-
-// Helper functions
-//
-
-// Returns true, if this event is triggered from group
-var _eventIsFromGroup = function(msg) {
-    return !_.isUndefined(msg.chat.title);
-};
-
 
 module.exports = commander;
