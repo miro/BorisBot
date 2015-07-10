@@ -166,13 +166,12 @@ module.exports = function dispatchUserCommand(msg) {
             break;
 
             case '/promille':
-                if (eventIsFromGroup) {
-                    ethanolController.display(userId, chatGroupId)
-                    .then(resolve);
-                } else {
-                    ethanolController.display(userId, null)
-                    .then(resolve);
-                }
+                ethanolController.getAlcoholLevel(userId)
+                .then( function (msg) {
+                    var targetId = (eventIsFromGroup) ? chatGroupId : userId;
+                    botApi.sendMessage(targetId, msg);
+                    resolve();
+                });
             break;
 
             default:

@@ -12,33 +12,33 @@ var controller = {};
 // ### Public functions
 //
 
-controller.display = function(userId, groupId) {
+controller.getAlcoholLevel = function(userId) {
     return new Promise( function(resolve,reject) {
-        var targetId = _.isNull(groupId) ? userId : groupId;
+        var msg = 'Promillesi: ';
 
-        controller.calculateDrunkLevel(userId, 1)
+        _calculateAlcoholLevel(userId, 1)
         .then(function calculateOk(alchLevel) {
-            botApi.sendMessage(targetId, 'Promillesi: ' + alchLevel);
-            resolve();
+            resolve(msg + alchLevel);
         })
         .catch(function(err) {
             // TODO: use Error-objects in here? https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error
             if (err === 'userError') {
-                botApi.sendMessage(userId, 'Käyttäjäsi täytyy olla rekisteröity laskeaksesi promillet!\nVoit tehdä tämän komennolla /addme');
-                resolve();
+                resolve('Käyttäjäsi täytyy olla rekisteröity laskeaksesi promillet!\nVoit tehdä tämän komennolla /addme');
             }
             else if (err === 'rangeError') {
-                controller.calculateDrunkLevel(userId, 5)
+                _calculateAlcoholLevel(userId, 5)
                 .then(function secondCalculateOk(alchLevel) {
-                    botApi.sendMessage(targetId, 'Promillesi: ' + alchLevel);
-                    resolve();
+                    resolve(msg + alchLevel);
                 });
             }
         });
     });
 };
 
-controller.calculateDrunkLevel = function(userId, startDaysBefore) {
+// ### Helper functions
+//
+
+var _calculateAlcoholLevel = function(userId, startDaysBefore) {
     return new Promise( function(resolve,reject) {
         db.getUserById(userId)
         .then( function UserFetchOk(user) {
@@ -87,11 +87,6 @@ controller.calculateDrunkLevel = function(userId, startDaysBefore) {
         });
     });
 };
-
-
-
-// ### Helper functions
-//
 
 // Source: http://www.mvnet.fi/blogi/index.php?title=alkoholin_palaminen_ja_alkoholilaskuri&more=1&c=1&tb=1&pb=1
 var _burnRate = function(weight) {
