@@ -166,14 +166,31 @@ module.exports = function dispatchUserCommand(msg) {
             break;
 
             case '/promille':
+                var targetId = (eventIsFromGroup) ? chatGroupId : userId;
                 ethanolController.getAlcoholLevel(userId)
-                .then( function (msg) {
-                    var targetId = (eventIsFromGroup) ? chatGroupId : userId;
-                    botApi.sendMessage(targetId, msg);
+                .then(function(msg) {                   
+                    botApi.sendMessage(targetId, 'Promillesi: ' + msg);
+                    resolve();
+                })
+                .catch(function(err) {
+                    botApi.sendMessage(targetId, err);
                     resolve();
                 });
             break;
 
+            case '/promillet':
+                if (eventIsFromGroup) {
+                    drinkController.getGroupStatusReport(chatGroupId)
+                    .then(function(msg) {
+                        botApi.sendMessage(chatGroupId, msg);
+                        resolve();
+                    });
+                } else {
+                    botApi.sendMessage(userId, 'Sinun täytyy olla rymässä suorittaaksesi tämän komennon!');
+                    resolve();
+                }
+            break;
+            
             default:
                 console.log('! Unknown command', msg.text);
                 resolve();

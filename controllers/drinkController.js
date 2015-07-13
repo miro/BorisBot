@@ -1,13 +1,15 @@
-var cfg         = require('../config');
-var db          = require('../database');
-var botApi      = require('../botApi');
-var utils       = require('../utils');
-var graph       = require('../graph');
+var cfg                 = require('../config');
+var db                  = require('../database');
+var botApi              = require('../botApi');
+var utils               = require('../utils');
+var graph               = require('../graph');
+var userController      = require('./userController');
+var ethanolController   = require('./ethanolController');
 
 
-var Promise     = require('bluebird');
-var moment      = require('moment-timezone');
-var _           = require('lodash');
+var Promise             = require('bluebird');
+var moment              = require('moment-timezone');
+var _                   = require('lodash');
 
 // set default timezone to bot timezone
 moment.tz.setDefault(cfg.botTimezone);
@@ -150,8 +152,78 @@ controller.getDrinksAmount = function(userId, chatGroupId, chatGroupTitle, targe
     });
 }
 
+controller.getGroupStatusReport = function(chatGroupId) {
+    
+    return new Promise(function (resolve, reject) {
+    
+        db.getDrinksSinceTimestamp(moment().subtract(1,'days'), chatGroupId)
+        .then(function fetchOk(collection) {
+            
+            var lastUsersId = [];
+            var userId;
+            _.each(collection.models, function(model) {
+                userId = model.get('creatorId');
+                if (_.indexOf(lastUsersId, userId) === -1) {
+                    lastUsersId.push(userId);
+                }
+            });
+            
+            var userPromises = [];
+            _.each(lastUsersId, function(userId) {
+                userPromises.push(db.getUserById(userId))
+            });
+            
+            // Remove unregistered users
+            _.remove(userPromises, function(promise) {
+                return promise.isFulfilled();
+            });
+            Promise.all(userPromises)
+            .then(function(userArr) { 
+                var alcoLevelPromises = [];
+                _.each(userArr, function(user) {
+                    alcoLevelPromises.push(ethanolController.getAlcoholLevel(user.get('telegramId')));
+                });
+                Promise.all(alcoLevelPromises)
+                .then(function(alcoLevelArr) {
+                    var logArr = [];
+                    for (var i=0;i<userArr.length;++i) {
+                        logArr.push({'userName': userArr[i].get('userName'), 'alcoLevel': alcoLevelArr[i]});
+                    }
+                    
+                    // Filter users who have alcoLevel > 0
+                    _.filter(logArr, function(object) {
+                        return object.alcoLevel > 0;
+                    });
+                    
+                    // Sort list by alcoLevel
+                    logArr = _.sortBy(logArr, function(object) {
+                        return object.alcoLevel;
+                    });
+                    
+                    // Calculate needed padding
+                    var paddingLength = _.max(logArr, function(object) {
+                        return object.userName.length;
+                    });
+                    paddingLength = paddingLength.userName.length + 3;
+                    
+                    // Generate string which goes to message
+                    var log = "";
+                    _.eachRight(logArr, function(userLog) {
+                        log += _.padRight(userLog.userName, paddingLength, '.') + ' ' + userLog.alcoLevel + ' \u2030\n';
+                    });
+                    resolve(log);
+                })
+                .catch(function(err) {
+                    resolve(err);
+                });
+            });
+        });
+    });
+};
+
 // ## Private functions
 //
+
 var _getTresholdMoment = function() {
     var treshold = moment().hour(9).minute(0);
 

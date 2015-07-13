@@ -99,5 +99,4 @@ controller.setGroup = function(userId, chatGroupId, chatGroupTitle, messageIsFro
     });
 };
 
-
 module.exports = controller;

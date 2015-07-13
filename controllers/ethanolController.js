@@ -18,17 +18,17 @@ controller.getAlcoholLevel = function(userId) {
 
         _calculateAlcoholLevel(userId, 1)
         .then(function calculateOk(alchLevel) {
-            resolve(msg + alchLevel);
+            resolve(alchLevel);
         })
         .catch(function(err) {
             // TODO: use Error-objects in here? https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error
             if (err === 'userError') {
-                resolve('Käyttäjäsi täytyy olla rekisteröity laskeaksesi promillet!\nVoit tehdä tämän komennolla /addme');
+                reject('Käyttäjäsi täytyy olla rekisteröity laskeaksesi promillet!\nVoit tehdä tämän komennolla /addme');
             }
             else if (err === 'rangeError') {
                 _calculateAlcoholLevel(userId, 5)
                 .then(function secondCalculateOk(alchLevel) {
-                    resolve(msg + alchLevel);
+                    resolve(alchLevel);
                 });
             }
         });
