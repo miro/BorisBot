@@ -161,6 +161,9 @@ controller.getGroupStatusReport = function(chatGroupId) {
             
             var lastUsersId = [];
             var userId;
+            
+            if (collection.models.length === 0) {resolve('Ei humaltuneita käyttäjiä.');}
+            
             _.each(collection.models, function(model) {
                 userId = model.get('creatorId');
                 if (_.indexOf(lastUsersId, userId) === -1) {
@@ -177,6 +180,7 @@ controller.getGroupStatusReport = function(chatGroupId) {
             _.remove(userPromises, function(promise) {
                 return promise.isFulfilled();
             });
+            
             Promise.all(userPromises)
             .then(function(userArr) { 
                 var alcoLevelPromises = [];
@@ -194,6 +198,8 @@ controller.getGroupStatusReport = function(chatGroupId) {
                     _.filter(logArr, function(object) {
                         return object.alcoLevel > 0;
                     });
+                    
+                    if (logArr.length === 0) {resolve('Ei humaltuneita käyttäjiä.');}
                     
                     // Sort list by alcoLevel
                     logArr = _.sortBy(logArr, function(object) {

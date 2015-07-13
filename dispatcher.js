@@ -169,7 +169,7 @@ module.exports = function dispatchUserCommand(msg) {
                 var targetId = (eventIsFromGroup) ? chatGroupId : userId;
                 ethanolController.getAlcoholLevel(userId)
                 .then(function(msg) {                   
-                    botApi.sendMessage(targetId, 'Promillesi: ' + msg);
+                    botApi.sendMessage(targetId, msg + ' \u2030');
                     resolve();
                 })
                 .catch(function(err) {
