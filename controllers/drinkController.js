@@ -10,6 +10,7 @@ var ethanolController   = require('./ethanolController');
 var Promise             = require('bluebird');
 var moment              = require('moment-timezone');
 var _                   = require('lodash');
+var emoji               = require('node-emoji');
 
 // set default timezone to bot timezone
 moment.tz.setDefault(cfg.botTimezone);
@@ -17,6 +18,32 @@ moment.tz.setDefault(cfg.botTimezone);
 
 var controller = {};
 
+
+controller.showDrinkKeyboard = function(userId, eventIsFromGroup) {
+    // TODO: give user instructions if they have not set up account and primaryGroup
+
+    var keyboard = [[
+        emoji.get(':beer:'), // beer glass
+        emoji.get(':wine_glass:'), // wine glass
+        emoji.get(':cocktail:'), // coctail glass
+    ]];
+
+    var msg = eventIsFromGroup ? 'Kippistele tänne! Älä spämmää ryhmächättiä!' : 'Let\'s festival!';
+
+    return new Promise(function (resolve, reject) {
+        botApi.sendMessage(
+            userId,
+            msg,
+            {
+                keyboard: keyboard,
+                resize_keyboard: true,
+                one_time_keyboard: true
+            }
+        );
+
+        resolve();
+    });
+};
 
 
 controller.addDrink = function(messageId, userId, userName, drinkType) {
