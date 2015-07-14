@@ -109,7 +109,7 @@ controller.drawGraph = function(userId, chatGroupId, msgIsFromGroup, userCommand
         .then(function(result) {
             var startRangeMoment = moment(result[0]['min']);
             var dateRangeParameter = parseInt(userCommandParams.split(' ')[0], 10);
-            
+
             if (!_.isNaN(dateRangeParameter) && dateRangeParameter > 0 && dateRangeParameter < moment().diff(startRangeMoment, 'days')) {
                 startRangeMoment = moment().subtract(dateRangeParameter,'days')
             }
@@ -153,14 +153,15 @@ controller.getDrinksAmount = function(userId, chatGroupId, chatGroupTitle, targe
 }
 
 controller.getGroupStatusReport = function(chatGroupId) {
-    
     return new Promise(function (resolve, reject) {
-    
+
         db.getDrinksSinceTimestamp(moment().subtract(1,'days'), chatGroupId)
         .then(function fetchOk(collection) {
-            
-            if (collection.models.length === 0) {resolve('Ei humaltuneita käyttäjiä.');}
-            
+
+            if (collection.models.length === 0) {
+                resolve('Ei humaltuneita käyttäjiä.');
+            }
+
             var lastUsersId = [];
             var userId;
 
@@ -170,18 +171,18 @@ controller.getGroupStatusReport = function(chatGroupId) {
                     lastUsersId.push(userId);
                 }
             });
-            
+
             var userPromises = [];
             _.each(lastUsersId, function(userId) {
                 userPromises.push(db.getUserById(userId))
             });
-            
+
             Promise.all(userPromises)
             .then(function(userArr) {
 
                 // Remove unregistered users
                 userArr = _.compact(userArr);
-                
+
                 var alcoLevelPromises = [];
                 _.each(userArr, function(user) {
                      alcoLevelPromises.push(ethanolController.getAlcoholLevel(user.get('telegramId')));
@@ -189,30 +190,32 @@ controller.getGroupStatusReport = function(chatGroupId) {
                 Promise.all(alcoLevelPromises)
                 .then(function(alcoLevelArr) {
                     var logArr = [];
-                    for (var i=0;i<alcoLevelArr.length;++i) {
+                    for (var i = 0; i < alcoLevelArr.length; ++i) {
                         logArr.push({'userName': userArr[i].get('userName'), 'alcoLevel': alcoLevelArr[i]});
                     }
-                    
+
                     // Filter users who have alcoLevel > 0
                     logArr = _.filter(logArr, function(object) {
                         return object.alcoLevel > 0.00;
                     });
-                    
-                    if (logArr.length === 0) {resolve('Ei humaltuneita käyttäjiä.');}
-                    
+
+                    if (logArr.length === 0) {
+                        resolve('Ei humaltuneita käyttäjiä.');
+                    }
+
                     // Sort list by alcoLevel
                     logArr = _.sortBy(logArr, function(object) {
                         return object.alcoLevel;
                     });
-                    
+
                     // Calculate needed padding
                     var paddingLength = _.max(logArr, function(object) {
                         return object.userName.length;
                     });
                     paddingLength = paddingLength.userName.length + 3;
-                    
+
                     // Generate string which goes to message
-                    var log = "";
+                    var log = '';
                     _.eachRight(logArr, function(userLog) {
                         log += _.padRight(userLog.userName, paddingLength, '.') + ' ' + userLog.alcoLevel + ' \u2030\n';
                     });
