@@ -162,14 +162,14 @@ module.exports = function dispatchUserCommand(msg) {
             // Can be called from any group which have this bot in it
             case '/setgroup':
             case '/asetaryhmä':
-                userController.setGroup(userId, chatGroupId, chatGroupTitle, messageIsFromGroup)
+                userController.setGroup(userId, chatGroupId, chatGroupTitle, eventIsFromGroup)
                 .then(resolve);
             break;
 
             case '/promille':
                 var targetId = (eventIsFromGroup) ? chatGroupId : userId;
                 ethanolController.getAlcoholLevel(userId)
-                .then(function(msg) {                   
+                .then(function(msg) {
                     botApi.sendMessage(targetId, msg + ' \u2030');
                     resolve();
                 })
@@ -191,7 +191,7 @@ module.exports = function dispatchUserCommand(msg) {
                     resolve();
                 }
             break;
-            
+
             default:
                 console.log('! Unknown command', msg.text);
                 resolve();
