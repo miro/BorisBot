@@ -4,6 +4,7 @@ var Promise     = require('bluebird');
 var request     = require('request');
 var moment      = require('moment-timezone');
 var _           = require('lodash');
+var emoji       = require('node-emoji');
 
 var cfg         = require('./config');
 var db          = require('./database');
@@ -61,6 +62,14 @@ module.exports = function dispatchUserCommand(msg) {
 
             case '/kalja':
             case '/kippis':
+                drinkController.showDrinkKeyboard(userId, eventIsFromGroup)
+                .then(resolve);
+            break;
+
+            // Drink logging commands - works only on private
+            case emoji.get(':beer:'):
+            case emoji.get(':wine_glass:'):
+            case emoji.get(':cocktail:'):
                 drinkController.addDrink(msg.message_id, userId, userCallName, userCommand, eventIsFromGroup)
                 .then(resolve);
             break;
