@@ -46,9 +46,15 @@ controller.showDrinkKeyboard = function(userId, eventIsFromGroup) {
 };
 
 
-controller.addDrink = function(messageId, userId, userName, drinkType) {
+controller.addDrink = function(messageId, userId, userName, drinkType, eventIsFromGroup) {
 
     return new Promise(function(resolve, reject) {
+
+        if (eventIsFromGroup) {
+            // ignore
+            resolve();
+        }
+
         db.getUserById(userId).then(function(user) {
             var primaryGroupId = (user && user.get('primaryGroupId')) ? user.get('primaryGroupId') : null;
 

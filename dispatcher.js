@@ -58,9 +58,10 @@ module.exports = function dispatchUserCommand(msg) {
 
         switch (userCommand) {
             // TODO: add /start, /help, /settings
+
             case '/kalja':
             case '/kippis':
-                drinkController.addDrink(msg.message_id, userId, userCallName, userCommand)
+                drinkController.addDrink(msg.message_id, userId, userCallName, userCommand, eventIsFromGroup)
                 .then(resolve);
             break;
 
