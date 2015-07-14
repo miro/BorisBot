@@ -60,7 +60,7 @@ module.exports = function dispatchUserCommand(msg) {
             // TODO: add /start, /help, /settings
             case '/kalja':
             case '/kippis':
-                drinkController.addDrink(msg.message_id, chatGroupId, chatGroupTitle, userId, userCallName, userCommandParams)
+                drinkController.addDrink(msg.message_id, userId, userCallName, userCommand)
                 .then(resolve);
             break;
 

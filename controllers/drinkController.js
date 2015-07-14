@@ -18,48 +18,47 @@ moment.tz.setDefault(cfg.botTimezone);
 var controller = {};
 
 
-controller.addDrink = function(messageId, chatGroupId, chatGroupTitle, userId, userName, drinkType) {
-    var responseTargetId = chatGroupId ? chatGroupId : userId;
 
-    drinkType = drinkType.substring(0,140); // shorthen this to match the DB field
-    // fallback to 'kalja' if no drinkType is set
-    drinkType = !drinkType ? 'kalja' : drinkType;
+controller.addDrink = function(messageId, userId, userName, drinkType) {
 
     return new Promise(function(resolve, reject) {
-        db.registerDrink(messageId, chatGroupId, userId, drinkType)
-        .then(function() {
-            db.getDrinksSinceTimestamp(_getTresholdMoment(), chatGroupId)
-            .then(function createReturnMessageFromCollection(drinksCollection) {
+        db.getUserById(userId).then(function(user) {
+            var primaryGroupId = (user && user.get('primaryGroupId')) ? user.get('primaryGroupId') : null;
 
-                var drinksToday = drinksCollection.models.length;
-                var drinksTodayForThisUser = _.filter(drinksCollection.models, function(model) {
-                    return model.attributes.creatorId === userId;
-                }).length;
+            db.registerDrink(messageId, primaryGroupId, userId, drinkType)
+            .then(function() {
+                db.getDrinksSinceTimestamp(_getTresholdMoment(), primaryGroupId)
+                .then(function createReturnMessageFromCollection(drinksCollection) {
 
-                // # Form the message
-                var returnMessage = 'Kippis!!';
+                    var drinksToday = drinksCollection.models.length;
+                    var drinksTodayForThisUser = _.filter(drinksCollection.models, function(model) {
+                        return model.attributes.creatorId === userId;
+                    }).length;
 
-                // was this todays first for the user?
-                if (drinksTodayForThisUser === 1) {
-                    returnMessage += ' Päivä käyntiin!';
-                }
+                    // # Form the message
+                    var returnMessage = 'Kippis!!';
 
-                // Is there a group title?
-                if (_.isNull(chatGroupTitle)) {
-                    returnMessage += ' Se olikin jo ' + drinksTodayForThisUser + '. tälle päivälle.\n';
-                }
-                else {
-                    returnMessage += ' Se olikin jo ryhmän ' + chatGroupTitle + ' ' + drinksToday +
-                    '. tälle päivälle, ja ' + drinksTodayForThisUser + '. käyttäjälle ' + userName + '.\n';
-                }
+                    // was this todays first for the user?
+                    if (drinksTodayForThisUser === 1) {
+                        returnMessage += ' Päivä käyntiin!';
+                    }
 
-                botApi.sendMessage(responseTargetId, returnMessage);
+                    // Is there a group title?
+                    if (_.isNull(primaryGroupId)) {
+                        returnMessage += ' Se olikin jo ' + drinksTodayForThisUser + '. tälle päivälle.\n';
+                    }
+                    else {
+                        returnMessage += ' Se olikin jo ryhmäsi ' + drinksToday +
+                        '. tälle päivälle, ja ' + drinksTodayForThisUser + '. käyttäjälle ' + userName + '.\n';
+                    }
 
-                resolve(returnMessage);
+                    botApi.sendMessage(userId, returnMessage);
+                    resolve(returnMessage);
+                });
             });
         })
         .error(function(e) {
-            botApi.sendMessage(responseTargetId, 'Kippistely epäonnistui, yritä myöhemmin uudelleen');
+            botApi.sendMessage(userId, 'Kippistely epäonnistui, yritä myöhemmin uudelleen');
             resolve();
         });
     });
