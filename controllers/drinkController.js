@@ -159,11 +159,11 @@ controller.getGroupStatusReport = function(chatGroupId) {
         db.getDrinksSinceTimestamp(moment().subtract(1,'days'), chatGroupId)
         .then(function fetchOk(collection) {
             
-            var lastUsersId = [];
-            var userId;
-            
             if (collection.models.length === 0) {resolve('Ei humaltuneita käyttäjiä.');}
             
+            var lastUsersId = [];
+            var userId;
+
             _.each(collection.models, function(model) {
                 userId = model.get('creatorId');
                 if (_.indexOf(lastUsersId, userId) === -1) {
@@ -176,27 +176,26 @@ controller.getGroupStatusReport = function(chatGroupId) {
                 userPromises.push(db.getUserById(userId))
             });
             
-            // Remove unregistered users
-            _.remove(userPromises, function(promise) {
-                return promise.isFulfilled();
-            });
-            
             Promise.all(userPromises)
-            .then(function(userArr) { 
+            .then(function(userArr) {
+
+                // Remove unregistered users
+                userArr = _.compact(userArr);
+                
                 var alcoLevelPromises = [];
                 _.each(userArr, function(user) {
-                    alcoLevelPromises.push(ethanolController.getAlcoholLevel(user.get('telegramId')));
+                     alcoLevelPromises.push(ethanolController.getAlcoholLevel(user.get('telegramId')));
                 });
                 Promise.all(alcoLevelPromises)
                 .then(function(alcoLevelArr) {
                     var logArr = [];
-                    for (var i=0;i<userArr.length;++i) {
+                    for (var i=0;i<alcoLevelArr.length;++i) {
                         logArr.push({'userName': userArr[i].get('userName'), 'alcoLevel': alcoLevelArr[i]});
                     }
                     
                     // Filter users who have alcoLevel > 0
-                    _.filter(logArr, function(object) {
-                        return object.alcoLevel > 0;
+                    logArr = _.filter(logArr, function(object) {
+                        return object.alcoLevel > 0.00;
                     });
                     
                     if (logArr.length === 0) {resolve('Ei humaltuneita käyttäjiä.');}
