@@ -52,11 +52,12 @@ module.exports = function dispatchUserCommand(msg) {
 
         // parse command & possible parameters
         var userInput = msg.text.split(' ');
-        var userCommand = userInput.shift();
+        var userCommand = userInput.shift().toLowerCase();
         var userCommandParams = userInput.join(' ');
 
 
-        switch (userCommand.toLowerCase()) {
+        switch (userCommand) {
+            // TODO: add /start, /help, /settings
             case '/kalja':
             case '/kippis':
                 drinkController.addDrink(msg.message_id, chatGroupId, chatGroupTitle, userId, userCallName, userCommandParams)
