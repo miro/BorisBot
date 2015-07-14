@@ -109,8 +109,8 @@ controller.drawGraph = function(userId, chatGroupId, msgIsFromGroup, userCommand
         .then(function(result) {
             var startRangeMoment = moment(result[0]['min']);
             var dateRangeParameter = parseInt(userCommandParams.split(' ')[0], 10);
-
-            if (!_.isNaN(dateRangeParameter) && dateRangeParameter > 0) {
+            
+            if (!_.isNaN(dateRangeParameter) && dateRangeParameter > 0 && dateRangeParameter < moment().diff(startRangeMoment, 'days')) {
                 startRangeMoment = moment().subtract(dateRangeParameter,'days')
             }
 
