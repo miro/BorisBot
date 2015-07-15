@@ -188,29 +188,21 @@ module.exports = function dispatchUserCommand(msg) {
                 .then(resolve);
             break;
 
-            case '/promille':
-                var targetId = (eventIsFromGroup) ? chatGroupId : userId;
-                ethanolController.getAlcoholLevel(userId)
-                .then(function(msg) {
-                    botApi.sendMessage(targetId, msg + ' \u2030');
-                    resolve();
-                })
-                .catch(function(err) {
-                    botApi.sendMessage(targetId, err);
-                    resolve();
-                });
-            break;
-
             case '/promillet':
+            case '/promille':
                 if (eventIsFromGroup) {
                     drinkController.getGroupStatusReport(chatGroupId)
                     .then(function(msg) {
                         botApi.sendMessage(chatGroupId, msg);
                         resolve();
                     });
-                } else {
-                    botApi.sendMessage(userId, 'Sinun täytyy olla rymässä suorittaaksesi tämän komennon!');
-                    resolve();
+                }
+                else {
+                    ethanolController.getAlcoholLevel(userId)
+                    .then(function(msg) {
+                        botApi.sendMessage(userId, msg + ' \u2030');
+                        resolve();
+                    });
                 }
             break;
 
