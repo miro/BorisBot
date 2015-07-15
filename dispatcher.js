@@ -19,8 +19,7 @@ var ethanolController   = require('./controllers/ethanolController');
 moment.tz.setDefault(cfg.botTimezone);
 
 
-// This function handle
-module.exports = function dispatchUserCommand(msg) {
+module.exports = function dispatchTelegramEvent(msg) {
     return new Promise(function (resolve, reject) {
         console.log('webhook event!', msg);
 
@@ -51,15 +50,14 @@ module.exports = function dispatchUserCommand(msg) {
         }
 
 
-        // parse command & possible parameters
+        // Parse command & possible parameters
         var userInput = msg.text.split(' ');
         var userCommand = userInput.shift().toLowerCase();
         var userCommandParams = userInput.join(' ');
 
 
+        // Dispatch!
         switch (userCommand) {
-            // TODO: add /start, /help, /settings
-
             case '/kalja':
             case '/kippis':
                 drinkController.showDrinkKeyboard(userId, eventIsFromGroup)
@@ -98,10 +96,8 @@ module.exports = function dispatchUserCommand(msg) {
             // Takes one parameter, which changes the length of the graph
             case '/graafi':
             case '/histogrammi':
-
                 drinkController.drawGraph(userId, chatGroupId, eventIsFromGroup, userCommandParams)
                 .then(resolve);
-
             break;
 
             // Sends image of current state of Spänni's webcam
@@ -181,7 +177,6 @@ module.exports = function dispatchUserCommand(msg) {
                 userController.removeUser(userId, userName)
                 .then(resolve);
             break;
-
 
             // Set primaryGroupId for user
             // Can be called from any group which have this bot in it
