@@ -49,16 +49,38 @@ generic.webcam = function(chatGroupId, eventIsFromGroup) {
 generic.help = function(userId) {
     
     var msg = '\
-    /asetaryhma\n\
-    /graafi\n\
-    /kalja\n\
-    /kippis\n\
-    /luotunnus\n\
-    /otinko\n\
-    /poistatunnus\n\
-    /promille\n\
-    /promillet\n\
-    /webcam\n\
+    Moro! Olen Spinnin oma Telegram-botti, näin kavereiden kesken BorisBot.\
+    Pääset alkuun kirjoittamalla minulle /luotunnus ja käy sen jälkeen /moro ´ttamassa\
+    Spinnin kanavalla!\
+    \n\
+    \nMinulta voit myös kysyä seuraavia toimintoja:\
+    \n\
+    \n/graafi - Tutkin alkoholinkäyttöäsi ja luon niistä kauniin kuvaajan.\
+    Jos annat komennon perään positiivisen numeron, rajaan kuvaajan\
+    leveyden olemaan kyseisen numeron verran päiviä.\
+    \n\
+    \n/kippis - Kirjaan kilistelemäsi juoman ylös ja käytän sitä\
+    myöhemmin erilaisiin toimintoihini.\
+    \n\
+    \n/luotunnus - Kirjoitan tietosi muistiin, jotta voin käyttää niitä\
+    myöhemmin. Tarvitsen komennon perään myös painosi ja sukupuolesi\
+    (lupaan että tietoja ei käytetä kaupallisiin tarkoituksiin).\
+    \n\
+    \n/moro - Yhdistän käyttäjäsi ryhmään, mistä tämä komento lähetettiin. \
+    Tämän avulla voin yhdistää tekemäsi kippikset ryhmän tilastoihin.\
+    \n\
+    \n/otinko - Muistutan sinua juomista, jotka olet ottanut viimeisen \
+    48 tunnin aikana.\
+    \n\
+    \n/poistatunnus - Unohdan tunnuksesi tietokannastani.\
+    \n\
+    \n/promille - Tulostan sinun henkilökohtaisen promilletasosi. \
+    HUOM: lasken promillesi neljännessä ulottuvuudessa, joten älä \
+    luota tulosten olevan täysin realistisia.\
+    \n\
+    \n/promillet - Tulostan ryhmän tämänhetkiset promilletasot.\
+    \n\
+    \n/webcam - Lähetän tuoreen kuvan Spinnin kerhohuoneelta.\
     ';
     botApi.sendMessage(userId, msg);
 };

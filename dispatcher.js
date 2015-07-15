@@ -146,7 +146,7 @@ module.exports = function dispatchUserCommand(msg) {
             // Set primaryGroupId for user
             // Can be called from any group which have this bot in it
             case '/setgroup':
-            case '/asetaryhma':
+            case '/asetaryhmä':
                 userController.setGroup(userId, chatGroupId, chatGroupTitle, eventIsFromGroup)
                 .then(resolve);
             break;
