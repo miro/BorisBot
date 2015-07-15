@@ -47,10 +47,8 @@ controller.showDrinkKeyboard = function(userId, eventIsFromGroup) {
 
 
 controller.addDrink = function(messageId, userId, userName, drinkType, eventIsFromGroup) {
-
     return new Promise(function(resolve, reject) {
         if (eventIsFromGroup) resolve(); // ignore
-
 
         db.getUserById(userId).then(function(user) {
             var primaryGroupId = (user && user.get('primaryGroupId')) ? user.get('primaryGroupId') : null;
@@ -71,6 +69,8 @@ controller.addDrink = function(messageId, userId, userName, drinkType, eventIsFr
                     // was this todays first for the user?
                     if (drinksTodayForThisUser === 1) {
                         returnMessage += ' Päivä käyntiin!';
+                        returnMessage += ' (Jos haluat merkata tarkemmin juomiasi, anna käsin jokin näppäimistön';
+                        returnMessage += ' emojeista ja kirjoita juoman nimi perään)';
                     }
 
                     // Is there a group title?

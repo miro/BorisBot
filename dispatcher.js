@@ -70,7 +70,8 @@ module.exports = function dispatchUserCommand(msg) {
             case emoji.get(':beer:'):
             case emoji.get(':wine_glass:'):
             case emoji.get(':cocktail:'):
-                drinkController.addDrink(msg.message_id, userId, userCallName, userCommand, eventIsFromGroup)
+                var drinkType = userCommand + ' ' + userCommandParams
+                drinkController.addDrink(msg.message_id, userId, userCallName, drinkType, eventIsFromGroup)
                 .then(resolve);
             break;
 
