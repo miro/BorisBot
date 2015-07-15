@@ -1,11 +1,12 @@
 // This module is for configuring cron jobs to the bot
 
-var moment      = require('moment-timezone');
-var _           = require('lodash');
-var CronJob     = require('cron').CronJob;
+var moment          = require('moment-timezone');
+var _               = require('lodash');
+var CronJob         = require('cron').CronJob;
 
-var botApi      = require('./botApi');
-var cfg         = require('./config');
+var botApi          = require('./botApi');
+var cfg             = require('./config');
+var drinkController = require('./controllers/drinkController');
 
 // set default timezone to bot timezone
 moment.tz.setDefault(cfg.botTimezone);
@@ -56,6 +57,18 @@ scheduler.addJob({
     timeZone: cfg.botTimezone
 });
 
-
+scheduler.addJob({
+    cronTime: '* * */1 * * *',
+    onTick: function sendReportToSpinniMobi() {
+        drinkController.getGroupStatusReport(cfg.allowedGroups.testChatId) // Change to mainChatId when ready
+        .then(function(msg) {
+            if (msg !== 'Ei humaltuneita käyttäjiä.') {
+                var message = '';
+                botApi.sendMessage(cfg.allowedGroups.testChatId, msg);
+            }
+        });
+    },
+    timeZone: cfg.botTimezone
+});
 
 module.exports = scheduler;
