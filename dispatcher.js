@@ -160,6 +160,12 @@ module.exports = function dispatchUserCommand(msg) {
                 }
             break;
 
+            // Echo the current user settings
+            case '/settings':
+                userController.getCurrentSettings(userId)
+                .then(resolve);
+            break;
+
             // Removes existing user from the database
             case '/removeme':
             case '/poistatunnus':

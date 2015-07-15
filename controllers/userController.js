@@ -54,6 +54,34 @@ controller.newUserProcess = function(userId, userName, userFirstName, userLastNa
     });
 };
 
+controller.getCurrentSettings = function(userId) {
+    return new Promise(function(resolve, reject) {
+        db.getUserById(userId).then(function(user) {
+            if (!user) {
+                var msg = 'Sinulla ei ole vielä käyttäjätunnusta minulle!\n';
+                msg += 'Tee sellainen käyttämällä /luotunnus -komentoa.';
+
+                botApi.sendMessage(userId, msg)
+                return resolve();
+            }
+            else {
+                var msg = 'Käyttäjätunnuksesi tiedot ovat seuraavat:\n\n';
+
+                msg += 'Etunimi: ' + user.get('firstName') + '\n';
+                msg += 'Sukunimi: ' + user.get('lastName') + '\n';
+                msg += 'Group: ' + (user.get('primaryGroupName') ? (user.get('primaryGroupName') + '\n') : '-\n');
+                msg += 'Paino: ' + user.get('weight') + 'kg\n';
+                msg += 'Sukupuoli: ' + (user.get('isMale') ? 'mies' : 'nainen');
+
+                console.log(user);
+
+                botApi.sendMessage(userId, msg)
+                return resolve();
+            }
+        });
+    });
+};
+
 controller.removeUser = function(userId, userName) {
     return new Promise(function(resolve, reject) {
         db.checkIfIdInUsers(userId)
