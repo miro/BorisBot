@@ -28,7 +28,7 @@ controller.showDrinkKeyboard = function(userId, eventIsFromGroup) {
         emoji.get(':cocktail:'), // coctail glass
     ]];
 
-    var msg = eventIsFromGroup ? 'Kippistele tänne! Älä spämmää ryhmächättiä!' : 'Let\'s festival!';
+    var msg = eventIsFromGroup ? 'Kippistele tänne! Älä spämmää ryhmächättiä!' : 'Let\'s festival! Mitä juot?';
 
     return new Promise(function (resolve, reject) {
         botApi.sendMessage(
