@@ -124,7 +124,9 @@ controller.getPersonalDrinkLog = function(userId) {
                 modelTimestamp = moment(model.get('timestamp'));
 
                 if (!currentDay || currentDay.isBefore(modelTimestamp, 'day')) {
-                    message += '\n\n>' + modelTimestamp.format('DD.MM:') + '\n';
+                    message += '\n\n' + emoji.get(':calendar:');
+                    message += modelTimestamp.format('DD.MM') + '\n';
+
                     currentDay = modelTimestamp.clone();
                 }
 
