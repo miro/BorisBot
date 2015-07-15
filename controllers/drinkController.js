@@ -82,6 +82,13 @@ controller.addDrink = function(messageId, userId, userName, drinkType, eventIsFr
                         '. tälle päivälle, ja ' + drinksTodayForThisUser + '. käyttäjälle ' + userName + '.\n';
 
                         // # Notify the group?
+                        if (drinksToday === 1) {
+                            // first drink for today!
+                            var groupMsg = userName + ' avasi pelin! ' + drinkType + '!';
+                            botApi.sendMessage(primaryGroupId, groupMsg);
+
+                        }
+
                         if (drinksToday % 10 === 0) {
                             controller.getGroupStatusReport(primaryGroupId).then(function (statusReport) {
                                 var groupMsg = userName + ' kellotti ryhmän ' + drinksToday + '. juoman tälle päivälle!\n';
