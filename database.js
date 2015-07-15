@@ -101,6 +101,7 @@ db.getTotalDrinksAmountForGroup = function(groupId) {
     .count('id');
 };
 
+// TODO: unite this and getFristTimestampForGroup by parametrizing isGroup info
 db.getFirstTimestampForUser = function(userId) {
     return schema.bookshelf
     .knex('drinks')
@@ -140,6 +141,10 @@ db.getDrinksSinceTimestampSortedForUser = function(userId, timestampMoment) {
     .andWhere('timestamp','>', timestampMoment.toJSON())
     .orderBy('timestamp', 'asc');
 };
+
+
+
+
 // ## Users related stuff
 //
 
@@ -166,15 +171,17 @@ db.removeUser = function(id) {
 };
 
 // Update primaryGroupId for existing user
-db.updatePrimaryGroupIdToUser = function(userId, groupId) {
+db.updatePrimaryGroupIdToUser = function(userId, groupId, groupName) {
     return schema.bookshelf
     .knex('users')
     .where({ telegramId: userId })
     .update({
-        primaryGroupId: groupId
+        primaryGroupId: groupId,
+        primaryGroupName: groupName
     });
 };
 
+// TODO: remove this function, use getUserById instead (and check if result is null)
 db.checkIfIdInUsers = function(id) {
     return new Promise(function (resolve, reject) {
         schema.bookshelf.knex('users').where({ telegramId: id }).count('id')

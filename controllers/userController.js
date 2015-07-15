@@ -88,7 +88,7 @@ controller.setGroup = function(userId, chatGroupId, chatGroupTitle, messageIsFro
                     resolve();
                 }
                 else {
-                    db.updatePrimaryGroupIdToUser(userId, chatGroupId)
+                    db.updatePrimaryGroupIdToUser(userId, chatGroupId, chatGroupTitle)
                     .then(function updateOk() {
                         botApi.sendMessage(chatGroupId, 'Käyttäjätunnuksesi on asetettu kuulumaan tähän ryhmään!');
                         resolve();
