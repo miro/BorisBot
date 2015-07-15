@@ -4,6 +4,7 @@ var Promise     = require('bluebird');
 var request     = require('request');
 var moment      = require('moment-timezone');
 var _           = require('lodash');
+var emoji       = require('node-emoji');
 
 var cfg         = require('./config');
 var db          = require('./database');
@@ -52,14 +53,24 @@ module.exports = function dispatchUserCommand(msg) {
 
         // parse command & possible parameters
         var userInput = msg.text.split(' ');
-        var userCommand = userInput.shift();
+        var userCommand = userInput.shift().toLowerCase();
         var userCommandParams = userInput.join(' ');
 
 
-        switch (userCommand.toLowerCase()) {
+        switch (userCommand) {
+            // TODO: add /start, /help, /settings
+
             case '/kalja':
             case '/kippis':
-                drinkController.addDrink(msg.message_id, chatGroupId, chatGroupTitle, userId, userCallName, userCommandParams)
+                drinkController.showDrinkKeyboard(userId, eventIsFromGroup)
+                .then(resolve);
+            break;
+
+            // Drink logging commands - works only on private
+            case emoji.get(':beer:'):
+            case emoji.get(':wine_glass:'):
+            case emoji.get(':cocktail:'):
+                drinkController.addDrink(msg.message_id, userId, userCallName, userCommand, eventIsFromGroup)
                 .then(resolve);
             break;
 
@@ -161,14 +172,14 @@ module.exports = function dispatchUserCommand(msg) {
             // Can be called from any group which have this bot in it
             case '/setgroup':
             case '/asetaryhmä':
-                userController.setGroup(userId, chatGroupId, chatGroupTitle, messageIsFromGroup)
+                userController.setGroup(userId, chatGroupId, chatGroupTitle, eventIsFromGroup)
                 .then(resolve);
             break;
 
             case '/promille':
                 var targetId = (eventIsFromGroup) ? chatGroupId : userId;
                 ethanolController.getAlcoholLevel(userId)
-                .then(function(msg) {                   
+                .then(function(msg) {
                     botApi.sendMessage(targetId, msg + ' \u2030');
                     resolve();
                 })
@@ -190,7 +201,7 @@ module.exports = function dispatchUserCommand(msg) {
                     resolve();
                 }
             break;
-            
+
             default:
                 console.log('! Unknown command', msg.text);
                 resolve();

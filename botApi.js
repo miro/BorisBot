@@ -10,11 +10,25 @@ var botApi = {};
 // ## Public functions
 //
 
-botApi.sendMessage = function(chatId, text) {
-    request.post(cfg.tgApiUrl + '/sendMessage', { form: {
-        chat_id: chatId,
-        text: text
-    }});
+botApi.sendMessage = function(chatId, text, replyKeyboard) {
+    var data = {};
+    data.chat_id = chatId;
+    data.text = text;
+
+    // Is there a reply keyboard set?
+    if (replyKeyboard) {
+        data.reply_markup = JSON.stringify(replyKeyboard);
+        // data.force_reply = 'True';
+    }
+    else {
+        data.hide_keyboard = true;
+    }
+
+    // Send the message to Telegram API
+    request.post(
+        cfg.tgApiUrl + '/sendMessage',
+        { form: data }
+    );
 };
 
 botApi.sendPhoto = function (chatId, photo, options) {

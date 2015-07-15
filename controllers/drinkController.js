@@ -10,6 +10,7 @@ var ethanolController   = require('./ethanolController');
 var Promise             = require('bluebird');
 var moment              = require('moment-timezone');
 var _                   = require('lodash');
+var emoji               = require('node-emoji');
 
 // set default timezone to bot timezone
 moment.tz.setDefault(cfg.botTimezone);
@@ -18,48 +19,93 @@ moment.tz.setDefault(cfg.botTimezone);
 var controller = {};
 
 
-controller.addDrink = function(messageId, chatGroupId, chatGroupTitle, userId, userName, drinkType) {
-    var responseTargetId = chatGroupId ? chatGroupId : userId;
+controller.showDrinkKeyboard = function(userId, eventIsFromGroup) {
+    // TODO: give user instructions if they have not set up account and primaryGroup
 
-    drinkType = drinkType.substring(0,140); // shorthen this to match the DB field
-    // fallback to 'kalja' if no drinkType is set
-    drinkType = !drinkType ? 'kalja' : drinkType;
+    var keyboard = [[
+        emoji.get(':beer:'), // beer glass
+        emoji.get(':wine_glass:'), // wine glass
+        emoji.get(':cocktail:'), // coctail glass
+    ]];
+
+    var msg = eventIsFromGroup ? 'Kippistele tänne! Älä spämmää ryhmächättiä!' : 'Let\'s festival! Mitä juot?';
+
+    return new Promise(function (resolve, reject) {
+        botApi.sendMessage(
+            userId,
+            msg,
+            {
+                keyboard: keyboard,
+                resize_keyboard: true,
+                one_time_keyboard: true
+            }
+        );
+
+        resolve();
+    });
+};
+
+
+controller.addDrink = function(messageId, userId, userName, drinkType, eventIsFromGroup) {
 
     return new Promise(function(resolve, reject) {
-        db.registerDrink(messageId, chatGroupId, userId, drinkType)
-        .then(function() {
-            db.getDrinksSinceTimestamp(_getTresholdMoment(), chatGroupId)
-            .then(function createReturnMessageFromCollection(drinksCollection) {
+        if (eventIsFromGroup) resolve(); // ignore
 
-                var drinksToday = drinksCollection.models.length;
-                var drinksTodayForThisUser = _.filter(drinksCollection.models, function(model) {
-                    return model.attributes.creatorId === userId;
-                }).length;
 
-                // # Form the message
-                var returnMessage = 'Kippis!!';
+        db.getUserById(userId).then(function(user) {
+            var primaryGroupId = (user && user.get('primaryGroupId')) ? user.get('primaryGroupId') : null;
 
-                // was this todays first for the user?
-                if (drinksTodayForThisUser === 1) {
-                    returnMessage += ' Päivä käyntiin!';
-                }
+            db.registerDrink(messageId, primaryGroupId, userId, drinkType)
+            .then(function() {
+                db.getDrinksSinceTimestamp(_getTresholdMoment(), primaryGroupId)
+                .then(function createReturnMessageFromCollection(drinksCollection) {
 
-                // Is there a group title?
-                if (_.isNull(chatGroupTitle)) {
-                    returnMessage += ' Se olikin jo ' + drinksTodayForThisUser + '. tälle päivälle.\n';
-                }
-                else {
-                    returnMessage += ' Se olikin jo ryhmän ' + chatGroupTitle + ' ' + drinksToday +
-                    '. tälle päivälle, ja ' + drinksTodayForThisUser + '. käyttäjälle ' + userName + '.\n';
-                }
+                    var drinksToday = drinksCollection.models.length;
+                    var drinksTodayForThisUser = _.filter(drinksCollection.models, function(model) {
+                        return model.attributes.creatorId === userId;
+                    }).length;
 
-                botApi.sendMessage(responseTargetId, returnMessage);
+                    // # Form the message
+                    var returnMessage = 'Kippis!!';
 
-                resolve(returnMessage);
+                    // was this todays first for the user?
+                    if (drinksTodayForThisUser === 1) {
+                        returnMessage += ' Päivä käyntiin!';
+                    }
+
+                    // Is there a group title?
+                    if (_.isNull(primaryGroupId)) {
+                        returnMessage += ' Se olikin jo ' + drinksTodayForThisUser + '. tälle päivälle.\n';
+                    }
+                    else {
+                        returnMessage += ' Se olikin jo ryhmäsi ' + drinksToday +
+                        '. tälle päivälle, ja ' + drinksTodayForThisUser + '. käyttäjälle ' + userName + '.\n';
+
+                        // # Notify the group?
+                        if (drinksToday === 1) {
+                            // first drink for today!
+                            var groupMsg = userName + ' avasi pelin! ' + drinkType + '!';
+                            botApi.sendMessage(primaryGroupId, groupMsg);
+
+                        }
+
+                        if (drinksToday % 10 === 0) {
+                            controller.getGroupStatusReport(primaryGroupId).then(function (statusReport) {
+                                var groupMsg = userName + ' kellotti ryhmän ' + drinksToday + '. juoman tälle päivälle!\n';
+                                groupMsg += statusReport;
+
+                                botApi.sendMessage(primaryGroupId, groupMsg);
+                            });
+                        }
+                    }
+
+                    botApi.sendMessage(userId, returnMessage);
+                    resolve(returnMessage);
+                });
             });
         })
         .error(function(e) {
-            botApi.sendMessage(responseTargetId, 'Kippistely epäonnistui, yritä myöhemmin uudelleen');
+            botApi.sendMessage(userId, 'Kippistely epäonnistui, yritä myöhemmin uudelleen');
             resolve();
         });
     });
@@ -116,7 +162,7 @@ controller.drawGraph = function(userId, chatGroupId, msgIsFromGroup, userCommand
         .then(function(result) {
             var startRangeMoment = moment(result[0]['min']);
             var dateRangeParameter = parseInt(userCommandParams.split(' ')[0], 10);
-            
+
             if (!_.isNaN(dateRangeParameter) && dateRangeParameter > 0 && dateRangeParameter < moment().diff(startRangeMoment, 'days')) {
                 startRangeMoment = moment().subtract(dateRangeParameter,'days')
             }
@@ -160,14 +206,15 @@ controller.getDrinksAmount = function(userId, chatGroupId, chatGroupTitle, targe
 }
 
 controller.getGroupStatusReport = function(chatGroupId) {
-    
     return new Promise(function (resolve, reject) {
-    
+
         db.getDrinksSinceTimestamp(moment().subtract(1,'days'), chatGroupId)
         .then(function fetchOk(collection) {
-            
-            if (collection.models.length === 0) {resolve('Ei humaltuneita käyttäjiä.');}
-            
+
+            if (collection.models.length === 0) {
+                resolve('Ei humaltuneita käyttäjiä.');
+            }
+
             var lastUsersId = [];
             var userId;
 
@@ -177,18 +224,18 @@ controller.getGroupStatusReport = function(chatGroupId) {
                     lastUsersId.push(userId);
                 }
             });
-            
+
             var userPromises = [];
             _.each(lastUsersId, function(userId) {
                 userPromises.push(db.getUserById(userId))
             });
-            
+
             Promise.all(userPromises)
             .then(function(userArr) {
 
                 // Remove unregistered users
                 userArr = _.compact(userArr);
-                
+
                 var alcoLevelPromises = [];
                 _.each(userArr, function(user) {
                      alcoLevelPromises.push(ethanolController.getAlcoholLevel(user.get('telegramId')));
@@ -196,30 +243,32 @@ controller.getGroupStatusReport = function(chatGroupId) {
                 Promise.all(alcoLevelPromises)
                 .then(function(alcoLevelArr) {
                     var logArr = [];
-                    for (var i=0;i<alcoLevelArr.length;++i) {
+                    for (var i = 0; i < alcoLevelArr.length; ++i) {
                         logArr.push({'userName': userArr[i].get('userName'), 'alcoLevel': alcoLevelArr[i]});
                     }
-                    
+
                     // Filter users who have alcoLevel > 0
                     logArr = _.filter(logArr, function(object) {
                         return object.alcoLevel > 0.00;
                     });
-                    
-                    if (logArr.length === 0) {resolve('Ei humaltuneita käyttäjiä.');}
-                    
+
+                    if (logArr.length === 0) {
+                        resolve('Ei humaltuneita käyttäjiä.');
+                    }
+
                     // Sort list by alcoLevel
                     logArr = _.sortBy(logArr, function(object) {
                         return object.alcoLevel;
                     });
-                    
+
                     // Calculate needed padding
                     var paddingLength = _.max(logArr, function(object) {
                         return object.userName.length;
                     });
                     paddingLength = paddingLength.userName.length + 3;
-                    
+
                     // Generate string which goes to message
-                    var log = "";
+                    var log = '';
                     _.eachRight(logArr, function(userLog) {
                         log += _.padRight(userLog.userName, paddingLength, '.') + ' ' + userLog.alcoLevel + ' \u2030\n';
                     });
