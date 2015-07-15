@@ -49,11 +49,8 @@ controller.showDrinkKeyboard = function(userId, eventIsFromGroup) {
 controller.addDrink = function(messageId, userId, userName, drinkType, eventIsFromGroup) {
 
     return new Promise(function(resolve, reject) {
+        if (eventIsFromGroup) resolve(); // ignore
 
-        if (eventIsFromGroup) {
-            // ignore
-            resolve();
-        }
 
         db.getUserById(userId).then(function(user) {
             var primaryGroupId = (user && user.get('primaryGroupId')) ? user.get('primaryGroupId') : null;
@@ -83,6 +80,16 @@ controller.addDrink = function(messageId, userId, userName, drinkType, eventIsFr
                     else {
                         returnMessage += ' Se olikin jo ryhmäsi ' + drinksToday +
                         '. tälle päivälle, ja ' + drinksTodayForThisUser + '. käyttäjälle ' + userName + '.\n';
+
+                        // # Notify the group?
+                        if (drinksToday % 10 === 0) {
+                            controller.getGroupStatusReport(primaryGroupId).then(function (statusReport) {
+                                var groupMsg = userName + ' kellotti ryhmän ' + drinksToday + '. juoman tälle päivälle!\n';
+                                groupMsg += statusReport;
+
+                                botApi.sendMessage(primaryGroupId, groupMsg);
+                            });
+                        }
                     }
 
                     botApi.sendMessage(userId, returnMessage);

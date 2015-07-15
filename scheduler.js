@@ -57,18 +57,4 @@ scheduler.addJob({
     timeZone: cfg.botTimezone
 });
 
-scheduler.addJob({
-    cronTime: '* * */1 * * *',
-    onTick: function sendReportToSpinniMobi() {
-        drinkController.getGroupStatusReport(cfg.allowedGroups.testChatId) // Change to mainChatId when ready
-        .then(function(msg) {
-            if (msg !== 'Ei humaltuneita käyttäjiä.') {
-                var message = '';
-                botApi.sendMessage(cfg.allowedGroups.testChatId, msg);
-            }
-        });
-    },
-    timeZone: cfg.botTimezone
-});
-
 module.exports = scheduler;
