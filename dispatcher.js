@@ -79,6 +79,7 @@ module.exports = function dispatchUserCommand(msg) {
                 .then(resolve);
             break;
 
+            case '/log':
             case '/otinko':
                 drinkController.getPersonalDrinkLog(userId)
                 .then(function() {
@@ -104,6 +105,8 @@ module.exports = function dispatchUserCommand(msg) {
 
             // Sends image of current state of Spänni's webcam
             // Triggering of this is only possible from the spännimobi group
+            case '/kerho':
+            case '/cam':
             case '/webcam':
 
                 if (_.isUndefined(cfg.webcamURL)) {
@@ -149,6 +152,7 @@ module.exports = function dispatchUserCommand(msg) {
             // Takes two parameters, weight of the person and gender
             case '/addme':
             case '/luotunnus':
+            case '/start':
                 if (eventIsFromGroup) {
                     botApi.sendMessage(msg.chat.id, 'Keskustellaan aiheesta lisää kahden kesken..');
                     botApi.sendMessage(userId, 'Rekisteröi käyttäjä komennolla /addme <paino> <sukupuoli>');
@@ -178,6 +182,8 @@ module.exports = function dispatchUserCommand(msg) {
             // Can be called from any group which have this bot in it
             case '/setgroup':
             case '/asetaryhmä':
+            case '/moro':
+            case '/ryhmä':
                 userController.setGroup(userId, chatGroupId, chatGroupTitle, eventIsFromGroup)
                 .then(resolve);
             break;
