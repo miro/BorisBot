@@ -45,7 +45,14 @@ controller.newUserProcess = function(userId, userName, userFirstName, userLastNa
 
                     db.registerUser(userId, userName, userFirstName, userLastName, weight, isMale)
                     .then(function registerOk() {
-                        botApi.sendMessage(userId, 'Käyttäjän ' + userName + ' rekisteröinti onnistui!');
+                        var msg = 'Käyttäjätunnuksesi luotiin onnistuneesti, olé!\n\n';
+                        msg += 'Käy lisäämässä itsesi johonkin ryhmään huutamalla ryhmän kanavalla /moro. ';
+                        msg += 'Muuten kippiksiäsi ei lasketa mukaan ryhmän tilastoihin.\n\n';
+
+                        msg += 'HUOM: ilmoittamasi painon perusteella lasketut promilleluvut ovat täysiä arvioita, ';
+                        msg += 'eikä niiden pohjalta voi tehdä mitään päätelmiä minkään suhteen. Stay safe!';
+
+                        botApi.sendMessage(userId, msg);
                         resolve();
                     });
                 };
@@ -107,8 +114,8 @@ controller.setGroup = function(userId, chatGroupId, chatGroupTitle, messageIsFro
             resolve();
         }
         else {
-            db.checkIfIdInUsers(userId)
-            .then(function checkOk(exists) {
+            db.getUserById(userId)
+            .then(function(exists) {
                 if (!exists) {
                     botApi.sendMessage(chatGroupId, 'Käyttäjääsi ei ole vielä luotu botille!\nLuo sellainen komennolla /addme');
                     resolve();
