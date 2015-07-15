@@ -52,7 +52,7 @@ module.exports = function dispatchTelegramEvent(msg) {
 
         // Parse command & possible parameters
         var userInput = msg.text.split(' ');
-        var userCommand = userInput.shift().toLowerCase();
+        var userCommand = userInput.shift().toLowerCase().split('@')[0];
         var userCommandParams = userInput.join(' ');
 
 
