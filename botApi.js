@@ -31,6 +31,15 @@ botApi.sendMessage = function(chatId, text, replyKeyboard) {
     );
 };
 
+botApi.sendAction = function (chatId, action) {
+    request.post(cfg.tgApiUrl + '/sendChatAction', {
+        form: {
+            chat_id: chatId,
+            action: action
+        }
+    });
+};
+
 botApi.sendPhoto = function (chatId, photo, options) {
     var opts = {
         qs: options || {}
