@@ -10,6 +10,7 @@ var cfg         = require('./config');
 var db          = require('./database');
 var botApi      = require('./botApi');
 var utils       = require('./utils');
+var generic     = require('./generic');
 
 var userController      = require('./controllers/userController');
 var drinkController     = require('./controllers/drinkController');
@@ -89,6 +90,13 @@ module.exports = function dispatchTelegramEvent(msg) {
                     resolve();
                 });
             break;
+            
+            case '/help':
+
+                generic.help(userId);
+                resolve();
+
+            break;
 
             // # "Histogram" - returns visualization from drink log data.
             // If triggered from a group, returns a graph from that group's data
@@ -108,44 +116,9 @@ module.exports = function dispatchTelegramEvent(msg) {
             case '/cam':
             case '/webcam':
 
-                if (_.isUndefined(cfg.webcamURL)) {
-                    botApi.sendMessage(userId, 'Botille ei ole määritetty webcamin osoitetta!');
-                    resolve();
-                }
-                else {
-
-                    if (!eventIsFromGroup) {
-                        // this command can only be triggered from a group, since this command is
-                        // limited to a certain users only, and for now we have no means of finding
-                        // out if the person belongs to one of those groups -> calling this personally from
-                        // the bot must be denied
-                        botApi.sendMessage(userId, 'Webcam-kuva näytetään vain tietyissä ryhmäkeskusteluissa :(');
-                        resolve();
-                        return;
-                    }
-
-                    // check if the command came from an allowedGroup
-                    var msgFromAllowedGroup = false;
-                    for (var group in cfg.allowedGroups) {
-                        if (chatGroupId === cfg.allowedGroups[group]) {
-                            msgFromAllowedGroup = true;
-                        }
-                    }
-
-                    if (!msgFromAllowedGroup) {
-                        // unauthorized
-                        resolve();
-                        return;
-                    }
-
-                    // -> If we get here, we are good to go!
-                    botApi.sendAction(chatGroupId, 'upload_photo');
-
-                    utils.downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg', function() {
-                        botApi.sendPhoto(chatGroupId, cfg.webcamDirectory + 'webcam.jpg');
-                        resolve();
-                    });
-                }
+                generic.webcam(chatGroupId, eventIsFromGroup)
+                .then(resolve);
+                
             break;
 
             // Add new user to 'user'-table
