@@ -46,7 +46,8 @@ db.getDrinksSinceTimestampForUser = function(timestampMoment, userId) {
     return schema.collections.Drinks
     .query(function(qb) {
         qb.where({ creatorId: userId })
-        .andWhere('timestamp', '>=', timestampMoment.toJSON());
+        .andWhere('timestamp', '>=', timestampMoment.toJSON())
+        .orderBy('timestamp');
     })
     .fetch()
 };
@@ -188,7 +189,7 @@ db.checkIfIdInUsers = function(id) {
 };
 
 db.getUserById = function(userId) {
-    
+
     return schema.collections.Users
     .query(function(qb) {
         qb.where({ telegramId: userId })
