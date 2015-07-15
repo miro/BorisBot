@@ -181,19 +181,6 @@ db.updatePrimaryGroupIdToUser = function(userId, groupId, groupName) {
     });
 };
 
-// TODO: remove this function, use getUserById instead (and check if result is null)
-db.checkIfIdInUsers = function(id) {
-    return new Promise(function (resolve, reject) {
-        schema.bookshelf.knex('users').where({ telegramId: id }).count('id')
-        .then( function fetchOk(result) {
-            if (result[0].count > 0) {
-                resolve(true);
-            } else {
-                resolve(false);
-            };
-        });
-    });
-};
 
 db.getUserById = function(userId) {
 

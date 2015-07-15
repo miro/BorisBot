@@ -16,11 +16,11 @@ controller.newUserProcess = function(userId, userName, userFirstName, userLastNa
     // TODO add note about uncertainity of the promille level calculations
 
     return new Promise(function(resolve, reject) {
-        db.checkIfIdInUsers(userId)
-        .then(function checkOk(exists) {
+        db.getUserById(userId)
+        .then(function(exists) {
             if (exists) {
                 botApi.sendMessage(userId, 'Käyttäjä ' + userName + ' on jo rekisteröity!\n' +
-                    'Jos haluat päivittää tietojasi, poista vanha käyttäjä komennolla\n/removeme ja komenna /addme uudelleen.');
+                    'Jos haluat päivittää tietojasi, poista vanha käyttäjä komennolla\n/poistatunnus ja komenna /luotunnus uudelleen.');
                 resolve();
             }
             else {
@@ -82,8 +82,8 @@ controller.getCurrentSettings = function(userId) {
 
 controller.removeUser = function(userId, userName) {
     return new Promise(function(resolve, reject) {
-        db.checkIfIdInUsers(userId)
-        .then(function checkOk(exists) {
+        db.getUserById(userId)
+        .then(function(exists) {
             if (!exists) {
                 botApi.sendMessage(userId, 'Käyttäjää ' + userName + ' ei löytynyt tietokannasta!');
                 resolve();
