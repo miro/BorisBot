@@ -160,6 +160,8 @@ controller.drawGraph = function(userId, chatGroupId, msgIsFromGroup, userCommand
             targetId = userId;
         }
 
+        botApi.sendAction(targetId, 'upload_photo');
+
         dbFetchTimestampFunction(targetId)
         .then(function(result) {
             var startRangeMoment = moment(result[0]['min']);
