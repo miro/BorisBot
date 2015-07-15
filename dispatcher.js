@@ -105,6 +105,8 @@ module.exports = function dispatchUserCommand(msg) {
 
             // Sends image of current state of Spänni's webcam
             // Triggering of this is only possible from the spännimobi group
+            // TODO: allow calling this from a 1on1 chat if user has account & that account
+            // is set to one of the allowed groups
             case '/kerho':
             case '/cam':
             case '/webcam':
@@ -112,17 +114,17 @@ module.exports = function dispatchUserCommand(msg) {
                 if (_.isUndefined(cfg.webcamURL)) {
                     botApi.sendMessage(userId, 'Botille ei ole määritetty webcamin osoitetta!');
                     resolve();
-                } else {
+                }
+                else {
 
                     if (!eventIsFromGroup) {
                         // this command can only be triggered from a group, since this command is
                         // limited to a certain users only, and for now we have no means of finding
                         // out if the person belongs to one of those groups -> calling this personally from
                         // the bot must be denied
-                        botApi.sendMessage(userId, 'Komento /webcam on käytössä vain valtuutetuissa ryhmäkeskusteluissa!');
+                        botApi.sendMessage(userId, 'Webcam-kuva näytetään vain tietyissä ryhmäkeskusteluissa :(');
                         resolve();
                         return;
-
                     }
 
                     // check if the command came from an allowedGroup
@@ -140,6 +142,8 @@ module.exports = function dispatchUserCommand(msg) {
                     }
 
                     // -> If we get here, we are good to go!
+                    botApi.sendAction(chatGroupId, 'upload_photo');
+
                     utils.downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg', function() {
                         botApi.sendPhoto(chatGroupId, cfg.webcamDirectory + 'webcam.jpg');
                         resolve();
