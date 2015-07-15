@@ -154,8 +154,8 @@ module.exports = function dispatchUserCommand(msg) {
             case '/luotunnus':
             case '/start':
                 if (eventIsFromGroup) {
-                    botApi.sendMessage(msg.chat.id, 'Keskustellaan aiheesta lisää kahden kesken..');
-                    botApi.sendMessage(userId, 'Rekisteröi käyttäjä komennolla /addme <paino> <sukupuoli>');
+                    botApi.sendMessage(chatGroupId, 'Keskustellaan aiheesta lisää kahden kesken..');
+                    botApi.sendMessage(userId, 'Rekisteröi käyttäjä komennolla /luotunnus <paino> <sukupuoli>');
                     resolve();
                 }
                 else {

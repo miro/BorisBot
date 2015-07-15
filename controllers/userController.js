@@ -73,8 +73,6 @@ controller.getCurrentSettings = function(userId) {
                 msg += 'Paino: ' + user.get('weight') + 'kg\n';
                 msg += 'Sukupuoli: ' + (user.get('isMale') ? 'mies' : 'nainen');
 
-                console.log(user);
-
                 botApi.sendMessage(userId, msg)
                 return resolve();
             }
