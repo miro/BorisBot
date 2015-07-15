@@ -44,6 +44,23 @@ generic.webcam = function(chatGroupId, eventIsFromGroup) {
             });
         }
     });
-}
+};
+
+generic.help = function(userId) {
+    
+    var msg = '\
+    /asetaryhma\n\
+    /graafi\n\
+    /kalja\n\
+    /kippis\n\
+    /luotunnus\n\
+    /otinko\n\
+    /poistatunnus\n\
+    /promille\n\
+    /promillet\n\
+    /webcam\n\
+    ';
+    botApi.sendMessage(userId, msg);
+};
 
 module.exports = generic;

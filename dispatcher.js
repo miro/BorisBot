@@ -90,6 +90,13 @@ module.exports = function dispatchUserCommand(msg) {
                     resolve();
                 });
             break;
+            
+            case '/help':
+
+                generic.help(userId);
+                resolve();
+
+            break;
 
             // # "Histogram" - returns visualization from drink log data.
             // If triggered from a group, returns a graph from that group's data
@@ -139,7 +146,7 @@ module.exports = function dispatchUserCommand(msg) {
             // Set primaryGroupId for user
             // Can be called from any group which have this bot in it
             case '/setgroup':
-            case '/asetaryhmä':
+            case '/asetaryhma':
                 userController.setGroup(userId, chatGroupId, chatGroupTitle, eventIsFromGroup)
                 .then(resolve);
             break;
