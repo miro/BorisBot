@@ -67,15 +67,22 @@ controller.addDrink = function(messageId, chatGroupId, chatGroupTitle, userId, u
 
 
 controller.getPersonalDrinkLog = function(userId) {
-    // TODO sort by timestamp, better
     return new Promise(function (resolve, reject) {
 
         db.getDrinksSinceTimestampForUser(moment().subtract(2, 'day'), userId)
         .then(function(collection) {
-            var message = 'Juomasi viimeisen 48h ajalta:\n\n';
+            var message = 'Juomasi viimeisen 48h ajalta:\n';
 
+            var currentDay;
             _.each(collection.models, function(model) {
-                message += moment(model.get('timestamp')).format('HH:mm');
+                modelTimestamp = moment(model.get('timestamp'));
+
+                if (!currentDay || currentDay.isBefore(modelTimestamp, 'day')) {
+                    message += '\n\n>' + modelTimestamp.format('DD.MM:') + '\n';
+                    currentDay = modelTimestamp.clone();
+                }
+
+                message += modelTimestamp.format('HH:mm');
                 message += ' - ' + model.get('drinkType') + '\n';
             });
 
