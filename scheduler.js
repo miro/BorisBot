@@ -1,11 +1,12 @@
 // This module is for configuring cron jobs to the bot
 
-var moment      = require('moment-timezone');
-var _           = require('lodash');
-var CronJob     = require('cron').CronJob;
+var moment          = require('moment-timezone');
+var _               = require('lodash');
+var CronJob         = require('cron').CronJob;
 
-var commander   = require('./commander');
-var cfg         = require('./config');
+var botApi          = require('./botApi');
+var cfg             = require('./config');
+var drinkController = require('./controllers/drinkController');
 
 // set default timezone to bot timezone
 moment.tz.setDefault(cfg.botTimezone);
@@ -50,12 +51,10 @@ scheduler.addJob({
         var daysLeft = startMoment.diff(moment(), 'days');
 
         if (daysLeft > 0) {
-            commander.sendMessage(cfg.allowedGroups.mainChatId, 'HUOOOMENTA! Kesäpäiviin aikaa ' + daysLeft + ' päivää!!');
+            botApi.sendMessage(cfg.allowedGroups.mainChatId, 'HUOOOMENTA! Kesäpäiviin aikaa ' + daysLeft + ' päivää!!');
         }
     },
     timeZone: cfg.botTimezone
 });
-
-
 
 module.exports = scheduler;

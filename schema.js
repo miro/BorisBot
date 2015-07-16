@@ -36,6 +36,28 @@ bookshelf.knex.schema.hasTable('expls').then(function(exists) {
 });
 
 
+
+bookshelf.knex.schema.hasTable('users').then(function(exists) {
+    if (!exists) {
+        return bookshelf.knex.schema.createTable('users', function(t) {
+            t.increments('id').primary();
+
+            t.integer('telegramId');
+            t.string('userName', 100).unique();
+            t.string('firstName', 100);
+            t.string('lastName', 100);
+
+            t.integer('primaryGroupId');
+            t.string('primaryGroupName', 100);
+
+            t.integer('weight').defaultTo(65);
+            t.boolean('isMale').defaultTo(true);
+        });
+    }
+});
+
+
+
 // Model definitions
 var models = {};
 models.Drink = bookshelf.Model.extend({
@@ -43,6 +65,9 @@ models.Drink = bookshelf.Model.extend({
 });
 models.Expl = bookshelf.Model.extend({
     tableName: 'expls'
+});
+models.User = bookshelf.Model.extend({
+    tableName: 'users'
 });
 
 
@@ -53,6 +78,10 @@ collections.Drinks = bookshelf.Collection.extend({
 collections.Expls = bookshelf.Collection.extend({
     model: models.Expl
 });
+collections.Users = bookshelf.Collection.extend({
+    model: models.User
+});
+
 
 module.exports = {
     bookshelf: bookshelf,

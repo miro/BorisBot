@@ -5,7 +5,8 @@ var _           = require('lodash');
 var fs          = require('fs');
 var exec        = require('child_process').exec;
 
-var commander   = require('./commander');
+var dispatcher  = require('./dispatcher');
+var botApi      = require('./botApi');
 var cfg         = require('./config');
 var msgHistory  = require('./messageHistory');
 var scheduler   = require('./scheduler');
@@ -33,7 +34,7 @@ app.post('/api/webhook', function(req, res) {
     }
 
     // Send message to the actual bot
-    commander.handleWebhookEvent(msg)
+    dispatcher(msg)
     .then(function() {
         msgHistory.messageProcessed(msg.message_id);
         res.sendStatus(200);
@@ -93,9 +94,13 @@ request.post(cfg.tgApiUrl + '/setWebhook', { form: { url: cfg.webhookUrl }},
 
 // Run test sequence
 request(cfg.tgApiUrl + '/getMe', function (error, res, body) {
-    console.log('I Am', body);
+    var response = JSON.parse(body);
+    var botName = response.result.first_name;
+    var botUserName = response.result.username;
+
+    console.log('I Am', botName + ' / @' + botUserName);
 });
-commander.sendMessage(cfg.allowedGroups.testChatId, 'Reboot! ' + Date() + '\nWebhook set to ' + cfg.webhookUrl);
+botApi.sendMessage(cfg.allowedGroups.testChatId, 'Reboot! ' + Date() + '\nWebhook set to ' + cfg.webhookUrl);
 
 // Start scheduler
 scheduler.startJobs();
