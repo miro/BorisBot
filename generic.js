@@ -75,7 +75,7 @@ generic.help = function(userId) {
     \n/poistatunnus - Unohdan tunnuksesi tietokannastani.\
     \n\
     \n/promille - Tulostan sinun henkilökohtaisen promilletasosi. \
-    HUOM: lasken promillesi neljännessä ulottuvuudessa, joten älä \
+    HUOM: lasken promillesi korkeammassa ulottuvuudessa, joten älä \
     luota tulosten olevan täysin realistisia.\
     \n\
     \n/promillet - Tulostan ryhmän tämänhetkiset promilletasot.\
