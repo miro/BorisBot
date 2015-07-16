@@ -20,7 +20,7 @@ generic.webcam = function(userId, chatGroupId, eventIsFromGroup) {
             .then(function(user) {
                 
                 if (_.isNull(user)) {
-                    botApi.sendMessage(userId, 'Sinun täytyy /luotunnus ja käydä /moro ´ttamassa SpänniMobissa saadaksesi /webcam toimimaan priva-chatissa!');
+                    botApi.sendMessage(userId, 'Sinun täytyy /luotunnus ja käydä /moro ´ttamassa SpänniMobissa saadaksesi /webcam toimimaan!');
                     resolve();
                 } else {
                 
