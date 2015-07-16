@@ -9,46 +9,44 @@ var _       = require('lodash');
 var generic = {};
 
 generic.webcam = function(userId, chatGroupId, eventIsFromGroup) {
-    
     return new Promise(function(resolve,reject) {
         if (_.isUndefined(cfg.webcamURL)) {
             botApi.sendMessage(userId, 'Botille ei ole määritetty webcamin osoitetta!');
-            resolve();
-        } else {
-            
-            db.getUserById(userId)
-            .then(function(user) {
-                
-                if (_.isNull(user)) {
-                    botApi.sendMessage(userId, 'Sinun täytyy /luotunnus ja käydä /moro ´ttamassa SpänniMobissa saadaksesi /webcam toimimaan!');
-                    resolve();
-                } else {
-                
-                    var groupId = (eventIsFromGroup) ? chatGroupId : user.get('primaryGroupId');
-                    var targetId = (eventIsFromGroup) ? chatGroupId : userId;
-
-                    // check if the command came from an allowedId
-                    var msgFromAllowedId = false;
-                    for (var group in cfg.allowedGroups) {
-                        if (groupId === cfg.allowedGroups[group]) {
-                            msgFromAllowedId = true;
-                        }
-                    }
-
-                    if (!msgFromAllowedId) {
-                        botApi.sendMessage(targetId, 'Sinun täytyy käydä /moro ´ttamassa SpänniMobissa saadaksesi /webcam toimimaan priva-chatissa!');
-                        resolve();
-                    } else {
-
-                        // -> If we get here, we are good to go!
-                        utils.downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg', function() {
-                            botApi.sendPhoto(targetId, cfg.webcamDirectory + 'webcam.jpg');
-                            resolve();
-                        });
-                    }
-                }
-            });
+            return resolve();
         }
+
+        db.getUserById(userId)
+        .then(function(user) {
+
+            if (_.isNull(user)) {
+                botApi.sendMessage(userId, 'Sinun täytyy /luotunnus ja käydä /moro ´ttamassa SpänniMobissa saadaksesi /webcam toimimaan!');
+                return resolve();
+            }
+
+            var groupId = (eventIsFromGroup) ? chatGroupId : user.get('primaryGroupId');
+            var targetId = (eventIsFromGroup) ? chatGroupId : userId;
+
+            // check if the command came from an allowedId
+            var msgFromAllowedId = false;
+            for (var group in cfg.allowedGroups) {
+                if (groupId === cfg.allowedGroups[group]) {
+                    msgFromAllowedId = true;
+                }
+            }
+
+            if (!msgFromAllowedId) {
+                botApi.sendMessage(targetId, 'Sinun täytyy käydä /moro ´ttamassa SpänniMobissa saadaksesi /webcam-komennon toimimaan priva-chatissa!');
+                resolve();
+            }
+            else {
+                // -> If we get here, we are good to go!
+                botApi.sendAction(targetId, 'upload_photo');
+                utils.downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg', function() {
+                    botApi.sendPhoto(targetId, cfg.webcamDirectory + 'webcam.jpg');
+                    resolve();
+                });
+            }
+        });
     });
 };
 
@@ -66,7 +64,7 @@ generic.talkAsBotToMainGroup = function(userId, msg) {
 };
 
 generic.help = function(userId) {
-    
+
     var msg = '\
     Moro! Olen Spinnin oma Telegram-botti, näin kavereiden kesken BorisBot.\
     Pääset alkuun kirjoittamalla minulle /luotunnus ja käy sen jälkeen /moro ´ttamassa\

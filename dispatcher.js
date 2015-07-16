@@ -91,12 +91,10 @@ module.exports = function dispatchTelegramEvent(msg) {
                     resolve();
                 });
             break;
-            
-            case '/help':
 
+            case '/help':
                 generic.help(userId);
                 resolve();
-
             break;
 
             // # "Histogram" - returns visualization from drink log data.
@@ -119,7 +117,7 @@ module.exports = function dispatchTelegramEvent(msg) {
 
                 generic.webcam(userId, chatGroupId, eventIsFromGroup)
                 .then(resolve);
-                
+
             break;
 
             // Add new user to 'user'-table
