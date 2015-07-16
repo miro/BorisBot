@@ -94,7 +94,8 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
 
                         if (drinksToday % 10 === 0) {
                             controller.getGroupStatusReport(primaryGroupId).then(function (statusReport) {
-                                var groupMsg = userName + ' kellotti ryhmän ' + drinksToday + '. juoman tälle päivälle!\n';
+                                var groupMsg = userName + ' kellotti ryhmän ' + drinksToday + '. juoman tälle päivälle!\n\n';
+                                groupMsg += emoji.get(':top:') + 'Tilanne:\n';
                                 groupMsg += statusReport;
 
                                 botApi.sendMessage(primaryGroupId, groupMsg);
