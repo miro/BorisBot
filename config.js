@@ -43,6 +43,9 @@ cfg.allowedGroups = {
     mainChatId: -8573374, // "SpänniMobi"
 };
 
+// List of users who can execute "admin only" commands
+cfg.adminUsers = [24175254, 100100780];
+
 cfg.ignoredUsers = [50446519]; // users whom commands are ignored
 
 // Port which the Boris server will listen to

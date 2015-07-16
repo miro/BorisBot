@@ -52,6 +52,19 @@ generic.webcam = function(userId, chatGroupId, eventIsFromGroup) {
     });
 };
 
+// Admin only!
+generic.talkAsBotToMainGroup = function(userId, msg) {
+    // lazy version which talks to "main group" as a bot
+    // TODO: convert this with a more generic one after we have info about groups
+    // on the database
+    if (utils.userIsAdmin((userId))) {
+        botApi.sendMessage(cfg.allowedGroups.mainChatId, msg);
+    }
+    else {
+        console.log('Non-admin tried to talk as Boris!');
+    }
+};
+
 generic.help = function(userId) {
     
     var msg = '\

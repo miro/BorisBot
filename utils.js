@@ -1,6 +1,8 @@
 var request     = require('request');
 var fs          = require('fs');
 
+var cfg         = require('./config');
+
 
 var utils = {};
 
@@ -13,6 +15,8 @@ utils.downloadFile = function(uri, filename, callback) {
     });
 };
 
-
+utils.userIsAdmin = function(userId) {
+    return cfg.adminUsers.indexOf(parseInt(userId, 10)) >= 0;
+};
 
 module.exports = utils;

@@ -162,6 +162,11 @@ module.exports = function dispatchTelegramEvent(msg) {
                 .then(resolve);
             break;
 
+            case '/bottalk':
+                generic.talkAsBotToMainGroup(userId, userCommandParams);
+                resolve();
+            break;
+
             case '/promillet':
             case '/promille':
                 if (eventIsFromGroup) {
