@@ -59,17 +59,18 @@ module.exports = function dispatchTelegramEvent(msg) {
 
         // Dispatch!
         switch (userCommand) {
-            case '/kalja':
+            
             case '/kippis':
                 drinkController.showDrinkKeyboard(userId, eventIsFromGroup)
                 .then(resolve);
             break;
 
             // Drink logging commands - works only on private
+            case '/kalja':
             case emoji.get(':beer:'):
             case emoji.get(':wine_glass:'):
             case emoji.get(':cocktail:'):
-                var drinkType = userCommand + ' ' + userCommandParams
+                var drinkType = (userCommand !== '/kalja') ? userCommand + ' ' + userCommandParams : emoji.get(':beer:') + ' ' + userCommandParams;
                 var drinkValue = 12; // Can be modified later.
                 drinkController.addDrink(msg.message_id, userId, userCallName, drinkType, drinkValue, eventIsFromGroup)
                 .then(resolve);
