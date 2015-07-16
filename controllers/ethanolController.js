@@ -23,7 +23,7 @@ controller.getAlcoholLevel = function(userId) {
         .catch(function(err) {
             // TODO: use Error-objects in here? https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error
             if (err === 'userError') {
-                reject('Käyttäjäsi täytyy olla rekisteröity laskeaksesi promillet!\nVoit tehdä tämän komennolla /addme');
+                reject('Käyttäjäsi täytyy olla rekisteröity laskeaksesi promillet!\nVoit tehdä tämän komennolla /luotunnus');
             }
             else if (err === 'rangeError') {
                 _calculateAlcoholLevel(userId, 5)

@@ -117,7 +117,7 @@ controller.setGroup = function(userId, chatGroupId, chatGroupTitle, messageIsFro
             db.getUserById(userId)
             .then(function(exists) {
                 if (!exists) {
-                    botApi.sendMessage(chatGroupId, 'Käyttäjääsi ei ole vielä luotu botille!\nLuo sellainen komennolla /addme');
+                    botApi.sendMessage(chatGroupId, 'Käyttäjääsi ei ole vielä luotu botille!\nLuo sellainen komennolla /luotunnus');
                     resolve();
                 }
                 else {
