@@ -20,8 +20,6 @@ var controller = {};
 
 
 controller.showDrinkKeyboard = function(userId, eventIsFromGroup) {
-    // TODO: give user instructions if they have not set up account and primaryGroup
-
     var keyboard = [[
         emoji.get(':beer:'), // beer glass
         emoji.get(':wine_glass:'), // wine glass
@@ -69,8 +67,14 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
                     // was this todays first for the user?
                     if (drinksTodayForThisUser === 1) {
                         returnMessage += ' Päivä käyntiin!';
-                        returnMessage += ' (Jos haluat merkata tarkemmin juomiasi, anna käsin jokin näppäimistön';
-                        returnMessage += ' emojeista ja kirjoita juoman nimi perään)';
+                        returnMessage += '\n(Jos haluat merkata tarkemmin juomiasi, anna käsin jokin näppäimistön';
+                        returnMessage += ' emojeista ja kirjoita juoman nimi perään)\n';
+
+                        // Does this user have an account?
+                        if (_.isNull(user)) {
+                            returnMessage += '\n(Tee tunnus /luotunnus-komennolla, niin voin laskea Sinulle arvion';
+                            returnMessage += ' promilletasostasi!)\n';
+                        }
                     }
 
                     // Is there a group title?
