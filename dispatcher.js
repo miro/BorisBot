@@ -109,15 +109,11 @@ module.exports = function dispatchTelegramEvent(msg) {
 
             // Sends image of current state of Spänni's webcam
             // Triggering of this is only possible from the spännimobi group
-            // TODO: allow calling this from a 1on1 chat if user has account & that account
-            // is set to one of the allowed groups
             case '/kerho':
             case '/cam':
             case '/webcam':
-
                 generic.webcam(userId, chatGroupId, eventIsFromGroup)
                 .then(resolve);
-
             break;
 
             // Add new user to 'user'-table

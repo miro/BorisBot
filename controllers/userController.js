@@ -13,8 +13,6 @@ var controller = {};
 
 
 controller.newUserProcess = function(userId, userName, userFirstName, userLastName, userCommandParams) {
-    // TODO add note about uncertainity of the promille level calculations
-
     return new Promise(function(resolve, reject) {
         db.getUserById(userId)
         .then(function(exists) {

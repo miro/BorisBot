@@ -15,15 +15,14 @@ var emoji               = require('node-emoji');
 // set default timezone to bot timezone
 moment.tz.setDefault(cfg.botTimezone);
 
-
 var controller = {};
 
 
 controller.showDrinkKeyboard = function(userId, eventIsFromGroup) {
     var keyboard = [[
-        emoji.get(':beer:'), // beer glass
-        emoji.get(':wine_glass:'), // wine glass
-        emoji.get(':cocktail:'), // coctail glass
+        emoji.get(':beer:'),
+        emoji.get(':wine_glass:'),
+        emoji.get(':cocktail:')
     ]];
 
     var msg = eventIsFromGroup ? 'Kippistele tänne! Älä spämmää ryhmächättiä!' : 'Let\'s festival! Mitä juot?';
