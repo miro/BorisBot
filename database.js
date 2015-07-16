@@ -184,6 +184,14 @@ db.updatePrimaryGroupIdToUser = function(userId, groupId, groupName) {
     });
 };
 
+db.getUsersByPrimaryGroupId = function(chatGroupId) {
+    
+    return schema.collections.Users
+    .query(function(qb) {
+        qb.where({ primaryGroupId: chatGroupId })
+    })
+    .fetch();
+};
 
 db.getUserById = function(userId) {
 

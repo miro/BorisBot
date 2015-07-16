@@ -160,6 +160,11 @@ module.exports = function dispatchTelegramEvent(msg) {
                 generic.talkAsBotToMainGroup(userId, userCommandParams);
                 resolve();
             break;
+            
+            case '/botprivatetalk':
+                generic.talkAsBotToUsersInMainGroup(userId, userCommandParams)
+                .then(resolve);
+            break;
 
             case '/promillet':
             case '/promille':
