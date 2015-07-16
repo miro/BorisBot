@@ -16,13 +16,16 @@ var db = {};
 //
 
 // Add new drink
-db.registerDrink = function(messageId, chatGroupId, drinker, drinkType) {
+db.registerDrink = function(messageId, chatGroupId, drinker, drinkType, drinkValue) {
+
+    var drinkVal = (!_.isNull(drinkValue)) ? drinkValue : 10;
 
     var drink = new schema.models.Drink({
         messageId: messageId,
         chatGroupId: chatGroupId,
         creatorId: drinker,
-        drinkType: drinkType
+        drinkType: drinkType,
+        drinkValue: drinkVal
     })
     .save();
 

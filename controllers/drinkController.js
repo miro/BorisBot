@@ -46,14 +46,14 @@ controller.showDrinkKeyboard = function(userId, eventIsFromGroup) {
 };
 
 
-controller.addDrink = function(messageId, userId, userName, drinkType, eventIsFromGroup) {
+controller.addDrink = function(messageId, userId, userName, drinkType, drinkValue, eventIsFromGroup) {
     return new Promise(function(resolve, reject) {
         if (eventIsFromGroup) resolve(); // ignore
 
         db.getUserById(userId).then(function(user) {
             var primaryGroupId = (user && user.get('primaryGroupId')) ? user.get('primaryGroupId') : null;
 
-            db.registerDrink(messageId, primaryGroupId, userId, drinkType)
+            db.registerDrink(messageId, primaryGroupId, userId, drinkType, drinkValue)
             .then(function() {
                 db.getDrinksSinceTimestamp(_getTresholdMoment(), primaryGroupId)
                 .then(function createReturnMessageFromCollection(drinksCollection) {

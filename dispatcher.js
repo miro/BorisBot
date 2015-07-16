@@ -70,7 +70,8 @@ module.exports = function dispatchTelegramEvent(msg) {
             case emoji.get(':wine_glass:'):
             case emoji.get(':cocktail:'):
                 var drinkType = userCommand + ' ' + userCommandParams
-                drinkController.addDrink(msg.message_id, userId, userCallName, drinkType, eventIsFromGroup)
+                var drinkValue = 12; // Can be modified later.
+                drinkController.addDrink(msg.message_id, userId, userCallName, drinkType, drinkValue, eventIsFromGroup)
                 .then(resolve);
             break;
 
