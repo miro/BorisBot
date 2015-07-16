@@ -1,46 +1,44 @@
 var utils   = require('./utils');
 var cfg     = require('./config');
 var botApi  = require('./botApi');
+var db      = require('./database');
 
 var Promise = require('bluebird');
 var _       = require('lodash');
 
 var generic = {};
 
-generic.webcam = function(chatGroupId, eventIsFromGroup) {
+generic.webcam = function(userId, chatGroupId, eventIsFromGroup) {
     
     return new Promise(function(resolve,reject) {
         if (_.isUndefined(cfg.webcamURL)) {
             botApi.sendMessage(userId, 'Botille ei ole määritetty webcamin osoitetta!');
             resolve();
         } else {
+            
+            db.getUserById(userId)
+            .then(function(user) {
+                
+                var targetId = (eventIsFromGroup) ? chatGroupId : user.get('primaryGroup');
 
-            if (!eventIsFromGroup) {
-                // this command can only be triggered from a group, since this command is
-                // limited to a certain users only, and for now we have no means of finding
-                // out if the person belongs to one of those groups -> calling this personally from
-                // the bot must be denied
-                botApi.sendMessage(userId, 'Komento /webcam on käytössä vain valtuutetuissa ryhmäkeskusteluissa!');
-                resolve();
-            }
-
-            // check if the command came from an allowedGroup
-            var msgFromAllowedGroup = false;
-            for (var group in cfg.allowedGroups) {
-                if (chatGroupId === cfg.allowedGroups[group]) {
-                    msgFromAllowedGroup = true;
+                // check if the command came from an allowedId
+                var msgFromAllowedId = false;
+                for (var group in cfg.allowedGroups) {
+                    if (targetId === cfg.allowedGroups[group]) {
+                        msgFromAllowedId = true;
+                    }
                 }
-            }
 
-            if (!msgFromAllowedGroup) {
-                // unauthorized
-                resolve();
-            }
+                if (!msgFromAllowedId) {
+                    botApi.sendMessage(targetId, 'Sinun täytyy käydä /moro ´ttamassa SpänniMobissa saadaksesi /webcam toimimaan priva-chatissa!');
+                    resolve();
+                }
 
-            // -> If we get here, we are good to go!
-            utils.downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg', function() {
-                botApi.sendPhoto(chatGroupId, cfg.webcamDirectory + 'webcam.jpg');
-                resolve();
+                // -> If we get here, we are good to go!
+                utils.downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg', function() {
+                    botApi.sendPhoto(targetId, cfg.webcamDirectory + 'webcam.jpg');
+                    resolve();
+                });
             });
         }
     });

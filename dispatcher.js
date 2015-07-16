@@ -117,7 +117,7 @@ module.exports = function dispatchTelegramEvent(msg) {
             case '/cam':
             case '/webcam':
 
-                generic.webcam(chatGroupId, eventIsFromGroup)
+                generic.webcam(userId, chatGroupId, eventIsFromGroup)
                 .then(resolve);
                 
             break;
