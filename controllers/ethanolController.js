@@ -92,7 +92,8 @@ var _calculateAlcoholLevel = function(userId, startDaysBefore) {
 var _burnRate = function(weight) {
     var liverBurnRate = 0.1; // 1 gram of ethanol per 10 kg bodymass in one hour
     var otherOrgansBurnRate = (liverBurnRate / 0.94) * 0.06 // 94% from liver, 6% from other organs
-    return (liverBurnRate + otherOrgansBurnRate) * weight // grams per hour
+    var safeParam = 0.90 // Modifies the output to be less than it really is, making final estimates more safe
+    return (liverBurnRate + otherOrgansBurnRate) * safeParam * weight // grams per hour
 };
 
 var _perMil = function(ethGrams, weight, isMale) {
