@@ -29,7 +29,7 @@ controller.newUserProcess = function(userId, userName, userFirstName, userLastNa
                 var isMale = userCommandParams.split(' ')[1];
 
                 if (userCommandParams.split(' ').length !== 2) {
-                    botApi.sendMessage(userId, 'Rekisteröi käyttäjä komennolla /addme <paino> <sukupuoli>');
+                    botApi.sendMessage(userId, 'Rekisteröi käyttäjä komennolla /luotunnus <paino> <sukupuoli>');
                     resolve();
 
                 } else if (_.isNaN(weight) || weight <= 0) {

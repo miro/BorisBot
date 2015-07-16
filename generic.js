@@ -19,26 +19,34 @@ generic.webcam = function(userId, chatGroupId, eventIsFromGroup) {
             db.getUserById(userId)
             .then(function(user) {
                 
-                var targetId = (eventIsFromGroup) ? chatGroupId : user.get('primaryGroup');
+                if (_.isNull(user)) {
+                    botApi.sendMessage(userId, 'Sinun täytyy /luotunnus ja käydä /moro ´ttamassa SpänniMobissa saadaksesi /webcam toimimaan priva-chatissa!');
+                    resolve();
+                } else {
+                
+                    var groupId = (eventIsFromGroup) ? chatGroupId : user.get('primaryGroupId');
+                    var targetId = (eventIsFromGroup) ? chatGroupId : userId;
 
-                // check if the command came from an allowedId
-                var msgFromAllowedId = false;
-                for (var group in cfg.allowedGroups) {
-                    if (targetId === cfg.allowedGroups[group]) {
-                        msgFromAllowedId = true;
+                    // check if the command came from an allowedId
+                    var msgFromAllowedId = false;
+                    for (var group in cfg.allowedGroups) {
+                        if (groupId === cfg.allowedGroups[group]) {
+                            msgFromAllowedId = true;
+                        }
+                    }
+
+                    if (!msgFromAllowedId) {
+                        botApi.sendMessage(targetId, 'Sinun täytyy käydä /moro ´ttamassa SpänniMobissa saadaksesi /webcam toimimaan priva-chatissa!');
+                        resolve();
+                    } else {
+
+                        // -> If we get here, we are good to go!
+                        utils.downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg', function() {
+                            botApi.sendPhoto(targetId, cfg.webcamDirectory + 'webcam.jpg');
+                            resolve();
+                        });
                     }
                 }
-
-                if (!msgFromAllowedId) {
-                    botApi.sendMessage(targetId, 'Sinun täytyy käydä /moro ´ttamassa SpänniMobissa saadaksesi /webcam toimimaan priva-chatissa!');
-                    resolve();
-                }
-
-                // -> If we get here, we are good to go!
-                utils.downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg', function() {
-                    botApi.sendPhoto(targetId, cfg.webcamDirectory + 'webcam.jpg');
-                    resolve();
-                });
             });
         }
     });
