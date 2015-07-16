@@ -69,7 +69,7 @@ generic.talkAsBotToUsersInMainGroup = function(userId, msg) {
 			console.log('Non-admin tried to talk as Boris!');
 			resolve();
 		} else {
-			db.getUsersByPrimaryGroupId(cfg.allowedGroups.testChatId)
+			db.getUsersByPrimaryGroupId(cfg.allowedGroups.mainChatId)
 			.then(function(collection) {
 				_.each(collection.models, function(user) {
 					botApi.sendMessage(user.get('telegramId'), msg);
