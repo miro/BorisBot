@@ -153,6 +153,8 @@ db.getDrinksSinceTimestampSortedForUser = function(userId, timestampMoment) {
 
 // Register new user without primaryGroupId
 db.registerUser = function(id, userName, firstName, lastName, weight, isMale) {
+    
+    if (_.isNull(userName)) {userName = 'tuntematon'};
     var user = new schema.models.User({
         telegramId: id,
         userName: userName,
