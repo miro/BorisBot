@@ -265,7 +265,7 @@ controller.getGroupStatusReport = function(chatGroupId) {
 
                     // Sort list by alcoLevel
                     logArr = _.sortBy(logArr, function(object) {
-                        return object.alcoLevel;
+                        return parseFloat(object.alcoLevel);
                     });
 
                     // Calculate needed padding
