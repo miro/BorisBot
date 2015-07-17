@@ -52,7 +52,15 @@ botApi.sendPhoto = function (chatId, photo, options) {
     request.post(cfg.tgApiUrl + '/sendPhoto', opts);
 };
 
-
+botApi.getUserProfilePhotos = function(userId, offset, limit) {
+    request.post(cfg.tgApiUrl + '/getUserProfilePhotos', {
+        form: {
+            user_id: userId,
+            offset: offset,
+            limit: limit
+        }
+    });
+};
 
 // ## Internal functions
 //
