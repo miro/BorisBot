@@ -115,13 +115,13 @@ controller.setGroup = function(userId, chatGroupId, chatGroupTitle, messageIsFro
             db.getUserById(userId)
             .then(function(exists) {
                 if (!exists) {
-                    botApi.sendMessage(chatGroupId, 'Käyttäjääsi ei ole vielä luotu botille!\nLuo sellainen komennolla /luotunnus');
+                    botApi.sendMessage(chatGroupId, 'Käyttäjääsi ei ole vielä luotu botille!\nLuo sellainen huutamalla minulle privassa /luotunnus');
                     resolve();
                 }
                 else {
                     db.updatePrimaryGroupIdToUser(userId, chatGroupId, chatGroupTitle)
                     .then(function updateOk() {
-                        botApi.sendMessage(chatGroupId, 'Käyttäjätunnuksesi on asetettu kuulumaan tähän ryhmään!');
+                        botApi.sendMessage(chatGroupId, '"Sielusi ratsastaa ikuisesti kera ' + chatGroupTitle + '-urhojen"');
                         resolve();
                     });
                 }

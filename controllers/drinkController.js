@@ -25,7 +25,8 @@ controller.showDrinkKeyboard = function(userId, eventIsFromGroup) {
         emoji.get(':cocktail:')
     ]];
 
-    var msg = eventIsFromGroup ? 'Kippistele tänne! Älä spämmää ryhmächättiä!' : 'Let\'s festival! Mitä juot?';
+    var msg = eventIsFromGroup ? 'Kippistele tänne! Älä spämmää ryhmächättiä!' : 'Let\'s festival! Mitä juot?\n';
+    msg += '(Tämä komento ei lisännyt vielä yhtään juomaa juoduksi.)'
 
     return new Promise(function (resolve, reject) {
         botApi.sendMessage(
@@ -66,13 +67,13 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
                     // was this todays first for the user?
                     if (drinksTodayForThisUser === 1) {
                         returnMessage += ' Päivä käyntiin!';
-                        returnMessage += '\n(Jos haluat merkata tarkemmin juomiasi, anna käsin jokin näppäimistön';
-                        returnMessage += ' emojeista ja kirjoita juoman nimi perään)\n';
+                        returnMessage += '\n\n(Jos haluat merkata tarkemmin juomiasi, anna käsin jokin näppäimistön';
+                        returnMessage += ' emojeista ja kirjoita juoman nimi perään)\n\n';
 
                         // Does this user have an account?
                         if (_.isNull(user)) {
-                            returnMessage += '\n(Tee tunnus /luotunnus-komennolla, niin voin laskea Sinulle arvion';
-                            returnMessage += ' promilletasostasi!)\n';
+                            returnMessage += '\n\n(Tee tunnus /luotunnus-komennolla, niin voin laskea Sinulle arvion';
+                            returnMessage += ' promilletasostasi!)\n\n';
                         }
                     }
 
@@ -82,7 +83,7 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
                     }
                     else {
                         returnMessage += ' Se olikin jo ryhmäsi ' + drinksToday +
-                        '. tälle päivälle, ja ' + drinksTodayForThisUser + '. käyttäjälle ' + userName + '.\n';
+                        '. tälle päivälle, ja Sinulle päivän ' + drinksTodayForThisUser + '.\n';
 
                         // # Notify the group?
                         if (drinksToday === 1) {
@@ -92,7 +93,8 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
 
                         }
 
-                        if (drinksToday % 10 === 0) {
+                        // Tell status report on 5, 10, 20, 30, ....
+                        if (drinksToday % 10 === 0 || drinksToday === 5) {
                             controller.getGroupStatusReport(primaryGroupId).then(function (statusReport) {
                                 var groupMsg = userName + ' kellotti ryhmän ' + drinksToday + '. juoman tälle päivälle!\n\n';
                                 groupMsg += emoji.get(':top:') + 'Tilanne:\n';
@@ -252,7 +254,8 @@ controller.getGroupStatusReport = function(chatGroupId) {
                 .then(function(alcoLevelArr) {
                     var logArr = [];
                     for (var i = 0; i < alcoLevelArr.length; ++i) {
-                        logArr.push({'userName': userArr[i].get('userName'), 'alcoLevel': alcoLevelArr[i]});
+                        var userCallName = userArr[i].get('userName') ? userArr[i].get('userName') : userArr[i].get('firstName');
+                        logArr.push({'userName': userCallName, 'alcoLevel': alcoLevelArr[i]});
                     }
 
                     // Filter users who have alcoLevel > 0
