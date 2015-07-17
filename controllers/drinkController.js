@@ -25,7 +25,8 @@ controller.showDrinkKeyboard = function(userId, eventIsFromGroup) {
         emoji.get(':cocktail:')
     ]];
 
-    var msg = eventIsFromGroup ? 'Kippistele tänne! Älä spämmää ryhmächättiä!' : 'Let\'s festival! Mitä juot?';
+    var msg = eventIsFromGroup ? 'Kippistele tänne! Älä spämmää ryhmächättiä!' : 'Let\'s festival! Mitä juot?\n';
+    msg += '(Tämä komento ei lisännyt vielä yhtään juomaa juoduksi.)'
 
     return new Promise(function (resolve, reject) {
         botApi.sendMessage(
@@ -66,13 +67,13 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
                     // was this todays first for the user?
                     if (drinksTodayForThisUser === 1) {
                         returnMessage += ' Päivä käyntiin!';
-                        returnMessage += '\n(Jos haluat merkata tarkemmin juomiasi, anna käsin jokin näppäimistön';
-                        returnMessage += ' emojeista ja kirjoita juoman nimi perään)\n';
+                        returnMessage += '\n\n(Jos haluat merkata tarkemmin juomiasi, anna käsin jokin näppäimistön';
+                        returnMessage += ' emojeista ja kirjoita juoman nimi perään)\n\n';
 
                         // Does this user have an account?
                         if (_.isNull(user)) {
-                            returnMessage += '\n(Tee tunnus /luotunnus-komennolla, niin voin laskea Sinulle arvion';
-                            returnMessage += ' promilletasostasi!)\n';
+                            returnMessage += '\n\n(Tee tunnus /luotunnus-komennolla, niin voin laskea Sinulle arvion';
+                            returnMessage += ' promilletasostasi!)\n\n';
                         }
                     }
 
@@ -82,7 +83,7 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
                     }
                     else {
                         returnMessage += ' Se olikin jo ryhmäsi ' + drinksToday +
-                        '. tälle päivälle, ja ' + drinksTodayForThisUser + '. käyttäjälle ' + userName + '.\n';
+                        '. tälle päivälle, ja Sinulle päivän ' + drinksTodayForThisUser + '.\n';
 
                         // # Notify the group?
                         if (drinksToday === 1) {
