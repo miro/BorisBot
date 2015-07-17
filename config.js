@@ -70,5 +70,6 @@ cfg.requiredDirectories = [cfg.plotlyDirectory, cfg.webcamDirectory]; // these f
 // URL where webcam image will be downloaded
 cfg.webcamURL = process.env.BORISBOT_WEBCAM_URL;
 
+cfg.googleMapsApi = process.env.BORISBOT_GOOGLEMAPS_API;
 
 module.exports = cfg;

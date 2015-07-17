@@ -11,6 +11,7 @@ var cfg         = require('./config');
 var msgHistory  = require('./messageHistory');
 var scheduler   = require('./scheduler');
 var graph       = require('./graph')
+var googlemaps  = require('./googlemaps');
 
 var app         = express();
 
@@ -100,7 +101,11 @@ request(cfg.tgApiUrl + '/getMe', function (error, res, body) {
 
     console.log('I Am', botName + ' / @' + botUserName);
 });
+
 botApi.sendMessage(cfg.allowedGroups.testChatId, 'Reboot! ' + Date() + '\nWebhook set to ' + cfg.webhookUrl);
+
+// Googlemaps testing
+googlemaps.test();
 
 // Start scheduler
 scheduler.startJobs();
