@@ -1,4 +1,5 @@
 var GoogleMapsAPI = require('googlemaps');
+var Promise       = require('bluebird');
 
 var cfg           = require('../config');
 var utils         = require('../utils');
@@ -11,7 +12,7 @@ controller.publicConfig = {
   key: cfg.googleMapsApi,
 };
 
-controller.params = {
+controller.testparams = {
   center: 'Tampere',
   zoom: 13,
   size: '500x400',
@@ -33,14 +34,17 @@ controller.api = new GoogleMapsAPI(controller.publicConfig);
 //
 
 controller.addLocation = function(userId, longitude, latitude) {
-    db.registerLocation(userId, longitude, latitude)
-    .then(function() {
-        botApi.sendMessage(userId, 'Sijainti kirjattu!');
+    return new Promise(function(resolve,reject) {
+        db.registerLocation(userId, longitude, latitude)
+        .then(function() {
+            botApi.sendMessage(userId, 'Sijainti kirjattu!');
+            resolve();
+        });
     });
 };
 
 controller.test = function() {
-    utils.downloadFile(controller.api.staticMap(controller.params), cfg.googlemapsDirectory + 'map.png', function() {
+    utils.downloadFile(controller.api.staticMap(controller.testparams), cfg.googlemapsDirectory + 'map.png', function() {
         botApi.sendPhoto(100100780, cfg.googlemapsDirectory + 'map.png');
     });
 };

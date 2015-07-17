@@ -190,8 +190,8 @@ module.exports = function dispatchTelegramEvent(msg) {
         // Event is location
         } else if (msg.location) {
             
-            mapController.addLocation(userId, msg.location.longitude, msg.location.latitude);
-            resolve();
+            mapController.addLocation(userId, msg.location.longitude, msg.location.latitude)
+            .then(resolve);
             
         } else {
             console.log('Unknown event!');
