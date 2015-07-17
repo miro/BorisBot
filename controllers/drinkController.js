@@ -93,7 +93,8 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
 
                         }
 
-                        if (drinksToday % 10 === 0) {
+                        // Tell status report on 5, 10, 20, 30, ....
+                        if (drinksToday % 10 === 0 || drinksToday === 5) {
                             controller.getGroupStatusReport(primaryGroupId).then(function (statusReport) {
                                 var groupMsg = userName + ' kellotti ryhmän ' + drinksToday + '. juoman tälle päivälle!\n\n';
                                 groupMsg += emoji.get(':top:') + 'Tilanne:\n';
