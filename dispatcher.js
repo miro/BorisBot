@@ -60,7 +60,12 @@ module.exports = function dispatchTelegramEvent(msg) {
         // Dispatch!
         switch (userCommand) {
             case '/kippis':
+                drinkController.showDrinkKeyboard(userId, eventIsFromGroup)
+                .then(resolve);
+            break;
+
             case '/kalja':
+            case '/juoma':
             case emoji.get(':beer:'):
             case emoji.get(':wine_glass:'):
             case emoji.get(':cocktail:'):
