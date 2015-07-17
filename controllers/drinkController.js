@@ -254,7 +254,8 @@ controller.getGroupStatusReport = function(chatGroupId) {
                 .then(function(alcoLevelArr) {
                     var logArr = [];
                     for (var i = 0; i < alcoLevelArr.length; ++i) {
-                        logArr.push({'userName': userArr[i].get('userName'), 'alcoLevel': alcoLevelArr[i]});
+                        var userCallName = userArr[i].get('userName') ? userArr[i].get('userName') : userArr[i].get('firstName');
+                        logArr.push({'userName': userCallName, 'alcoLevel': alcoLevelArr[i]});
                     }
 
                     // Filter users who have alcoLevel > 0
