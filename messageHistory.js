@@ -6,6 +6,7 @@ module.exports = {
     historySize: 15, // how many message id's will be stored
     history: [], // array of previous messages
     inProgress: {}, // messages currently in "progress"
+    eventCounter: 0, // events succesfully handler
 
 
     // marks the message to be "in progress", returns false if this message
@@ -37,5 +38,11 @@ module.exports = {
         if (this.history.length > this.historySize) {
             this.history.shift();
         }
+
+        this.eventCounter++;
+    },
+
+    getEventCount: function() {
+        return this.eventCounter;
     }
 };
