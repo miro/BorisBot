@@ -26,7 +26,8 @@ controller.showDrinkKeyboard = function(userId, eventIsFromGroup) {
     ]];
 
     var msg = eventIsFromGroup ? 'Kippistele tänne! Älä spämmää ryhmächättiä!' : 'Let\'s festival! Mitä juot?\n';
-    msg += '(Tämä komento ei lisännyt vielä yhtään juomaa juoduksi.)'
+    msg += 'Käytä allaolevaa näppäimistöä merkataksesi juoman, tai anna /kippis <juoman nimi>\n';
+    msg += '(Tämä komento ei lisännyt vielä yhtään juomaa juoduksi.)';
 
     return new Promise(function (resolve, reject) {
         botApi.sendMessage(
@@ -47,6 +48,8 @@ controller.showDrinkKeyboard = function(userId, eventIsFromGroup) {
 controller.addDrink = function(messageId, userId, userName, drinkType, drinkValue, eventIsFromGroup) {
     return new Promise(function(resolve, reject) {
         if (eventIsFromGroup) resolve(); // ignore
+
+        drinkType = drinkType.substr(0, 140); // shorten to fit DB field
 
         db.getUserById(userId).then(function(user) {
             var primaryGroupId = (user && user.get('primaryGroupId')) ? user.get('primaryGroupId') : null;

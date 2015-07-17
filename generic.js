@@ -2,6 +2,7 @@ var utils   = require('./utils');
 var cfg     = require('./config');
 var botApi  = require('./botApi');
 var db      = require('./database');
+var msgs    = require('./messageHistory');
 
 var Promise = require('bluebird');
 var _       = require('lodash');
@@ -78,6 +79,13 @@ generic.talkAsBotToUsersInMainGroup = function(userId, msg) {
 			});
 		}
 	});
+};
+
+generic.commandCount = function(userId) {
+    return new Promise(function(resolve, reject) {
+        botApi.sendMessage(userId, 'Viestejä hanskattu ' + msgs.getEventCount());
+        resolve();
+    });
 };
 
 generic.help = function(userId) {
