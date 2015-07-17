@@ -56,7 +56,18 @@ bookshelf.knex.schema.hasTable('users').then(function(exists) {
     }
 });
 
+bookshelf.knex.schema.hasTable('locations').then(function(exists) {
+    if (!exists) {
+        return bookshelf.knex.schema.createTable('locations', function(t) {
+            t.increments('id').primary();
+            t.timestamp('timestamp').defaultTo(knex.raw('now()'));
 
+            t.integer('creatorId');
+            t.float('longitude');
+            t.float('latitude');
+        });
+    }
+});
 
 // Model definitions
 var models = {};
@@ -68,6 +79,9 @@ models.Expl = bookshelf.Model.extend({
 });
 models.User = bookshelf.Model.extend({
     tableName: 'users'
+});
+models.Location = bookshelf.Model.extend({
+    tableName: 'locations'
 });
 
 
@@ -81,7 +95,9 @@ collections.Expls = bookshelf.Collection.extend({
 collections.Users = bookshelf.Collection.extend({
     model: models.User
 });
-
+collections.Locations = bookshelf.Collection.extend({
+    model: models.Location
+});
 
 module.exports = {
     bookshelf: bookshelf,

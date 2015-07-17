@@ -204,5 +204,28 @@ db.getUserById = function(userId) {
     .fetchOne();
 };
 
+// ## Location related stuff
+//
+
+db.registerLocation = function(id, longitude, latitude) {
+    
+    var location = new schema.models.Location({
+        creatorId: id,
+        longitude: longitude,
+        latitude: latitude
+    })
+    .save();
+    
+    return location;
+};
+
+db.getLocationsSinceTimestampById = function(id, timestamp) {
+    return collections.Locations
+    .query(function(qb) {
+        qb.where({ creatorId: userId })
+        .andWhere('timestamp', '>', timestampMoment.toJSON());
+    })
+    .fetch();
+};
 
 module.exports = db;

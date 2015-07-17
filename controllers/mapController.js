@@ -3,14 +3,15 @@ var GoogleMapsAPI = require('googlemaps');
 var cfg           = require('../config');
 var utils         = require('../utils');
 var botApi        = require('../botApi');
+var db            = require('../database');
 
-var googlemaps = {};
+var controller = {};
 
-googlemaps.publicConfig = {
+controller.publicConfig = {
   key: cfg.googleMapsApi,
 };
 
-googlemaps.params = {
+controller.params = {
   center: 'Tampere',
   zoom: 13,
   size: '500x400',
@@ -26,12 +27,22 @@ googlemaps.params = {
   ],
 };
 
-googlemaps.api = new GoogleMapsAPI(googlemaps.publicConfig);
+controller.api = new GoogleMapsAPI(controller.publicConfig);
 
-googlemaps.test = function() {
-    utils.downloadFile(googlemaps.api.staticMap(googlemaps.params), cfg.googlemapsDirectory + 'map.png', function() {
+// ## Public functions
+//
+
+controller.addLocation = function(userId, longitude, latitude) {
+    db.registerLocation(userId, longitude, latitude)
+    .then(function() {
+        botApi.sendMessage(userId, 'Sijainti kirjattu!');
+    });
+};
+
+controller.test = function() {
+    utils.downloadFile(controller.api.staticMap(controller.params), cfg.googlemapsDirectory + 'map.png', function() {
         botApi.sendPhoto(100100780, cfg.googlemapsDirectory + 'map.png');
     });
 };
 
-module.exports = googlemaps;
+module.exports = controller;
