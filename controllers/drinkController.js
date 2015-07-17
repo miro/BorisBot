@@ -26,7 +26,8 @@ controller.showDrinkKeyboard = function(userId, eventIsFromGroup) {
     ]];
 
     var msg = eventIsFromGroup ? 'Kippistele tänne! Älä spämmää ryhmächättiä!' : 'Let\'s festival! Mitä juot?\n';
-    msg += '(Tämä komento ei lisännyt vielä yhtään juomaa juoduksi.)'
+    msg += 'Käytä allaolevaa näppäimistöä merkataksesi juoman, tai anna /kippis <juoman nimi>\n';
+    msg += '(Tämä komento ei lisännyt vielä yhtään juomaa juoduksi.)';
 
     return new Promise(function (resolve, reject) {
         botApi.sendMessage(

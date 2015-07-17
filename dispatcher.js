@@ -136,8 +136,8 @@ module.exports = function dispatchTelegramEvent(msg) {
             case '/luotunnus':
             case '/start':
                 if (eventIsFromGroup) {
-                    botApi.sendMessage(chatGroupId, 'Keskustellaan aiheesta lisää kahden kesken..');
-                    botApi.sendMessage(userId, 'Rekisteröi käyttäjä komennolla /luotunnus <paino> <sukupuoli>');
+                    botApi.sendMessage(chatGroupId, 'Jutellaan lisää privassa ' + emoji.get(':smirk:'));
+                    botApi.sendMessage(userId, 'Luo käyttäjätunnus komennolla /luotunnus <paino> <sukupuoli>');
                     resolve();
                 }
                 else {
