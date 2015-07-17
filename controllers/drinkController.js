@@ -48,6 +48,8 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
     return new Promise(function(resolve, reject) {
         if (eventIsFromGroup) resolve(); // ignore
 
+        drinkType = drinkType.substr(0, 140); // shorten to fit DB field
+
         db.getUserById(userId).then(function(user) {
             var primaryGroupId = (user && user.get('primaryGroupId')) ? user.get('primaryGroupId') : null;
 
