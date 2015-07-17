@@ -11,7 +11,7 @@ var cfg         = require('./config');
 var msgHistory  = require('./messageHistory');
 var scheduler   = require('./scheduler');
 var graph       = require('./graph')
-var googlemaps  = require('./googlemaps');
+var googlemaps  = require('./controllers/mapController');
 
 var app         = express();
 
