@@ -87,7 +87,7 @@ generic.checkWebcamLightness = function() {
                 
                     // Lights on, check if they were already on
                     if (!generic.webcamLightsOn) {
-                        botApi.sendMessage(cfg.allowedGroups.mainChatId, 'Webcam havaitsi kerholla ihmisiä!');
+                        botApi.sendMessage(cfg.allowedGroups.mainChatId, 'Kerholla räpsähti valot päälle!');
                         generic.webcamLightsOn = true;
                     }
                     resolve();
