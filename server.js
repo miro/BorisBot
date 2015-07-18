@@ -10,7 +10,6 @@ var botApi      = require('./botApi');
 var cfg         = require('./config');
 var msgHistory  = require('./messageHistory');
 var scheduler   = require('./scheduler');
-var graph       = require('./graph')
 
 var app         = express();
 

@@ -6,6 +6,7 @@ var CronJob         = require('cron').CronJob;
 
 var botApi          = require('./botApi');
 var cfg             = require('./config');
+var generic         = require('./generic');
 var drinkController = require('./controllers/drinkController');
 
 // set default timezone to bot timezone
@@ -53,6 +54,15 @@ scheduler.addJob({
         if (daysLeft > 0) {
             botApi.sendMessage(cfg.allowedGroups.mainChatId, 'HUOOOMENTA! Kesäpäiviin aikaa ' + daysLeft + ' päivää!!');
         }
+    },
+    timeZone: cfg.botTimezone
+});
+
+// "If there is lights on at clubroom"
+scheduler.addJob({
+    cronTime: '00 */5 * * * *',
+    onTick: function checkClubRoomStatus() {
+        generic.checkWebcamLightness();
     },
     timeZone: cfg.botTimezone
 });
