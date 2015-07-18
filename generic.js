@@ -1,11 +1,12 @@
-var utils   = require('./utils');
-var cfg     = require('./config');
-var botApi  = require('./botApi');
-var db      = require('./database');
-var msgs    = require('./messageHistory');
+var utils       = require('./utils');
+var cfg         = require('./config');
+var botApi      = require('./botApi');
+var db          = require('./database');
+var msgs        = require('./messageHistory');
 
-var Promise = require('bluebird');
-var _       = require('lodash');
+var Promise     = require('bluebird');
+var _           = require('lodash');
+var getPixels   = require('get-pixels');
 
 var generic = {};
 
@@ -50,6 +51,57 @@ generic.webcam = function(userId, chatGroupId, eventIsFromGroup) {
         });
     });
 };
+
+generic.checkWebcamLightness = function() {
+    return new Promise(function(resolve,reject) {
+        utils.downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg', function() {
+            getPixels(cfg.webcamDirectory + 'webcam.jpg', function(err,pixels) {
+                if (err) {
+                    console.log('Error when getting pixels!');
+                    resolve();
+                    return;
+                }
+                
+                // Notice only every n pixel
+                var n = 4;
+                
+                // Calculate sum of averages
+                var sum = 0;
+                var x = 0;
+                for(var i=0; i<pixels.shape[0]; i+=n) {
+                    for(var j=0; j<pixels.shape[1]; ++j) {
+                        var colorValue = 0;
+                        for(var k=0; k<3; ++k) {
+                            colorValue += parseInt(pixels.get(i,j,k));
+                        };
+                        sum += Math.round(colorValue / 3);
+                        ++x;
+                    };
+                };
+                
+                // Calculate whole average
+                var threshold = Math.round(sum / x);
+                
+                if (threshold > 80) {   // TODO: Explore more specific thresholds
+                
+                    // Lights on, check if they were already on
+                    if (!generic.webcamLightsOn) {
+                        botApi.sendMessage(cfg.allowedGroups.mainChatId, 'Kerholla räpsähti valot päälle!');
+                        generic.webcamLightsOn = true;
+                    }
+                    resolve();
+                } else {
+                        
+                    // Lights off, reset status
+                    generic.webcamLightsOn = false;
+                    resolve();
+                }   
+            });
+        });
+    });
+}
+
+generic.webcamLightsOn = false;
 
 // Admin only!
 generic.talkAsBotToMainGroup = function(userId, msg) {
