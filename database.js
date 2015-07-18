@@ -51,7 +51,7 @@ db.getCount = function(tableName, whereObject, minTimestamp) {
         whereObject = whereObject || {};
 
         var query = schema.bookshelf
-        .knex('drinks')
+        .knex(tableName)
         .where(whereObject);
 
         if (minTimestamp) {
