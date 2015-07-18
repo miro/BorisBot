@@ -63,24 +63,25 @@ generic.webcamLightnessChange = function() {
                     return;
                 }
                 
-                // Generate Uint8Array from average of pixels rgb-values
-                var averageRGBArray = new Uint8Array(pixels.shape[0] * pixels.shape[1]);
-                for(var i=0; i<pixels.shape[0]; ++i) {
+                // Notice only every n pixel
+                var n = 4;
+                
+                // Calculate sum of averages
+                var sum = 0;
+                var x = 0;
+                for(var i=0; i<pixels.shape[0]; i+=n) {
                     for(var j=0; j<pixels.shape[1]; ++j) {
                         var colorValue = 0;
                         for(var k=0; k<3; ++k) {
                             colorValue += parseInt(pixels.get(i,j,k));
                         };
-                        averageRGBArray[i+j*pixels.shape[0]] = Math.round(colorValue / 3);
+                        sum += Math.round(colorValue / 3);
+                        ++x;
                     };
                 };
                 
-                // Calculate total
-                var sum = 0;
-                for(var i=0;i<averageRGBArray.length;i++) {
-                    sum += averageRGBArray[i];
-                }
-                average = Math.round(sum / averageRGBArray.length);
+                // Calculate whole average
+                average = Math.round(sum / x);
                 console.log(average);
                 
                 //TODO: botApi function and explore proper thresholds
