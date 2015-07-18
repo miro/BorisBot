@@ -58,7 +58,7 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
 
             db.registerDrink(messageId, primaryGroupId, userId, drinkType, drinkValue)
             .then(function() {
-                db.getDrinksSinceTimestamp(_getTresholdMoment(), primaryGroupId)
+                db.getDrinksSinceTimestamp(_getTresholdMoment(), { chatGroupId: primaryGroupId })
                 .then(function createReturnMessageFromCollection(drinksCollection) {
 
                     var drinksToday = drinksCollection.models.length;
@@ -126,7 +126,7 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
 controller.getPersonalDrinkLog = function(userId) {
     return new Promise(function (resolve, reject) {
 
-        db.getDrinksSinceTimestampForUser(moment().subtract(2, 'day'), userId)
+        db.getDrinksSinceTimestamp(moment().subtract(2, 'day'), { creatorId: userId })
         .then(function(collection) {
             var message = 'Juomasi viimeisen 48h ajalta:\n';
 
@@ -157,23 +157,21 @@ controller.getPersonalDrinkLog = function(userId) {
 controller.drawGraph = function(userId, chatGroupId, msgIsFromGroup, userCommandParams) {
     return new Promise(function(resolve, reject) {
 
-        var dbFetchFunction = null;
         var targetId = null;
+        var whereObject = {};
 
         if (msgIsFromGroup) {
-            dbFetchTimestampFunction = db.getFirstTimestampForGroup;
-            dbFetchDrinksFunction = db.getGroupDrinkTimesSince;
+            whereObject.chatGroupId = chatGroupId;
             targetId = chatGroupId;
         }
         else {
-            dbFetchTimestampFunction = db.getFirstTimestampForUser;
-            dbFetchDrinksFunction = db.getPersonalDrinkTimesSince;
+            whereObject.creatorId = userId;
             targetId = userId;
         }
 
         botApi.sendAction(targetId, 'upload_photo');
 
-        dbFetchTimestampFunction(targetId)
+        db.getOldest('drinks', whereObject)
         .then(function(result) {
             var startRangeMoment = moment(result[0]['min']);
             var dateRangeParameter = parseInt(userCommandParams.split(' ')[0], 10);
@@ -182,9 +180,14 @@ controller.drawGraph = function(userId, chatGroupId, msgIsFromGroup, userCommand
                 startRangeMoment = moment().subtract(dateRangeParameter,'days')
             }
 
-            dbFetchDrinksFunction(targetId, startRangeMoment)
-            .then(function createHistogramFromData(drinkTimestamps) {
-                graph.makeHistogram(drinkTimestamps, startRangeMoment)
+            db.getDrinksSinceTimestamp(startRangeMoment, whereObject)
+            .then(function createHistogramFromData(drinks) {
+                var timestamps = [];
+                _.each(drinks.models, function(model) {
+                    timestamps.push(moment(model.get('timestamp')));
+                });
+
+                graph.makeHistogram(timestamps, startRangeMoment)
                 .then(function histogramCreatedHandler(plotly) {
                     var destinationFilePath = cfg.plotlyDirectory + 'latestGraph.png';
                     utils.downloadFile(plotly.url + '.png', destinationFilePath, function () {
@@ -230,7 +233,7 @@ controller.getDrinksAmount = function(userId, chatGroupId, chatGroupTitle, targe
 controller.getGroupStatusReport = function(chatGroupId) {
     return new Promise(function (resolve, reject) {
 
-        db.getDrinksSinceTimestamp(moment().subtract(1,'days'), chatGroupId)
+        db.getDrinksSinceTimestamp(moment().subtract(1,'days'), { chatGroupId: chatGroupId })
         .then(function fetchOk(drinkCollection) {
 
             if (drinkCollection.models.length === 0) {

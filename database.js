@@ -32,64 +32,17 @@ db.registerDrink = function(messageId, chatGroupId, drinker, drinkType, drinkVal
     return drink;
 };
 
-db.getDrinksSinceTimestamp = function(timestampMoment, chatGroupId) {
+db.getDrinksSinceTimestamp = function(minTimestamp, whereObject) {
 
     return schema.collections.Drinks
     .query(function(qb) {
-        qb.where('timestamp', '>=', timestampMoment.toJSON());
+        qb.where('timestamp', '>=', minTimestamp.toJSON());
 
-        if (!_.isNull(chatGroupId)) {
-            qb.andWhere({ chatGroupId: chatGroupId });
+        if (whereObject) {
+            qb.andWhere(whereObject);
         }
     })
     .fetch();
-};
-
-db.getDrinksSinceTimestampForUser = function(timestampMoment, userId) {
-    return schema.collections.Drinks
-    .query(function(qb) {
-        qb.where({ creatorId: userId })
-        .andWhere('timestamp', '>=', timestampMoment.toJSON())
-        .orderBy('timestamp');
-    })
-    .fetch()
-};
-
-db.getDrinkOnTimestampForUser = function(userId, timestampMoment) {
-    return schema.collections.Drinks
-    .query(function(qb) {
-        qb.where('timestamp', '=', timestampMoment.toJSON())
-        .andWhere( {creatorId: userId} );
-    })
-    .fetchOne()
-};
-
-db.getPersonalDrinkTimesSince = function(userId, timestamp) {
-    return new Promise(function (resolve, reject) {
-
-        db.getDrinksSinceTimestampForUser(timestamp, userId)
-        .then(function(collection) {
-            var timestamp_arr = [];
-            _.each(collection.models, function(model) {
-                timestamp_arr.push(moment(model.get('timestamp')))
-            });
-            resolve(timestamp_arr);
-        });
-    });
-};
-
-db.getGroupDrinkTimesSince = function(chatGroupId, timestamp) {
-    return new Promise(function (resolve, reject) {
-
-        db.getDrinksSinceTimestamp(timestamp, chatGroupId)
-        .then(function(collection) {
-            var timestamp_arr = [];
-            _.each(collection.models, function(model) {
-                timestamp_arr.push(moment(model.get('timestamp')))
-            });
-            resolve(timestamp_arr);
-        });
-    });
 };
 
 
@@ -116,20 +69,13 @@ db.getCount = function(tableName, whereObject, minTimestamp) {
 };
 
 
-// TODO: unite this and getFristTimestampForGroup by parametrizing isGroup info
-db.getFirstTimestampForUser = function(userId) {
+db.getOldest = function(tableName, whereObject) {
     return schema.bookshelf
-    .knex('drinks')
-    .where( {creatorId: userId} )
+    .knex(tableName)
+    .where(whereObject)
     .min('timestamp')
 };
 
-db.getFirstTimestampForGroup = function(groupId) {
-    return schema.bookshelf
-    .knex('drinks')
-    .where( {chatGroupId: groupId} )
-    .min('timestamp')
-};
 
 db.getLastDrinkBeforeTimestamp = function(userId, timestampMoment) {
     return schema.collections.Drinks
@@ -149,6 +95,7 @@ db.getNextDrinkAfterTimestamp = function(userId, timestampMoment) {
     .fetchOne();
 };
 
+// TODO remove this function?
 db.getDrinksSinceTimestampSortedForUser = function(userId, timestampMoment) {
     return schema.bookshelf
     .knex('drinks')
