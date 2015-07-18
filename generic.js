@@ -81,7 +81,7 @@ generic.webcamLightnessChange = function() {
                 };
                 
                 // Calculate whole average
-                average = Math.round(sum / x);
+                var average = Math.round(sum / x);
                 console.log(average);
                 
                 //TODO: botApi function and explore proper thresholds
