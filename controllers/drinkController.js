@@ -48,6 +48,7 @@ controller.showDrinkKeyboard = function(userId, eventIsFromGroup) {
 
 
 controller.addDrink = function(messageId, userId, userName, drinkType, drinkValue, eventIsFromGroup) {
+    // TODO: don't save chatGroup as part drink
     return new Promise(function(resolve, reject) {
         if (eventIsFromGroup) resolve(); // ignore
 
@@ -263,12 +264,13 @@ controller.getGroupStatusReport = function(chatGroupId) {
                 });
                 Promise.all(alcoLevelPromises)
                 .then(function(alcoLevelArr) {
-                    var logArr = [];
+
+                    var drinkersArray = [];
                     for (var i = 0; i < alcoLevelArr.length; ++i) {
                         var userCallName = users[i].get('userName') ? users[i].get('userName') : users[i].get('firstName');
                         var userIdAsStr = '' + users[i].get('telegramId');
 
-                        logArr.push({
+                        drinkersArray.push({
                             userName: userCallName,
                             alcoLevel: alcoLevelArr[i],
                             drinkCount: drinksByUser[userIdAsStr].length
@@ -276,30 +278,31 @@ controller.getGroupStatusReport = function(chatGroupId) {
                     }
 
                     // Filter users who have alcoLevel > 0
-                    logArr = _.filter(logArr, function(object) {
+                    drinkersArray = _.filter(drinkersArray, function(object) {
                         return object.alcoLevel > 0.00;
                     });
 
-                    if (logArr.length === 0) {
+                    if (drinkersArray.length === 0) {
                         resolve('Ei humaltuneita käyttäjiä.');
                     }
 
                     // Sort list by alcoLevel
-                    logArr = _.sortBy(logArr, function(object) {
+                    drinkersArray = _.sortBy(drinkersArray, function(object) {
                         return parseFloat(object.alcoLevel);
                     });
 
+
                     // Calculate needed padding
-                    var paddingLength = _.max(logArr, function(object) {
+                    var paddingLength = _.max(drinkersArray, function(object) {
                         return object.userName.length;
                     });
                     paddingLength = paddingLength.userName.length + 3;
 
                     // Generate string which goes to message
-                    var log = emoji.get('mens') + ' –--- ' +  emoji.get('chart_with_upwards_trend') +
-                         ' –--- ' + emoji.get('beer') + '/48h\n';
+                    var log = emoji.get('mens') + ' –––– ' +  emoji.get('chart_with_upwards_trend') +
+                         ' –––– ' + '24h/48h\n';
 
-                    _.eachRight(logArr, function(userLog) {
+                    _.eachRight(drinkersArray, function(userLog) {
                         log += _.padRight(userLog.userName, paddingLength, '.') + ' ' + userLog.alcoLevel + ' \u2030';
                         log += ' (' + userLog.drinkCount + ' kpl)\n';
                     });
