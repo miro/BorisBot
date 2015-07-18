@@ -6,6 +6,7 @@ var CronJob         = require('cron').CronJob;
 
 var botApi          = require('./botApi');
 var cfg             = require('./config');
+var generic         = require('./generic');
 var drinkController = require('./controllers/drinkController');
 
 // set default timezone to bot timezone
@@ -54,6 +55,12 @@ scheduler.addJob({
             botApi.sendMessage(cfg.allowedGroups.mainChatId, 'HUOOOMENTA! Kesäpäiviin aikaa ' + daysLeft + ' päivää!!');
         }
     },
+    timeZone: cfg.botTimezone
+});
+
+scheduler.addJob({
+    cronTime: '00 */5 * * * *',
+    onTick: generic.checkWebcamLightness(),
     timeZone: cfg.botTimezone
 });
 
