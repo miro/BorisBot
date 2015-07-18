@@ -243,7 +243,7 @@ controller.getDrinksAmount = function(userId, chatGroupId, chatGroupTitle, targe
 controller.getGroupStatusReport = function(chatGroupId) {
     return new Promise(function (resolve, reject) {
 
-        db.getDrinksSinceTimestamp(moment().subtract(1,'days'), { chatGroupId: chatGroupId })
+        db.getDrinksSinceTimestamp(moment().subtract(2,'days'), { chatGroupId: chatGroupId })
         .then(function fetchOk(drinkCollection) {
 
             if (drinkCollection.models.length === 0) {
