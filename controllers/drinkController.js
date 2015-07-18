@@ -322,7 +322,7 @@ controller.getGroupStatusReport = function(chatGroupId) {
 
                     _.eachRight(drinkersArray, function(userLog) {
                         log += _.padRight(userLog.userName, paddingLength, '.') + ' ' + userLog.alcoLevel + ' \u2030';
-                        log += ' (' + userLog.drinkCount24h + ' kpl / ' + userLog.drinkCount48h + ' kpl)\n';
+                        log += ' (' + userLog.drinkCount24h + ' / ' + userLog.drinkCount48h + ')\n';
                     });
                     resolve(log);
                 })
