@@ -111,7 +111,16 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
                         }
                     }
 
+                    // send the message
                     botApi.sendMessage(userId, returnMessage);
+
+                    // trigger also status report (to discourage users from spamming group chat)
+                    if (!_.isNull(primaryGroupId)) {
+                        controller.getGroupStatusReport(primaryGroupId).then(function(statusReport) {
+                            botApi.sendMessage(userId, '\nRyhmäsi tilanne:\n' + statusReport);
+                        });
+                    }
+
                     resolve(returnMessage);
                 });
             });
