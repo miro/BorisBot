@@ -10,7 +10,8 @@ var botApi      = require('./botApi');
 var cfg         = require('./config');
 var msgHistory  = require('./messageHistory');
 var scheduler   = require('./scheduler');
-var graph       = require('./graph')
+var graph       = require('./graph');
+var generic     = require('./generic');
 
 var app         = express();
 
@@ -101,6 +102,8 @@ request(cfg.tgApiUrl + '/getMe', function (error, res, body) {
     console.log('I Am', botName + ' / @' + botUserName);
 });
 botApi.sendMessage(cfg.allowedGroups.testChatId, 'Reboot! ' + Date() + '\nWebhook set to ' + cfg.webhookUrl);
+
+generic.webcamLightnessChange();
 
 // Start scheduler
 scheduler.startJobs();

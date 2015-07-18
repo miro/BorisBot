@@ -1,11 +1,13 @@
-var utils   = require('./utils');
-var cfg     = require('./config');
-var botApi  = require('./botApi');
-var db      = require('./database');
-var msgs    = require('./messageHistory');
+var utils       = require('./utils');
+var cfg         = require('./config');
+var botApi      = require('./botApi');
+var db          = require('./database');
+var msgs        = require('./messageHistory');
 
-var Promise = require('bluebird');
-var _       = require('lodash');
+var Promise     = require('bluebird');
+var _           = require('lodash');
+var getPixels   = require('get-pixels');
+var ndarray     = require('ndarray');
 
 var generic = {};
 
@@ -50,6 +52,44 @@ generic.webcam = function(userId, chatGroupId, eventIsFromGroup) {
         });
     });
 };
+
+generic.webcamLightnessChange = function() {
+    return new Promise(function(resolve,reject) {
+        utils.downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg', function() {
+            getPixels(cfg.webcamDirectory + 'webcam.jpg', function(err,pixels) {
+                if (err) {
+                    console.log('Error when getting pixels!');
+                    resolve();
+                    return;
+                }
+                
+                // Generate Uint8Array from average of pixels rgb-values
+                var averageRGBArray = new Uint8Array(pixels.shape[0] * pixels.shape[1]);
+                for(var i=0; i<pixels.shape[0]; ++i) {
+                    for(var j=0; j<pixels.shape[1]; ++j) {
+                        var colorValue = 0;
+                        for(var k=0; k<3; ++k) {
+                            colorValue += parseInt(pixels.get(i,j,k));
+                        };
+                        averageRGBArray[i+j*pixels.shape[0]] = Math.round(colorValue / 3);
+                    };
+                };
+                
+                // Calculate total
+                var sum = 0;
+                for(var i=0;i<averageRGBArray.length;i++) {
+                    sum += averageRGBArray[i];
+                }
+                average = Math.round(sum / averageRGBArray.length);
+                console.log(average);
+                
+                //TODO: botApi function and explore proper thresholds
+                
+                resolve();
+            });
+        });
+    });
+}
 
 // Admin only!
 generic.talkAsBotToMainGroup = function(userId, msg) {
