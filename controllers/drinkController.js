@@ -48,6 +48,7 @@ controller.showDrinkKeyboard = function(userId, eventIsFromGroup) {
 
 
 controller.addDrink = function(messageId, userId, userName, drinkType, drinkValue, eventIsFromGroup) {
+    // TODO: don't save chatGroup as part drink
     return new Promise(function(resolve, reject) {
         if (eventIsFromGroup) resolve(); // ignore
 
@@ -58,7 +59,7 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
 
             db.registerDrink(messageId, primaryGroupId, userId, drinkType, drinkValue)
             .then(function() {
-                db.getDrinksSinceTimestamp(_getTresholdMoment(), primaryGroupId)
+                db.getDrinksSinceTimestamp(_getTresholdMoment(), { chatGroupId: primaryGroupId })
                 .then(function createReturnMessageFromCollection(drinksCollection) {
 
                     var drinksToday = drinksCollection.models.length;
@@ -110,7 +111,16 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
                         }
                     }
 
+                    // send the message
                     botApi.sendMessage(userId, returnMessage);
+
+                    // trigger also status report (to discourage users from spamming group chat)
+                    if (!_.isNull(primaryGroupId)) {
+                        controller.getGroupStatusReport(primaryGroupId).then(function(statusReport) {
+                            botApi.sendMessage(userId, '\nRyhmäsi tilanne:\n' + statusReport);
+                        });
+                    }
+
                     resolve(returnMessage);
                 });
             });
@@ -126,7 +136,7 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
 controller.getPersonalDrinkLog = function(userId) {
     return new Promise(function (resolve, reject) {
 
-        db.getDrinksSinceTimestampForUser(moment().subtract(2, 'day'), userId)
+        db.getDrinksSinceTimestamp(moment().subtract(2, 'day'), { creatorId: userId })
         .then(function(collection) {
             var message = 'Juomasi viimeisen 48h ajalta:\n';
 
@@ -157,23 +167,21 @@ controller.getPersonalDrinkLog = function(userId) {
 controller.drawGraph = function(userId, chatGroupId, msgIsFromGroup, userCommandParams) {
     return new Promise(function(resolve, reject) {
 
-        var dbFetchFunction = null;
         var targetId = null;
+        var whereObject = {};
 
         if (msgIsFromGroup) {
-            dbFetchTimestampFunction = db.getFirstTimestampForGroup;
-            dbFetchDrinksFunction = db.getGroupDrinkTimesSince;
+            whereObject.chatGroupId = chatGroupId;
             targetId = chatGroupId;
         }
         else {
-            dbFetchTimestampFunction = db.getFirstTimestampForUser;
-            dbFetchDrinksFunction = db.getPersonalDrinkTimesSince;
+            whereObject.creatorId = userId;
             targetId = userId;
         }
 
         botApi.sendAction(targetId, 'upload_photo');
 
-        dbFetchTimestampFunction(targetId)
+        db.getOldest('drinks', whereObject)
         .then(function(result) {
             var startRangeMoment = moment(result[0]['min']);
             var dateRangeParameter = parseInt(userCommandParams.split(' ')[0], 10);
@@ -182,9 +190,14 @@ controller.drawGraph = function(userId, chatGroupId, msgIsFromGroup, userCommand
                 startRangeMoment = moment().subtract(dateRangeParameter,'days')
             }
 
-            dbFetchDrinksFunction(targetId, startRangeMoment)
-            .then(function createHistogramFromData(drinkTimestamps) {
-                graph.makeHistogram(drinkTimestamps, startRangeMoment)
+            db.getDrinksSinceTimestamp(startRangeMoment, whereObject)
+            .then(function createHistogramFromData(drinks) {
+                var timestamps = [];
+                _.each(drinks.models, function(model) {
+                    timestamps.push(moment(model.get('timestamp')));
+                });
+
+                graph.makeHistogram(timestamps, startRangeMoment)
                 .then(function histogramCreatedHandler(plotly) {
                     var destinationFilePath = cfg.plotlyDirectory + 'latestGraph.png';
                     utils.downloadFile(plotly.url + '.png', destinationFilePath, function () {
@@ -230,7 +243,7 @@ controller.getDrinksAmount = function(userId, chatGroupId, chatGroupTitle, targe
 controller.getGroupStatusReport = function(chatGroupId) {
     return new Promise(function (resolve, reject) {
 
-        db.getDrinksSinceTimestamp(moment().subtract(1,'days'), chatGroupId)
+        db.getDrinksSinceTimestamp(moment().subtract(1,'days'), { chatGroupId: chatGroupId })
         .then(function fetchOk(drinkCollection) {
 
             if (drinkCollection.models.length === 0) {
@@ -260,45 +273,56 @@ controller.getGroupStatusReport = function(chatGroupId) {
                 });
                 Promise.all(alcoLevelPromises)
                 .then(function(alcoLevelArr) {
-                    var logArr = [];
+
+                    var drinkersArray = [];
                     for (var i = 0; i < alcoLevelArr.length; ++i) {
                         var userCallName = users[i].get('userName') ? users[i].get('userName') : users[i].get('firstName');
                         var userIdAsStr = '' + users[i].get('telegramId');
 
-                        logArr.push({
+                        // count drinks from the last 24h
+                        var drinkCount24h = 0;
+                        var minMoment = moment().subtract(1, 'day');
+                        _.each(drinksByUser[userIdAsStr], function(drinkModel) {
+                            if (minMoment.isBefore(moment(drinkModel.get('timestamp')))) {
+                                drinkCount24h++;
+                            }
+                        });
+
+                        drinkersArray.push({
                             userName: userCallName,
                             alcoLevel: alcoLevelArr[i],
-                            drinkCount: drinksByUser[userIdAsStr].length
+                            drinkCount48h: drinksByUser[userIdAsStr].length,
+                            drinkCount24h: drinkCount24h
                         });
                     }
 
                     // Filter users who have alcoLevel > 0
-                    logArr = _.filter(logArr, function(object) {
+                    drinkersArray = _.filter(drinkersArray, function(object) {
                         return object.alcoLevel > 0.00;
                     });
 
-                    if (logArr.length === 0) {
+                    if (drinkersArray.length === 0) {
                         resolve('Ei humaltuneita käyttäjiä.');
                     }
 
                     // Sort list by alcoLevel
-                    logArr = _.sortBy(logArr, function(object) {
+                    drinkersArray = _.sortBy(drinkersArray, function(object) {
                         return parseFloat(object.alcoLevel);
                     });
 
                     // Calculate needed padding
-                    var paddingLength = _.max(logArr, function(object) {
+                    var paddingLength = _.max(drinkersArray, function(object) {
                         return object.userName.length;
                     });
                     paddingLength = paddingLength.userName.length + 3;
 
                     // Generate string which goes to message
-                    var log = emoji.get('mens') + ' –--- ' +  emoji.get('chart_with_upwards_trend') +
-                         ' –--- ' + emoji.get('beer') + '/48h\n';
+                    var log = emoji.get('mens') + ' –––– ' +  emoji.get('chart_with_upwards_trend') +
+                         ' –––– ' + '(24h/48h)\n';
 
-                    _.eachRight(logArr, function(userLog) {
+                    _.eachRight(drinkersArray, function(userLog) {
                         log += _.padRight(userLog.userName, paddingLength, '.') + ' ' + userLog.alcoLevel + ' \u2030';
-                        log += ' (' + userLog.drinkCount + ' kpl)\n';
+                        log += ' (' + userLog.drinkCount24h + ' kpl / ' + userLog.drinkCount48h + ' kpl)\n';
                     });
                     resolve(log);
                 })
