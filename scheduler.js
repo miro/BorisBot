@@ -58,9 +58,12 @@ scheduler.addJob({
     timeZone: cfg.botTimezone
 });
 
+// "If there is lights on at clubroom"
 scheduler.addJob({
     cronTime: '00 */5 * * * *',
-    onTick: generic.checkWebcamLightness(),
+    onTick: function checkClubRoomStatus() {
+        generic.checkWebcamLightness();
+    },
     timeZone: cfg.botTimezone
 });
 
