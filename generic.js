@@ -53,7 +53,7 @@ generic.webcam = function(userId, chatGroupId, eventIsFromGroup) {
     });
 };
 
-generic.webcamLightnessChange = function() {
+generic.checkWebcamLightness = function() {
     return new Promise(function(resolve,reject) {
         utils.downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg', function() {
             getPixels(cfg.webcamDirectory + 'webcam.jpg', function(err,pixels) {
@@ -81,16 +81,28 @@ generic.webcamLightnessChange = function() {
                 };
                 
                 // Calculate whole average
-                var average = Math.round(sum / x);
-                console.log(average);
+                var threshold = Math.round(sum / x);
                 
-                //TODO: botApi function and explore proper thresholds
+                if (threshold > 80) {   // TODO: Explore more specific thresholds
                 
-                resolve();
+                    // Lights on, check if they were already on
+                    if (!generic.webcamLightsOn) {
+                        botApi.sendMessage(cfg.allowedGroups.mainChatId, 'Webcam havaitsi kerholla ihmisiä!');
+                        generic.webcamLightsOn = true;
+                    }
+                    resolve();
+                } else {
+                        
+                    // Lights off, reset status
+                    generic.webcamLightsOn = false;
+                    resolve();
+                }   
             });
         });
     });
 }
+
+generic.webcamLightsOn = false;
 
 // Admin only!
 generic.talkAsBotToMainGroup = function(userId, msg) {
