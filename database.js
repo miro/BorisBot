@@ -93,16 +93,28 @@ db.getGroupDrinkTimesSince = function(chatGroupId, timestamp) {
 };
 
 
-db.getTotalDrinksAmount = function() {
-    return schema.bookshelf.knex('drinks').count('id');
+db.getCount = function(tableName, whereObject, minTimestamp) {
+    return new Promise(function(resolve, reject) {
+        whereObject = whereObject || {};
+
+        var query = schema.bookshelf
+        .knex('drinks')
+        .where(whereObject);
+
+        if (minTimestamp) {
+            query.where('timestamp', '>=', minTimestamp);
+        }
+
+        // execute
+        query.count('id')
+        .then(function(result) {
+            console.log(result);
+            resolve(result[0].count);
+        })
+        .error(reject);
+    });
 };
 
-db.getTotalDrinksAmountForGroup = function(groupId) {
-    return schema.bookshelf
-    .knex('drinks')
-    .where({ chatGroupId: groupId })
-    .count('id');
-};
 
 // TODO: unite this and getFristTimestampForGroup by parametrizing isGroup info
 db.getFirstTimestampForUser = function(userId) {
@@ -186,7 +198,7 @@ db.updatePrimaryGroupIdToUser = function(userId, groupId, groupName) {
 };
 
 db.getUsersByPrimaryGroupId = function(chatGroupId) {
-    
+
     return schema.collections.Users
     .query(function(qb) {
         qb.where({ primaryGroupId: chatGroupId })

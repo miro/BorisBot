@@ -1,7 +1,7 @@
 BorisBot
 =========
 
-for-the-lulz -based [Telegram Bot](https://telegram.org/blog/bot-revolution). Currently capable of keeping track of your & your Telegram group's drink consumption. Talks only Finnish at the moment.
+for-the-lulz -based [Telegram Bot](https://telegram.org/blog/bot-revolution). Currently capable of keeping track of your & your Telegram group's drink consumption. Talks only Finnish at the moment. See some of the available commands from [here](commands.md)
 
 This repository consists of NodeJS web server, which subscribes and understands events `POST`ed by [Telegram Bot API](https://core.telegram.org/bots/api)'s webhook. In order to get the events of your bot to this backend, you must expose this server to the Intertubes.
 

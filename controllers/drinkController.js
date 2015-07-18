@@ -17,6 +17,8 @@ moment.tz.setDefault(cfg.botTimezone);
 
 var controller = {};
 
+// TODO: announce when % 100 breaks in group
+
 
 controller.showDrinkKeyboard = function(userId, eventIsFromGroup) {
     var keyboard = [[
@@ -197,21 +199,28 @@ controller.drawGraph = function(userId, chatGroupId, msgIsFromGroup, userCommand
 
 
 controller.getDrinksAmount = function(userId, chatGroupId, chatGroupTitle, targetIsGroup) {
-    // TODO "joista x viimeisen tunnin aikana"?
-
     return new Promise(function (resolve, reject) {
          if (targetIsGroup) {
-            db.getTotalDrinksAmountForGroup(chatGroupId)
-            .then(function fetchOk(result) {
-                var output = chatGroupTitle + ' on tuhonnut yhteensä ' + result[0].count + ' juomaa!';
+
+            var dbFetches = [];
+
+            // all-time drinks for group
+            dbFetches.push(db.getCount('drinks', { chatGroupId: chatGroupId }));
+            dbFetches.push(db.getCount('drinks', { chatGroupId: chatGroupId }, moment().subtract(1, 'days').toJSON()));
+            dbFetches.push(db.getCount('drinks', { chatGroupId: chatGroupId }, moment().subtract(2, 'days').toJSON()));
+
+            Promise.all(dbFetches).then(function fetchOk(counts) {
+                var output = chatGroupTitle + ' on tuhonnut yhteensä ' + counts[0] + ' juomaa, joista ';
+                output += counts[1] + ' viimeisen 24h aikana ja ' + counts[2] + ' viimeisen 48h aikana.';
+
                 botApi.sendMessage(chatGroupId, output);
                 resolve();
             });
         }
         else {
-            db.getTotalDrinksAmount()
-            .then(function fetchOk(result) {
-                botApi.sendMessage(userId, 'Kaikenkaikkiaan juotu ' + result[0].count + ' juomaa');
+            db.getCount('drinks')
+            .then(function fetchOk(drinkCount) {
+                botApi.sendMessage(userId, 'Kaikenkaikkiaan juotu ' + drinkCount + ' juomaa');
                 resolve();
             });
         }
@@ -222,43 +231,45 @@ controller.getGroupStatusReport = function(chatGroupId) {
     return new Promise(function (resolve, reject) {
 
         db.getDrinksSinceTimestamp(moment().subtract(1,'days'), chatGroupId)
-        .then(function fetchOk(collection) {
+        .then(function fetchOk(drinkCollection) {
 
-            if (collection.models.length === 0) {
+            if (drinkCollection.models.length === 0) {
                 resolve('Ei humaltuneita käyttäjiä.');
             }
 
-            var lastUsersId = [];
-            var userId;
-
-            _.each(collection.models, function(model) {
-                userId = model.get('creatorId');
-                if (_.indexOf(lastUsersId, userId) === -1) {
-                    lastUsersId.push(userId);
-                }
+            var drinksByUser = _.groupBy(drinkCollection.models, function(model) {
+                return model.get('creatorId');
             });
 
-            var userPromises = [];
-            _.each(lastUsersId, function(userId) {
-                userPromises.push(db.getUserById(userId))
+            // Create DB fetch for each of these users
+            var userAccountPromises = [];
+            _.each(drinksByUser, function(drink, userId) {
+                userAccountPromises.push(db.getUserById(userId));
             });
 
-            Promise.all(userPromises)
-            .then(function(userArr) {
+            Promise.all(userAccountPromises)
+            .then(function(users) {
 
                 // Remove unregistered users
-                userArr = _.compact(userArr);
+                users = _.compact(users);
 
+                // Calculate alcohol level for each user
                 var alcoLevelPromises = [];
-                _.each(userArr, function(user) {
+                _.each(users, function(user) {
                      alcoLevelPromises.push(ethanolController.getAlcoholLevel(user.get('telegramId')));
                 });
                 Promise.all(alcoLevelPromises)
                 .then(function(alcoLevelArr) {
                     var logArr = [];
                     for (var i = 0; i < alcoLevelArr.length; ++i) {
-                        var userCallName = userArr[i].get('userName') ? userArr[i].get('userName') : userArr[i].get('firstName');
-                        logArr.push({'userName': userCallName, 'alcoLevel': alcoLevelArr[i]});
+                        var userCallName = users[i].get('userName') ? users[i].get('userName') : users[i].get('firstName');
+                        var userIdAsStr = '' + users[i].get('telegramId');
+
+                        logArr.push({
+                            userName: userCallName,
+                            alcoLevel: alcoLevelArr[i],
+                            drinkCount: drinksByUser[userIdAsStr].length
+                        });
                     }
 
                     // Filter users who have alcoLevel > 0
@@ -282,13 +293,17 @@ controller.getGroupStatusReport = function(chatGroupId) {
                     paddingLength = paddingLength.userName.length + 3;
 
                     // Generate string which goes to message
-                    var log = '';
+                    var log = emoji.get('mens') + ' –--- ' +  emoji.get('chart_with_upwards_trend') +
+                         ' –--- ' + emoji.get('beer') + '/48h\n';
+
                     _.eachRight(logArr, function(userLog) {
-                        log += _.padRight(userLog.userName, paddingLength, '.') + ' ' + userLog.alcoLevel + ' \u2030\n';
+                        log += _.padRight(userLog.userName, paddingLength, '.') + ' ' + userLog.alcoLevel + ' \u2030';
+                        log += ' (' + userLog.drinkCount + ' kpl)\n';
                     });
                     resolve(log);
                 })
                 .catch(function(err) {
+                    console.log('ERROR on status report function', err);
                     resolve(err);
                 });
             });
