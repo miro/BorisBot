@@ -103,8 +103,6 @@ request(cfg.tgApiUrl + '/getMe', function (error, res, body) {
 });
 botApi.sendMessage(cfg.allowedGroups.testChatId, 'Reboot! ' + Date() + '\nWebhook set to ' + cfg.webhookUrl);
 
-generic.checkWebcamLightness();
-
 // Start scheduler
 scheduler.startJobs();
 
