@@ -1,9 +1,14 @@
 var cfg             = require('./config');
+
+var Promise         = require('bluebird');
 var request         = require('request');
 var stream          = require('stream');
 var fs              = require('fs');
 var mime            = require('mime');
 var path            = require('path');
+var URL             = require('url');
+
+var requestPromise  = Promise.promisify(request);
 
 var botApi = {};
 
@@ -53,13 +58,12 @@ botApi.sendPhoto = function (chatId, photo, options) {
 };
 
 botApi.getUserProfilePhotos = function(userId, offset, limit) {
-    request.post(cfg.tgApiUrl + '/getUserProfilePhotos', {
-        form: {
-            user_id: userId,
-            offset: offset,
-            limit: limit
-        }
-    });
+    var query = {
+        user_id: userId,
+        offset: offset,
+        limit: limit
+    };
+    return _request('getUserProfilePhotos', {qs: query});
 };
 
 // ## Internal functions
@@ -97,6 +101,27 @@ var _formatSendData = function (type, data) {
         formData: formData,
         file: fileId
     };
+};
+
+var _request = function (path, options) {
+    options = options || {};
+    options.url = URL.format({
+        protocol: 'https',
+        host: 'api.telegram.org',
+        pathname: '/bot'+cfg.tgApiKey+'/'+path
+    });
+    return requestPromise(options)
+    .then(function (resp) {
+        if (resp[0].statusCode !== 200) {
+            throw new Error(resp[0].statusCode+' '+resp[0].body);
+        }
+        var data = JSON.parse(resp[0].body);
+        if (data.ok) {
+            return data.result;
+        } else {
+            throw new Error(data.error_code+' '+data.description);
+        }
+    });
 };
 
 module.exports = botApi;
