@@ -286,7 +286,9 @@ controller.getGroupStatusReport = function(chatGroupId) {
                     paddingLength = paddingLength.userName.length + 3;
 
                     // Generate string which goes to message
-                    var log = '';
+                    var log = emoji.get('mens') + ' –--- ' +  emoji.get('chart_with_upwards_trend') +
+                         ' –--- ' + emoji.get('beer') + '/48h\n';
+
                     _.eachRight(logArr, function(userLog) {
                         log += _.padRight(userLog.userName, paddingLength, '.') + ' ' + userLog.alcoLevel + ' \u2030';
                         log += ' (' + userLog.drinkCount + ' kpl)\n';
@@ -294,6 +296,7 @@ controller.getGroupStatusReport = function(chatGroupId) {
                     resolve(log);
                 })
                 .catch(function(err) {
+                    console.log('ERROR on status report function', err);
                     resolve(err);
                 });
             });
