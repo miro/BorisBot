@@ -77,7 +77,10 @@ module.exports = function dispatchTelegramEvent(msg) {
                 else {
                     // Figure out drinkType
                     var drinkType;
-                    if (userCommand.charAt(0) === '/') {
+                    if (userCommand === '/juoma') {
+                        drinkType = userCommandParams;
+                    }
+                    else if (userCommand.charAt(0) === '/') {
                         // this was a user command
                         drinkType = 'kalja ' + userCommandParams;
                     }
