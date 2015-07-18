@@ -93,13 +93,26 @@ db.getGroupDrinkTimesSince = function(chatGroupId, timestamp) {
 };
 
 
-db.getCount = function(tableName, whereObject) {
-    whereObject = whereObject || {};
+db.getCount = function(tableName, whereObject, minTimestamp) {
+    return new Promise(function(resolve, reject) {
+        whereObject = whereObject || {};
 
-    return schema.bookshelf
-    .knex('drinks')
-    .where(whereObject)
-    .count('id');
+        var query = schema.bookshelf
+        .knex('drinks')
+        .where(whereObject);
+
+        if (minTimestamp) {
+            query.where('timestamp', '>=', minTimestamp);
+        }
+
+        // execute
+        query.count('id')
+        .then(function(result) {
+            console.log(result);
+            resolve(result[0].count);
+        })
+        .error(reject);
+    });
 };
 
 
