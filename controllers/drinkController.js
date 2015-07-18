@@ -203,7 +203,7 @@ controller.getDrinksAmount = function(userId, chatGroupId, chatGroupTitle, targe
 
     return new Promise(function (resolve, reject) {
          if (targetIsGroup) {
-            db.getTotalDrinksAmountForGroup(chatGroupId)
+            db.getCount('drinks', { chatGroupId: chatGroupId })
             .then(function fetchOk(result) {
                 var output = chatGroupTitle + ' on tuhonnut yhteensä ' + result[0].count + ' juomaa!';
                 botApi.sendMessage(chatGroupId, output);
@@ -211,7 +211,7 @@ controller.getDrinksAmount = function(userId, chatGroupId, chatGroupTitle, targe
             });
         }
         else {
-            db.getTotalDrinksAmount()
+            db.getCount('drinks')
             .then(function fetchOk(result) {
                 botApi.sendMessage(userId, 'Kaikenkaikkiaan juotu ' + result[0].count + ' juomaa');
                 resolve();
