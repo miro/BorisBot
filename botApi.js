@@ -18,13 +18,13 @@ botApi.sendMessage = function(chatId, text, replyKeyboard) {
     // Is there a reply keyboard set?
     if (replyKeyboard) {
         data.reply_markup = JSON.stringify(replyKeyboard);
-        // data.force_reply = 'True';
     }
     else {
         data.hide_keyboard = true;
     }
 
     // Send the message to Telegram API
+    console.log(chatId + ' -> "' + text + '"');
     request.post(
         cfg.tgApiUrl + '/sendMessage',
         { form: data }
