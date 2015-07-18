@@ -199,21 +199,28 @@ controller.drawGraph = function(userId, chatGroupId, msgIsFromGroup, userCommand
 
 
 controller.getDrinksAmount = function(userId, chatGroupId, chatGroupTitle, targetIsGroup) {
-    // TODO "joista x viimeisen tunnin aikana"?
-
     return new Promise(function (resolve, reject) {
          if (targetIsGroup) {
-            db.getCount('drinks', { chatGroupId: chatGroupId })
-            .then(function fetchOk(result) {
-                var output = chatGroupTitle + ' on tuhonnut yhteensä ' + result[0].count + ' juomaa!';
+
+            var dbFetches = [];
+
+            // all-time drinks for group
+            dbFetches.push(db.getCount('drinks', { chatGroupId: chatGroupId }));
+            dbFetches.push(db.getCount('drinks', { chatGroupId: chatGroupId }, moment().subtract(1, 'days').toJSON()));
+            dbFetches.push(db.getCount('drinks', { chatGroupId: chatGroupId }, moment().subtract(2, 'days').toJSON()));
+
+            Promise.all(dbFetches).then(function fetchOk(counts) {
+                var output = chatGroupTitle + ' on tuhonnut yhteensä ' + counts[0] + ' juomaa, joista ';
+                output += counts[1] + ' viimeisen 24h aikana ja ' + counts[2] + ' viimeisen 48h aikana.';
+
                 botApi.sendMessage(chatGroupId, output);
                 resolve();
             });
         }
         else {
             db.getCount('drinks')
-            .then(function fetchOk(result) {
-                botApi.sendMessage(userId, 'Kaikenkaikkiaan juotu ' + result[0].count + ' juomaa');
+            .then(function fetchOk(drinkCount) {
+                botApi.sendMessage(userId, 'Kaikenkaikkiaan juotu ' + drinkCount + ' juomaa');
                 resolve();
             });
         }
