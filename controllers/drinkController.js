@@ -270,10 +270,20 @@ controller.getGroupStatusReport = function(chatGroupId) {
                         var userCallName = users[i].get('userName') ? users[i].get('userName') : users[i].get('firstName');
                         var userIdAsStr = '' + users[i].get('telegramId');
 
+                        // count drinks from the last 24h
+                        var drinkCount24h = 0;
+                        var minMoment = moment().subtract(1, 'day');
+                        _.each(drinksByUser[userIdAsStr], function(drinkModel) {
+                            if (minMoment.isBefore(moment(drinkModel.get('timestamp')))) {
+                                drinkCount24h++;
+                            }
+                        });
+
                         drinkersArray.push({
                             userName: userCallName,
                             alcoLevel: alcoLevelArr[i],
-                            drinkCount: drinksByUser[userIdAsStr].length
+                            drinkCount48h: drinksByUser[userIdAsStr].length,
+                            drinkCount24h: drinkCount24h
                         });
                     }
 
@@ -291,7 +301,6 @@ controller.getGroupStatusReport = function(chatGroupId) {
                         return parseFloat(object.alcoLevel);
                     });
 
-
                     // Calculate needed padding
                     var paddingLength = _.max(drinkersArray, function(object) {
                         return object.userName.length;
@@ -300,11 +309,11 @@ controller.getGroupStatusReport = function(chatGroupId) {
 
                     // Generate string which goes to message
                     var log = emoji.get('mens') + ' –––– ' +  emoji.get('chart_with_upwards_trend') +
-                         ' –––– ' + '24h/48h\n';
+                         ' –––– ' + '(24h/48h)\n';
 
                     _.eachRight(drinkersArray, function(userLog) {
                         log += _.padRight(userLog.userName, paddingLength, '.') + ' ' + userLog.alcoLevel + ' \u2030';
-                        log += ' (' + userLog.drinkCount + ' kpl)\n';
+                        log += ' (' + userLog.drinkCount24h + ' kpl / ' + userLog.drinkCount48h + ' kpl)\n';
                     });
                     resolve(log);
                 })
