@@ -86,6 +86,7 @@ generic.checkWebcamLightness = function() {
                 
                     // Lights on, check if they were already on
                     if (!generic.webcamLightsOn) {
+                        console.log('Webcam detected lights at clubroom, threshold: ' + threshold);
                         botApi.sendMessage(cfg.allowedGroups.mainChatId, 'Kerholla räpsähti valot päälle!');
                         generic.webcamLightsOn = true;
                     }
