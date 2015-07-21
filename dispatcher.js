@@ -182,6 +182,11 @@ module.exports = function dispatchTelegramEvent(msg) {
                     }
                 break;
 
+                case '/sijainnit':
+                    mapController.getLocationsForUser(userId,12)
+                    .then(resolve);
+                break;
+                
                 default:
                     console.log('! Unknown command', msg.text);
                     resolve();

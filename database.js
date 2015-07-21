@@ -219,11 +219,12 @@ db.registerLocation = function(id, longitude, latitude) {
     return location;
 };
 
-db.getLocationsSinceTimestampById = function(id, timestamp) {
-    return collections.Locations
+db.getLocationsSinceTimestampById = function(id, timestampMoment) {
+    return schema.collections.Locations
     .query(function(qb) {
-        qb.where({ creatorId: userId })
-        .andWhere('timestamp', '>', timestampMoment.toJSON());
+        qb.where({ creatorId: id })
+        .andWhere('timestamp', '>', timestampMoment.toJSON())
+        .orderBy('timestamp', 'asc');
     })
     .fetch();
 };
