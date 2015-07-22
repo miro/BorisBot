@@ -24,6 +24,19 @@ var dbConfigs = {
         client: 'postgresql',
         connection: process.env.DATABASE_URL
     }
+    
+    test: {
+        client: 'postgresql',
+        connection: {
+            host: 'localhost',
+            user: 'borisbot',
+            port: 5432,
+            password: 'borisbot',
+            database: 'borisbot_test',
+            charset: 'utf8'
+        },
+        pool: { min: 0, max: 5 }
+    },
 };
 
 // Determine the correct database config
