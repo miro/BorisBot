@@ -20,11 +20,6 @@ var dbConfigs = {
         pool: { min: 0, max: 5 }
     },
 
-    production: {
-        client: 'postgresql',
-        connection: process.env.DATABASE_URL
-    }
-    
     test: {
         client: 'postgresql',
         connection: {
@@ -37,6 +32,12 @@ var dbConfigs = {
         },
         pool: { min: 0, max: 5 }
     },
+    
+    production: {
+        client: 'postgresql',
+        connection: process.env.DATABASE_URL
+    }
+    
 };
 
 // Determine the correct database config

@@ -56,8 +56,6 @@ bookshelf.knex.schema.hasTable('users').then(function(exists) {
     }
 });
 
-
-
 // Model definitions
 var models = {};
 models.Drink = bookshelf.Model.extend({

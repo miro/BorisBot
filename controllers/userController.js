@@ -22,7 +22,7 @@ controller.newUserProcess = function(userId, userName, userFirstName, userLastNa
                 resolve();
             }
             else {
-
+                
                 var weight = parseInt(userCommandParams.split(' ')[0],10);
                 var isMale = userCommandParams.split(' ')[1];
 
