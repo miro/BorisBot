@@ -154,6 +154,8 @@ generic.help = function(userId) {
     Jos annat komennon perään positiivisen numeron, rajaan kuvaajan\
     leveyden olemaan kyseisen numeron verran päiviä.\
     \n\
+    \n/kahvi - Kirjaan nauttimasi kupillisen tietokantaani.\
+    \n\
     \n/kippis - Kirjaan kilistelemäsi juoman ylös ja käytän sitä\
     myöhemmin erilaisiin toimintoihini.\
     \n\
