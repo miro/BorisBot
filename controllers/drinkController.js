@@ -94,33 +94,29 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
                                 returnMessage += ' promilletasostasi!)\n\n';
                             }
                         }
-
+                    
                         // Is there a group title?
-                        if (_.isNull(primaryGroupId) && drinksTodayForThisUser > 1) {
+                        if (_.isNull(primaryGroupId)) {
                             returnMessage += ' Se olikin jo ' + drinksTodayForThisUser + '. tälle päivälle.\n';
-                        }
-                        else {
+                        } else {
                             returnMessage += ' Se olikin jo ryhmäsi ' + drinksToday +
                             '. tälle päivälle, ja Sinulle päivän ' + drinksTodayForThisUser + '.\n';
-
-                            // # Notify the group?
-                            if (drinksToday === 1) {
-                                // first drink for today!
-                                var groupMsg = userName + ' avasi pelin! ' + drinkType + '!';
-                                botApi.sendMessage(primaryGroupId, groupMsg);
-
-                            }
-
-                            // Tell status report on 5, 10, 20, 30, ....
-                            if (drinksToday % 10 === 0 || drinksToday === 5) {
-                                controller.getGroupAlcoholStatusReport(primaryGroupId).then(function (statusReport) {
-                                    var groupMsg = userName + ' kellotti ryhmän ' + drinksToday + '. juoman tälle päivälle!\n\n';
-                                    groupMsg += emoji.get(':top:') + 'Tilanne:\n';
-                                    groupMsg += statusReport;
-
+                                // # Notify the group?
+                                if (drinksToday === 1) {
+                                    // first drink for today!
+                                    var groupMsg = userName + ' avasi pelin! ' + drinkType + '!';
                                     botApi.sendMessage(primaryGroupId, groupMsg);
-                                });
-                            }
+                                }
+                                // Tell status report on 5, 10, 20, 30, ....
+                                if (drinksToday % 10 === 0 || drinksToday === 5) {
+                                    controller.getGroupAlcoholStatusReport(primaryGroupId).then(function (statusReport) {
+                                        var groupMsg = userName + ' kellotti ryhmän ' + drinksToday + '. juoman tälle päivälle!\n\n';
+                                        groupMsg += emoji.get(':top:') + 'Tilanne:\n';
+                                        groupMsg += statusReport;
+
+                                        botApi.sendMessage(primaryGroupId, groupMsg);
+                                    });
+                                }
                         }
 
                         // send the message
@@ -385,7 +381,7 @@ controller.getGroupAlcoholStatusReport = function(chatGroupId) {
 
 controller.getGroupHotBeveragelStatusReport = function (chatGroupId) {
     return new Promise(function(resolve,reject) {
-        var log = 'Ryhmäsi hörppimät kuumat kupposet:\n- - - - - - - - - - - - - - - - - - - - - - - - - - -\n';
+        var log = 'Ryhmäsi hörppimät kuumat kupposet:\n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n';
         db.getDrinksSinceTimestamp(_getTresholdMoment(6), {drinkValue: 0})
         .then(function fetchOk(collection) {
             
