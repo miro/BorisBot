@@ -106,12 +106,12 @@ module.exports = function dispatchTelegramEvent(msg) {
             break;
 
             case '/kaljoja':
-                drinkController.getDrinksAmount(userId, chatGroupId, chatGroupTitle, eventIsFromGroup, true)
+                drinkController.getDrinksAmount(userId, chatGroupId, chatGroupTitle, eventIsFromGroup, 1)
                 .then(resolve);
             break;
             
             case '/kahveja':
-                drinkController.getDrinksAmount(userId, chatGroupId, chatGroupTitle, eventIsFromGroup, false)
+                drinkController.getDrinksAmount(userId, chatGroupId, chatGroupTitle, eventIsFromGroup, 0)
                 .then(resolve);
             break;
 

@@ -133,12 +133,24 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
                         
                     // Drink was coffee
                     } else if (drinkType === 'coffee') {
-                        controller.getGroupCoffeeStatusReport(primaryGroupId)
-                        .then(function(statusReport) {
-                            botApi.sendMessage(userId, statusReport);
-                            resolve(statusReport);
-                        });
-                        
+                        if (!_.isNull(primaryGroupId)) {
+                            controller.getGroupCoffeeStatusReport(primaryGroupId)
+                            .then(function(statusReport) {
+                                botApi.sendMessage(userId, statusReport);
+                                resolve(statusReport);
+                            });
+                        } else { 
+                            var msg = 'Tänään nauttimasi kahvikupit:\n';
+                            db.getCount('drinks', {creatorId: userId, drinkType: 'coffee'}, _getTresholdMoment(6))
+                            .then(function(count) {
+                                _.times(count, function() {
+                                    msg += emoji.get(':coffee:');
+                                });
+                                msg += '\n\nHuom: Käy /moro ´ttamassa ryhmässä nähdäksesi koko ryhmäsi nauttimat sumpit!';
+                                botApi.sendMessage(userId, msg);
+                                resolve(msg);
+                            });
+                        }
                         
                     // Drink was something non-alcohol and unspecified
                     } else {
@@ -234,18 +246,18 @@ controller.drawGraph = function(userId, chatGroupId, msgIsFromGroup, userCommand
 };
 
 
-controller.getDrinksAmount = function(userId, chatGroupId, chatGroupTitle, targetIsGroup, onlyAlcoholic) {
+controller.getDrinksAmount = function(userId, chatGroupId, chatGroupTitle, targetIsGroup, minDrinkValue) {
     return new Promise(function (resolve, reject) {
         
-        var drinkType = onlyAlcoholic ? 'alkoholillista juomaa' : 'alkoholitonta juomaa';
+        var drinkType = (minDrinkValue > 0) ? 'alkoholillista juomaa' : 'alkoholitonta juomaa';
         if (targetIsGroup) {
 
             var dbFetches = [];
 
             // all-time drinks for group
-            dbFetches.push(db.getCount('drinks', { chatGroupId: chatGroupId }, null, onlyAlcoholic));
-            dbFetches.push(db.getCount('drinks', { chatGroupId: chatGroupId,}, moment().subtract(1, 'days').toJSON(), onlyAlcoholic));
-            dbFetches.push(db.getCount('drinks', { chatGroupId: chatGroupId }, moment().subtract(2, 'days').toJSON(), onlyAlcoholic));
+            dbFetches.push(db.getCount('drinks', { chatGroupId: chatGroupId }, null, minDrinkValue));
+            dbFetches.push(db.getCount('drinks', { chatGroupId: chatGroupId,}, moment().subtract(1, 'days').toJSON(), minDrinkValue));
+            dbFetches.push(db.getCount('drinks', { chatGroupId: chatGroupId }, moment().subtract(2, 'days').toJSON(), minDrinkValue));
 
             Promise.all(dbFetches).then(function fetchOk(counts) {
                 var output = chatGroupTitle + ' on tuhonnut yhteensä ' + counts[0] + ' ' + drinkType + ', joista ';
@@ -256,7 +268,7 @@ controller.getDrinksAmount = function(userId, chatGroupId, chatGroupTitle, targe
             });
         }
         else {
-            db.getCount('drinks', null, null, onlyAlcoholic)
+            db.getCount('drinks', null, null, minDrinkValue)
             .then(function fetchOk(drinkCount) {
                 botApi.sendMessage(userId, 'Kaikenkaikkiaan juotu ' + drinkCount + ' ' + drinkType + '.' );
                 resolve();
