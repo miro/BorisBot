@@ -154,8 +154,14 @@ generic.help = function(userId) {
     Jos annat komennon perään positiivisen numeron, rajaan kuvaajan\
     leveyden olemaan kyseisen numeron verran päiviä.\
     \n\
+    \n/kahvi - Kirjaan nauttimasi kupillisen tietokantaani.\
+    \n\
+    \n/kalja - Kirjaan nauttimasi ohrapirtelön tietokantaani.\
+    \n\
     \n/kippis - Kirjaan kilistelemäsi juoman ylös ja käytän sitä\
     myöhemmin erilaisiin toimintoihini.\
+    \n\
+    \n/kaljoja - Näytän kaikki nautitut alkoholilliset juomat.\
     \n\
     \n/luotunnus - Kirjoitan tietosi muistiin, jotta voin käyttää niitä\
     myöhemmin. Tarvitsen komennon perään myös painosi ja sukupuolesi\
@@ -174,6 +180,10 @@ generic.help = function(userId) {
     luota tulosten olevan täysin realistisia.\
     \n\
     \n/promillet - Tulostan ryhmän tämänhetkiset promilletasot.\
+    \n\
+    \n/tee - Kirjaan nauttimasi kupillisen tietokantaani.\
+    \n\
+    \n/virvokkeita - Näytän kaikki nautitut alkoholittomat juomat.\
     \n\
     \n/webcam - Lähetän tuoreen kuvan Spinnin kerhohuoneelta.\
     ';
