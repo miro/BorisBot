@@ -25,6 +25,10 @@ controller.showDrinkKeyboard = function(userId, eventIsFromGroup) {
         emoji.get(':beer:'),
         emoji.get(':wine_glass:'),
         emoji.get(':cocktail:')
+    ],
+    [
+        emoji.get(':coffee:'),
+        emoji.get(':tea:')
     ]];
 
     var msg = eventIsFromGroup ? 'Kippistele tänne! Älä spämmää ryhmächättiä!' : 'Let\'s festival! Mitä juot?\n';
@@ -131,27 +135,30 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
 
                         resolve(returnMessage);
                         
-                    // Drink was coffee
-                    } else if (drinkType === 'coffee') {
-                        if (!_.isNull(primaryGroupId)) {
-                            controller.getGroupCoffeeStatusReport(primaryGroupId)
-                            .then(function(statusReport) {
-                                botApi.sendMessage(userId, statusReport);
-                                resolve(statusReport);
+                    // Drink was coffee or tea
+                    } else if (drinkType === 'coffee' || drinkType === 'tea') {
+                        var drinkTypeMsg = (drinkType === 'coffee') ? 'kahvikupit' : 'teekupposet';
+                        var msg = 'Tänään nauttimasi ' + drinkTypeMsg + ':\n';
+                        db.getCount('drinks', {creatorId: userId, drinkType: drinkType}, _getTresholdMoment(6))
+                        .then(function(count) {
+                            _.times(count, function() {
+                                msg += emoji.get(':' + drinkType + ':');
                             });
-                        } else { 
-                            var msg = 'Tänään nauttimasi kahvikupit:\n';
-                            db.getCount('drinks', {creatorId: userId, drinkType: 'coffee'}, _getTresholdMoment(6))
-                            .then(function(count) {
-                                _.times(count, function() {
-                                    msg += emoji.get(':coffee:');
+                            msg += '\n\n';
+                            if (!_.isNull(primaryGroupId)) {
+                                controller.getGroupHotBeveragelStatusReport(primaryGroupId)
+                                .then(function(statusReport) {
+                                    msg += statusReport;
+                                    botApi.sendMessage(userId, msg);
+                                    resolve(msg);
                                 });
-                                msg += '\n\nHuom: Käy /moro ´ttamassa ryhmässä nähdäksesi koko ryhmäsi nauttimat sumpit!';
+                            } else {
+                                msg += 'Huom: Käy /moro ´ttamassa ryhmässä nähdäksesi koko ryhmäsi nauttimat kupposet!';
                                 botApi.sendMessage(userId, msg);
                                 resolve(msg);
-                            });
-                        }
-                        
+                            }
+                        });
+                          
                     // Drink was something non-alcohol and unspecified
                     } else {
                         console.log(drinkType);
@@ -376,17 +383,22 @@ controller.getGroupAlcoholStatusReport = function(chatGroupId) {
     });
 };
 
-controller.getGroupCoffeeStatusReport = function (chatGroupId) {
+controller.getGroupHotBeveragelStatusReport = function (chatGroupId) {
     return new Promise(function(resolve,reject) {
-        var log = 'Ryhmäsi hörppimät kahvikupit:\n- - - - - - - - - - - - - - - - - - - - - - - - - - -\n';
-        db.getDrinksSinceTimestamp(_getTresholdMoment(6), {drinkType: 'coffee'})
+        var log = 'Ryhmäsi hörppimät kuumat kupposet:\n- - - - - - - - - - - - - - - - - - - - - - - - - - -\n';
+        db.getDrinksSinceTimestamp(_getTresholdMoment(6), {drinkValue: 0})
         .then(function fetchOk(collection) {
             
-            var coffeesByUser = _.groupBy(collection.models, function(model) {
+            // Filter coffees and teas
+            var beveragesByUser = _.filter(collection.models, function(model) {
+                return model.get('drinkType') === 'coffee' || model.get('drinkType') === 'tea';
+            });
+            
+            beveragesByUser = _.groupBy(collection.models, function(model) {
                 return model.get('creatorId');
             });
             var userAccountPromises = [];
-            _.each(coffeesByUser, function(coffee, userId) {
+            _.each(beveragesByUser, function(coffee, userId) {
                 userAccountPromises.push(db.getUserById(userId));
             });
             Promise.all(userAccountPromises)
@@ -394,8 +406,8 @@ controller.getGroupCoffeeStatusReport = function (chatGroupId) {
                 users = _.compact(users);
                 _.each(users, function(user) {
                     log += user.get('userName') + ': ';
-                    _.each(coffeesByUser[user.get('telegramId')], function(coffee) {
-                        log += emoji.get(':coffee:');
+                    _.each(beveragesByUser[user.get('telegramId')], function(beverage) {
+                        log += emoji.get(':' + beverage.get('drinkType') + ':');
                     });
                     log += '\n';
                 });

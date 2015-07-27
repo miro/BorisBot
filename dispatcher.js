@@ -68,6 +68,12 @@ module.exports = function dispatchTelegramEvent(msg) {
                 .then(resolve);
             break;
             
+            case '/tee':
+            case emoji.get(':tea:'):
+                drinkController.addDrink(msg.message_id, userId, userCallName, 'tea', 0, eventIsFromGroup)
+                .then(resolve);
+            break;
+            
             case '/kippis':
                 drinkController.showDrinkKeyboard(userId, eventIsFromGroup)
                 .then(resolve);
@@ -110,7 +116,7 @@ module.exports = function dispatchTelegramEvent(msg) {
                 .then(resolve);
             break;
             
-            case '/kahveja':
+            case '/virvokkeita':
                 drinkController.getDrinksAmount(userId, chatGroupId, chatGroupTitle, eventIsFromGroup, 0)
                 .then(resolve);
             break;
