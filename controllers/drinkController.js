@@ -84,7 +84,7 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
                     }
 
                     // Is there a group title?
-                    if (_.isNull(primaryGroupId) && drinksTodayForThisUser > 1) {
+                    if (_.isNull(primaryGroupId)) {
                         returnMessage += ' Se olikin jo ' + drinksTodayForThisUser + '. tälle päivälle.\n';
                     }
                     else {
