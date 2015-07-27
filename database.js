@@ -46,7 +46,7 @@ db.getDrinksSinceTimestamp = function(minTimestamp, whereObject) {
 };
 
 
-db.getCount = function(tableName, whereObject, minTimestamp) {
+db.getCount = function(tableName, whereObject, minTimestamp, minDrinkValue) {
     return new Promise(function(resolve, reject) {
         whereObject = whereObject || {};
 
@@ -57,11 +57,12 @@ db.getCount = function(tableName, whereObject, minTimestamp) {
         if (minTimestamp) {
             query.where('timestamp', '>=', minTimestamp);
         }
-
+        if (minDrinkValue) {
+            query.where('drinkValue', '>=', minDrinkValue);
+        }
         // execute
         query.count('id')
         .then(function(result) {
-            console.log(result);
             resolve(result[0].count);
         })
         .error(reject);

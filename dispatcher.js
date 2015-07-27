@@ -59,6 +59,21 @@ module.exports = function dispatchTelegramEvent(msg) {
 
         // Dispatch!
         switch (userCommand) {
+            
+            case '/kahvutti':
+            case '/sumppi':
+            case '/kahvi':
+            case emoji.get(':coffee:'):
+                drinkController.addDrink(msg.message_id, userId, userCallName, 'coffee',  0, eventIsFromGroup)
+                .then(resolve);
+            break;
+            
+            case '/tee':
+            case emoji.get(':tea:'):
+                drinkController.addDrink(msg.message_id, userId, userCallName, 'tea', 0, eventIsFromGroup)
+                .then(resolve);
+            break;
+            
             case '/kippis':
                 drinkController.showDrinkKeyboard(userId, eventIsFromGroup)
                 .then(resolve);
@@ -97,7 +112,12 @@ module.exports = function dispatchTelegramEvent(msg) {
             break;
 
             case '/kaljoja':
-                drinkController.getDrinksAmount(userId, chatGroupId, chatGroupTitle, eventIsFromGroup)
+                drinkController.getDrinksAmount(userId, chatGroupId, chatGroupTitle, eventIsFromGroup, 1)
+                .then(resolve);
+            break;
+            
+            case '/virvokkeita':
+                drinkController.getDrinksAmount(userId, chatGroupId, chatGroupTitle, eventIsFromGroup, 0)
                 .then(resolve);
             break;
 
@@ -194,7 +214,7 @@ module.exports = function dispatchTelegramEvent(msg) {
             case '/promillet':
             case '/promille':
                 if (eventIsFromGroup) {
-                    drinkController.getGroupStatusReport(chatGroupId)
+                    drinkController.getGroupAlcoholStatusReport(chatGroupId)
                     .then(function(msg) {
                         botApi.sendMessage(chatGroupId, msg);
                         resolve();
