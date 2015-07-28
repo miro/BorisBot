@@ -46,6 +46,9 @@ cfg.allowedGroups = {
 // List of users who can execute "admin only" commands
 cfg.adminUsers = [24175254, 100100780];
 
+// List of users who can send messages through bot
+cfg.botTalkUsers = _.union(cfg.adminUsers, [73814886]);
+
 cfg.ignoredUsers = [50446519]; // users whom commands are ignored
 
 // Port which the Boris server will listen to

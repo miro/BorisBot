@@ -104,12 +104,12 @@ generic.checkWebcamLightness = function() {
 
 generic.webcamLightsOn = false;
 
-// Admin only!
+
 generic.talkAsBotToMainGroup = function(userId, msg) {
     // lazy version which talks to "main group" as a bot
     // TODO: convert this with a more generic one after we have info about groups
     // on the database
-    if (utils.userIsAdmin(userId)) {
+    if (_userHaveBotTalkRights(userId)) {
         botApi.sendMessage(cfg.allowedGroups.mainChatId, msg);
     }
     else {
@@ -119,7 +119,7 @@ generic.talkAsBotToMainGroup = function(userId, msg) {
 
 generic.talkAsBotToUsersInMainGroup = function(userId, msg) {
 	return new Promise(function(resolve,reject) {
-        if (!utils.userIsAdmin(userId)) {
+        if (!_userHaveBotTalkRights(userId)) {
 			console.log('Non-admin tried to talk as Boris!');
 			resolve();
 		} else {
@@ -188,6 +188,10 @@ generic.help = function(userId) {
     \n/webcam - Lähetän tuoreen kuvan Spinnin kerhohuoneelta.\
     ';
     botApi.sendMessage(userId, msg);
+};
+
+var _userHaveBotTalkRights = function(userId) {
+    return cfg.botTalkUsers.indexOf(parseInt(userId, 10)) >= 0;
 };
 
 module.exports = generic;
