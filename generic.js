@@ -43,7 +43,8 @@ generic.webcam = function(userId, chatGroupId, eventIsFromGroup) {
             else {
                 // -> If we get here, we are good to go!
                 botApi.sendAction(targetId, 'upload_photo');
-                utils.downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg', function() {
+                utils.downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg')
+                .then(function() {
                     botApi.sendPhoto(targetId, cfg.webcamDirectory + 'webcam.jpg');
                     resolve();
                 });
@@ -54,7 +55,8 @@ generic.webcam = function(userId, chatGroupId, eventIsFromGroup) {
 
 generic.checkWebcamLightness = function() {
     return new Promise(function(resolve,reject) {
-        utils.downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg', function() {
+        utils.downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg')
+        .then(function() {
             getPixels(cfg.webcamDirectory + 'webcam.jpg', function(err,pixels) {
                 if (err) {
                     console.log('Error when getting pixels!');

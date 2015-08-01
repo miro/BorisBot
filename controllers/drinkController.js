@@ -238,7 +238,8 @@ controller.drawGraph = function(userId, chatGroupId, msgIsFromGroup, userCommand
                 graph.makeHistogram(timestamps, startRangeMoment)
                 .then(function histogramCreatedHandler(plotly) {
                     var destinationFilePath = cfg.plotlyDirectory + 'latestGraph.png';
-                    utils.downloadFile(plotly.url + '.png', destinationFilePath, function () {
+                    utils.downloadFile(plotly.url + '.png', destinationFilePath)
+                    .then(function() {
                         botApi.sendPhoto(targetId, destinationFilePath);
                         resolve();
                     });
