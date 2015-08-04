@@ -1,15 +1,16 @@
-var express     = require('express');
-var bodyParser  = require('body-parser');
-var request     = require('request');
-var _           = require('lodash');
-var fs          = require('fs');
-var exec        = require('child_process').exec;
+var express         = require('express');
+var bodyParser      = require('body-parser');
+var request         = require('request');
+var _               = require('lodash');
+var fs              = require('fs');
+var exec            = require('child_process').exec;
 
-var dispatcher  = require('./dispatcher');
-var botApi      = require('./botApi');
-var cfg         = require('./config');
-var msgHistory  = require('./messageHistory');
-var scheduler   = require('./scheduler');
+var dispatcher      = require('./dispatcher');
+var botApi          = require('./botApi');
+var cfg             = require('./config');
+var msgHistory      = require('./messageHistory');
+var scheduler       = require('./scheduler');
+var memeController  = require('./controllers/memeController');
 
 var app         = express();
 
@@ -99,7 +100,11 @@ request(cfg.tgApiUrl + '/getMe', function (error, res, body) {
 
     console.log('I Am', botName + ' / @' + botUserName);
 });
+
 botApi.sendMessage(cfg.allowedGroups.testChatId, 'Reboot! ' + Date() + '\nWebhook set to ' + cfg.webhookUrl);
+
+// Download meme-object
+memeController.getMemes();
 
 // Start scheduler
 scheduler.startJobs();
