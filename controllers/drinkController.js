@@ -420,7 +420,7 @@ controller.sendHotBeverageStatusReportForUser = function(userId) {
         .then(function(model) {
             var primaryGroupId = (_.isNull(model)) ? null : model.get('primaryGroupId');
             if (!_.isNull(primaryGroupId)) {
-                drinkController.getGroupHotBeveragelStatusReport(primaryGroupId)
+                controller.getGroupHotBeveragelStatusReport(primaryGroupId)
                 .then(function(msg) {
                     botApi.sendMessage(userId, msg);
                     resolve();
