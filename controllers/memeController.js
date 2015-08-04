@@ -42,7 +42,7 @@ controller.dispatch = function(userId) {
             });
 
         } else {
-            botApi.sendMessage(userId, 'Meemiä ' + _.startCase(memeType) + ' ei löytynyt!');
+            botApi.sendMessage(userId, 'Meemiä ' + _.startCase(memeType) + ' ei löytynyt! Löydät tuetut meemit komennolla /meemit');
         }
     });
     
