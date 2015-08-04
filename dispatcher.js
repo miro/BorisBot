@@ -11,6 +11,7 @@ var db          = require('./database');
 var botApi      = require('./botApi');
 var utils       = require('./utils');
 var generic     = require('./generic');
+var replys      = require('./replys');
 
 var userController      = require('./controllers/userController');
 var drinkController     = require('./controllers/drinkController');
@@ -52,6 +53,7 @@ module.exports = function dispatchTelegramEvent(msg) {
         }
 
         if (msg.reply_to_message) {
+            replys.eventEmitter.emit(msg.reply_to_message.message_id, msg.text);
             resolve();
             return;
         }
@@ -240,8 +242,8 @@ module.exports = function dispatchTelegramEvent(msg) {
             break;
             
             case '/luomeemi':
-                memeController.dispatch(userId, userCommandParams)
-                .then(resolve);
+                memeController.dispatch(userId, userCommandParams);
+                resolve();
             break;
             
             default:

@@ -11,15 +11,15 @@ var botApi = {};
 // ## Public functions
 //
 
-botApi.sendMessage = function(chatId, text, replyKeyboard) {
+botApi.sendMessage = function(chatId, text, replyMarkupObject) {
     return new Promise(function(resolve, reject) {
         var data = {};
         data.chat_id = chatId;
         data.text = text;
 
-        // Is there a reply keyboard set?
-        if (replyKeyboard) {
-            data.reply_markup = JSON.stringify(replyKeyboard);
+        // Is there a reply markup set?
+        if (replyMarkupObject) {
+            data.reply_markup = JSON.stringify(replyMarkupObject);
         }
         else {
             data.hide_keyboard = true;

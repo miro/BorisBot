@@ -2,6 +2,7 @@ var _       = require('lodash');
 var Promise = require('bluebird');
 var request = require('request');
 
+var replys = require('../replys');
 var cfg     = require('../config');
 var utils   = require('../utils');
 var botApi  = require('../botApi');
@@ -9,27 +10,30 @@ var botApi  = require('../botApi');
 
 var controller = {};
 
-controller.dispatch = function(userId,userParams) {
-    return new Promise(function(resolve,reject) {
-        var memeObject = _getMemeObject(_.startCase(userParams));
+controller.dispatch = function(userId) {
+    replys.sendMessageAndListenForReply(userId, 'Mita meemia haluat kayttaa?')
+    .then(function(memeType) {
+        var memeObject = _getMemeObject(_.startCase(memeType));
         if (!_.isNull(memeObject)) {
-            botApi.sendMessage(userId, 'Mitä meemiä haluat käyttää?')
-            .then(function(msg) {
-                _generateMeme(memeObject.id, 'Bottiin', 'meme-generaattori')
-                .then(function(imageUrl) {
-                    utils.downloadFile(imageUrl, cfg.memeDirectory + 'meme.jpg')
-                    .then(function() {
-                        botApi.sendPhoto(userId, cfg.memeDirectory + 'meme.jpg');
+            replys.sendMessageAndListenForReply(userId, 'Mita laitetaan ylatekstiin?')
+            .then(function(upperText) {
+                replys.sendMessageAndListenForReply(userId, 'Entas alas?')
+                .then(function(bottomText) {
+                    _generateMeme(memeObject.id, upperText, bottomText)
+                    .then(function(imageUrl) {
+                        utils.downloadFile(imageUrl, cfg.memeDirectory + 'meme.jpg')
+                        .then(function() {
+                            botApi.sendPhoto(userId, cfg.memeDirectory + 'meme.jpg');
+                        });
+                    }).catch(function(err) {
+                        botApi.sendMessage(userId, err);
                         resolve();
                     });
-                }).catch(function(err) {
-                    botApi.sendMessage(userId, err);
-                    resolve();
                 });
             });
+
         } else {
             botApi.sendMessage(userId, 'Meemiä ' + _.startCase(userParams) + ' ei löytynyt!');
-            resolve();
         }
     });
 };
