@@ -165,9 +165,14 @@ generic.help = function(userId) {
     \n\
     \n/kaljoja - Näytän kaikki nautitut alkoholilliset juomat.\
     \n\
+    \n/luomeemi - Luon haluamasi meemin haluamillasi teksteillä.\
+    Tuetut meemit saat tietoosi /meemit komennolla.\
+    \n\
     \n/luotunnus - Kirjoitan tietosi muistiin, jotta voin käyttää niitä\
     myöhemmin. Tarvitsen komennon perään myös painosi ja sukupuolesi\
     (lupaan että tietoja ei käytetä kaupallisiin tarkoituksiin).\
+    \n\
+    \n/meemit - Listaan meemi-generaattorissa tuetut meemit.\
     \n\
     \n/moro - Yhdistän käyttäjäsi ryhmään, mistä tämä komento lähetettiin. \
     Tämän avulla voin yhdistää tekemäsi kippikset ryhmän tilastoihin.\
