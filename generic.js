@@ -43,7 +43,8 @@ generic.webcam = function(userId, chatGroupId, eventIsFromGroup) {
             else {
                 // -> If we get here, we are good to go!
                 botApi.sendAction(targetId, 'upload_photo');
-                utils.downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg', function() {
+                utils.downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg')
+                .then(function() {
                     botApi.sendPhoto(targetId, cfg.webcamDirectory + 'webcam.jpg');
                     resolve();
                 });
@@ -54,7 +55,8 @@ generic.webcam = function(userId, chatGroupId, eventIsFromGroup) {
 
 generic.checkWebcamLightness = function() {
     return new Promise(function(resolve,reject) {
-        utils.downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg', function() {
+        utils.downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg')
+        .then(function() {
             getPixels(cfg.webcamDirectory + 'webcam.jpg', function(err,pixels) {
                 if (err) {
                     console.log('Error when getting pixels!');
@@ -161,11 +163,18 @@ generic.help = function(userId) {
     \n/kippis - Kirjaan kilistelemäsi juoman ylös ja käytän sitä\
     myöhemmin erilaisiin toimintoihini.\
     \n\
+    \n/kahvit - Printaan sinulle ryhmäsi tämänhetkisen kahvitilanteen.\
+    \n\
     \n/kaljoja - Näytän kaikki nautitut alkoholilliset juomat.\
+    \n\
+    \n/luomeemi - Luon haluamasi meemin haluamillasi teksteillä.\
+    Tuetut meemit saat tietoosi /meemit komennolla.\
     \n\
     \n/luotunnus - Kirjoitan tietosi muistiin, jotta voin käyttää niitä\
     myöhemmin. Tarvitsen komennon perään myös painosi ja sukupuolesi\
     (lupaan että tietoja ei käytetä kaupallisiin tarkoituksiin).\
+    \n\
+    \n/meemit - Listaan meemi-generaattorissa tuetut meemit.\
     \n\
     \n/moro - Yhdistän käyttäjäsi ryhmään, mistä tämä komento lähetettiin. \
     Tämän avulla voin yhdistää tekemäsi kippikset ryhmän tilastoihin.\

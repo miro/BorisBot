@@ -65,10 +65,15 @@ cfg.webhookUrl = process.env.BORISBOT_PUBLIC_URL + '/api/webhook';
 cfg.plotlyUserName = process.env.BORISBOT_PLOTLY_USERNAME || "BorisBot";
 cfg.plotlyApiKey = process.env.BORISBOT_PLOTLY_APIKEY;
 
+// ImgFlip API configs
+cfg.imgFlipUserName = process.env.BORISBOT_IMGFLIP_USERNAME;
+cfg.imgFlipPassword = process.env.BORISBOT_IMGFLIP_PASSWORD;
+
 // Local directories for data storage
 cfg.plotlyDirectory = './plotly/';
 cfg.webcamDirectory = './webcam/';
-cfg.requiredDirectories = [cfg.plotlyDirectory, cfg.webcamDirectory]; // these folders will be made with mkdir
+cfg.memeDirectory = './memes/';
+cfg.requiredDirectories = [cfg.plotlyDirectory, cfg.webcamDirectory, cfg.memeDirectory]; // these folders will be made with mkdir
 
 // URL where webcam image will be downloaded
 cfg.webcamURL = process.env.BORISBOT_WEBCAM_URL;

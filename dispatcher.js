@@ -11,10 +11,12 @@ var db          = require('./database');
 var botApi      = require('./botApi');
 var utils       = require('./utils');
 var generic     = require('./generic');
+var replys      = require('./replys');
 
 var userController      = require('./controllers/userController');
 var drinkController     = require('./controllers/drinkController');
 var ethanolController   = require('./controllers/ethanolController');
+var memeController      = require('./controllers/memeController');
 
 // set default timezone to bot timezone
 moment.tz.setDefault(cfg.botTimezone);
@@ -50,6 +52,11 @@ module.exports = function dispatchTelegramEvent(msg) {
             return;
         }
 
+        if (msg.reply_to_message) {
+            replys.eventEmitter.emit(msg.reply_to_message.message_id, msg.text);
+            resolve();
+            return;
+        }
 
         // Parse command & possible parameters
         var userInput = msg.text.split(' ');
@@ -71,6 +78,11 @@ module.exports = function dispatchTelegramEvent(msg) {
             case '/tee':
             case emoji.get(':tea:'):
                 drinkController.addDrink(msg.message_id, userId, userCallName, 'tea', 0, eventIsFromGroup)
+                .then(resolve);
+            break;
+            
+            case '/kahvit':
+                drinkController.sendHotBeverageStatusReportForUser(userId)
                 .then(resolve);
             break;
             
@@ -229,6 +241,16 @@ module.exports = function dispatchTelegramEvent(msg) {
                 }
             break;
 
+            case '/meemit':
+                memeController.sendSupportedMemes(userId);
+                resolve();
+            break;
+            
+            case '/luomeemi':
+                memeController.dispatch(userId);
+                resolve();
+            break;
+            
             default:
                 console.log('! Unknown command', msg.text);
                 resolve();

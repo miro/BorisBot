@@ -4,31 +4,41 @@ var stream          = require('stream');
 var fs              = require('fs');
 var mime            = require('mime');
 var path            = require('path');
+var Promise         = require('bluebird');
 
 var botApi = {};
 
 // ## Public functions
 //
 
-botApi.sendMessage = function(chatId, text, replyKeyboard) {
-    var data = {};
-    data.chat_id = chatId;
-    data.text = text;
+botApi.sendMessage = function(chatId, text, replyMarkupObject) {
+    return new Promise(function(resolve, reject) {
+        var data = {};
+        data.chat_id = chatId;
+        data.text = text;
 
-    // Is there a reply keyboard set?
-    if (replyKeyboard) {
-        data.reply_markup = JSON.stringify(replyKeyboard);
-    }
-    else {
-        data.hide_keyboard = true;
-    }
+        // Is there a reply markup set?
+        if (replyMarkupObject) {
+            data.reply_markup = JSON.stringify(replyMarkupObject);
+        }
+        else {
+            data.hide_keyboard = true;
+        }
 
-    // Send the message to Telegram API
-    console.log(chatId + ' -> "' + text + '"');
-    request.post(
-        cfg.tgApiUrl + '/sendMessage',
-        { form: data }
-    );
+        // Send the message to Telegram API
+        console.log(chatId + ' -> "' + text + '"');
+        request.post(
+            cfg.tgApiUrl + '/sendMessage',
+            { form: data },
+            function(err, httpResponse, body) {
+                if (!err) {
+                    resolve(body);
+                } else {
+                    resolve(err);
+                }
+            }
+        );
+    });
 };
 
 botApi.sendAction = function (chatId, action) {
