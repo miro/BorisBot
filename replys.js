@@ -1,12 +1,13 @@
-var events = require('events');
+var events  = require('events');
 var Promise = require('bluebird');
 
-var botApi = require('./botApi');
+var botApi  = require('./botApi');
 
-var replys = {};
+var replys  = {};
 
 replys.eventEmitter = new events.EventEmitter();
 
+// Creates event listener, which reacts to the user's reply 
 replys.sendMessageAndListenForReply = function(targetId, msg) {
     return new Promise(function(resolve,reject) {
         botApi.sendMessage(targetId, msg, {force_reply: true})

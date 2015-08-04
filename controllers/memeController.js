@@ -3,23 +3,29 @@ var Promise = require('bluebird');
 var request = require('request');
 var moment  = require('moment-timezone');
 
-var replys = require('../replys');
+var replys  = require('../replys');
 var cfg     = require('../config');
 var utils   = require('../utils');
 var botApi  = require('../botApi');
 
-// set default timezone to bot timezone
+// Set default timezone to bot timezone
 moment.tz.setDefault(cfg.botTimezone);
 
 var controller = {};
 
 controller.dispatch = function(userId) {
+    
+    // Ask which meme user wants to use
     replys.sendMessageAndListenForReply(userId, 'Mitä meemiä haluat käyttää?')
     .then(function(memeType) {
         var memeObject = _getMemeObject(_.startCase(memeType));
         if (!_.isNull(memeObject)) {
+            
+            // Ask content of the top text
             replys.sendMessageAndListenForReply(userId, 'Mitä laitetaan ylätekstiin?')
             .then(function(upperText) {
+                
+                // Ask content of the bottom text
                 replys.sendMessageAndListenForReply(userId, 'Entäs alas?')
                 .then(function(bottomText) {
                     _generateMeme(memeObject.id, upperText, bottomText)
@@ -39,20 +45,24 @@ controller.dispatch = function(userId) {
             botApi.sendMessage(userId, 'Meemiä ' + _.startCase(memeType) + ' ei löytynyt!');
         }
     });
+    
+    // .sendMessageAndListenForReply -function may return reject
+    // if user hasn't replied to the question.
     Promise.onPossiblyUnhandledRejection(function(error){
         console.log('Unhandled rejection on memeController, possibly user didn´t response');
     });
 };
 
-controller.sendSupportedMemes = function(userId) {
+controller.sendSupportedMemes = function(targetId) {
     var msg = 'Tuetut meemit:\n---------------------';
     _.each(controller.supportedMemes, function(meme) {
         msg += '\n';
         msg += meme.name;
     });
-    botApi.sendMessage(userId, msg);
+    botApi.sendMessage(targetId, msg);
 };
 
+// Get memes which ImgFlip.com supports
 controller.getMemes = function() {
     request('https://api.imgflip.com/get_memes', function(error,res,body) {
         var response = JSON.parse(body);
