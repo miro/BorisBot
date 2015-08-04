@@ -39,7 +39,7 @@ controller.dispatch = function(userId) {
 };
 
 controller.sendSupportedMemes = function(userId) {
-    var msg = 'Tuetut meemit:\n------------------';
+    var msg = 'Tuetut meemit:\n---------------------';
     _.each(controller.supportedMemes, function(meme) {
         msg += '\n';
         msg += meme.name;
@@ -51,7 +51,9 @@ controller.getMemes = function() {
     request('https://api.imgflip.com/get_memes', function(error,res,body) {
         var response = JSON.parse(body);
         if (response['success']) {
-            controller.supportedMemes = response['data']['memes'];
+            controller.supportedMemes = _.sortBy(response['data']['memes'], function(meme) {
+                return meme.name;
+            });
         } else {
             console.log('Error when using ImgFlip.com API');
         }
