@@ -1,12 +1,15 @@
 var _       = require('lodash');
 var Promise = require('bluebird');
 var request = require('request');
+var moment  = require('moment-timezone');
 
 var replys = require('../replys');
 var cfg     = require('../config');
 var utils   = require('../utils');
 var botApi  = require('../botApi');
 
+// set default timezone to bot timezone
+moment.tz.setDefault(cfg.botTimezone);
 
 var controller = {};
 
@@ -21,13 +24,13 @@ controller.dispatch = function(userId) {
                 .then(function(bottomText) {
                     _generateMeme(memeObject.id, upperText, bottomText)
                     .then(function(imageUrl) {
-                        utils.downloadFile(imageUrl, cfg.memeDirectory + 'meme.jpg')
+                        var filename = cfg.memeDirectory + userId + '_' + moment().format('x') + '.jpg'
+                        utils.downloadFile(imageUrl, filename)
                         .then(function() {
-                            botApi.sendPhoto(userId, cfg.memeDirectory + 'meme.jpg');
+                            botApi.sendPhoto(userId, filename);
                         });
                     }).catch(function(err) {
                         botApi.sendMessage(userId, err);
-                        resolve();
                     });
                 });
             });
