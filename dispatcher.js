@@ -81,6 +81,11 @@ module.exports = function dispatchTelegramEvent(msg) {
                 .then(resolve);
             break;
             
+            case '/kahvit':
+                drinkController.sendHotBeverageStatusReportForUser(userId)
+                .then(resolve);
+            break;
+            
             case '/kippis':
                 drinkController.showDrinkKeyboard(userId, eventIsFromGroup)
                 .then(resolve);

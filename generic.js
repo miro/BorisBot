@@ -163,6 +163,8 @@ generic.help = function(userId) {
     \n/kippis - Kirjaan kilistelemäsi juoman ylös ja käytän sitä\
     myöhemmin erilaisiin toimintoihini.\
     \n\
+    \n/kahvit - Printaan sinulle ryhmäsi tämänhetkisen kahvitilanteen.\
+    \n\
     \n/kaljoja - Näytän kaikki nautitut alkoholilliset juomat.\
     \n\
     \n/luomeemi - Luon haluamasi meemin haluamillasi teksteillä.\

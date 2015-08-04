@@ -380,7 +380,7 @@ controller.getGroupAlcoholStatusReport = function(chatGroupId) {
     });
 };
 
-controller.getGroupHotBeveragelStatusReport = function (chatGroupId) {
+controller.getGroupHotBeveragelStatusReport = function(chatGroupId) {
     return new Promise(function(resolve,reject) {
         var log = 'Ryhmäsi hörppimät kuumat kupposet:\n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n';
         db.getDrinksSinceTimestamp(_getTresholdMoment(6), {drinkValue: 0})
@@ -410,6 +410,25 @@ controller.getGroupHotBeveragelStatusReport = function (chatGroupId) {
                 });
                 resolve(log);
             });
+        });
+    });
+};
+
+controller.sendHotBeverageStatusReportForUser = function(userId) {
+    return new Promise(function(resolve,reject) {
+        db.getUserById(userId)
+        .then(function(model) {
+            var primaryGroupId = (_.isNull(model)) ? null : model.get('primaryGroupId');
+            if (!_.isNull(primaryGroupId)) {
+                drinkController.getGroupHotBeveragelStatusReport(primaryGroupId)
+                .then(function(msg) {
+                    botApi.sendMessage(userId, msg);
+                    resolve();
+                });
+            } else {
+                botApi.sendMessage(userId, 'Käy /moro´ttamassa ryhmässä saadaksesi kahvitilastot näkyviin!');
+                resolve();
+            }
         });
     });
 };
