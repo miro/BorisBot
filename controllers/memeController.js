@@ -14,13 +14,13 @@ moment.tz.setDefault(cfg.botTimezone);
 var controller = {};
 
 controller.dispatch = function(userId) {
-    replys.sendMessageAndListenForReply(userId, 'Mita meemia haluat kayttaa?')
+    replys.sendMessageAndListenForReply(userId, 'Mitä meemiä haluat käyttää?')
     .then(function(memeType) {
         var memeObject = _getMemeObject(_.startCase(memeType));
         if (!_.isNull(memeObject)) {
-            replys.sendMessageAndListenForReply(userId, 'Mita laitetaan ylatekstiin?')
+            replys.sendMessageAndListenForReply(userId, 'Mitä laitetaan ylätekstiin?')
             .then(function(upperText) {
-                replys.sendMessageAndListenForReply(userId, 'Entas alas?')
+                replys.sendMessageAndListenForReply(userId, 'Entäs alas?')
                 .then(function(bottomText) {
                     _generateMeme(memeObject.id, upperText, bottomText)
                     .then(function(imageUrl) {
@@ -36,8 +36,11 @@ controller.dispatch = function(userId) {
             });
 
         } else {
-            botApi.sendMessage(userId, 'Meemiä ' + _.startCase(userParams) + ' ei löytynyt!');
+            botApi.sendMessage(userId, 'Meemiä ' + _.startCase(memeType) + ' ei löytynyt!');
         }
+    });
+    Promise.onPossiblyUnhandledRejection(function(error){
+        console.log('Unhandled rejection on memeController, possibly user didn´t response');
     });
 };
 
