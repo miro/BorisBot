@@ -242,7 +242,7 @@ module.exports = function dispatchTelegramEvent(msg) {
             break;
             
             case '/luomeemi':
-                memeController.dispatch(userId, userCommandParams);
+                memeController.dispatch(userId);
                 resolve();
             break;
             

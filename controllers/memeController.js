@@ -1,4 +1,4 @@
-var _       = require('lodash');
+Ôªøvar _       = require('lodash');
 var Promise = require('bluebird');
 var request = require('request');
 var moment  = require('moment-timezone');
@@ -14,13 +14,13 @@ moment.tz.setDefault(cfg.botTimezone);
 var controller = {};
 
 controller.dispatch = function(userId) {
-    replys.sendMessageAndListenForReply(userId, 'Mit‰ meemi‰ haluat k‰ytt‰‰?')
+    replys.sendMessageAndListenForReply(userId, 'Mit√§ meemi√§ haluat k√§ytt√§√§?')
     .then(function(memeType) {
         var memeObject = _getMemeObject(_.startCase(memeType));
         if (!_.isNull(memeObject)) {
-            replys.sendMessageAndListenForReply(userId, 'Mit‰ laitetaan yl‰tekstiin?')
+            replys.sendMessageAndListenForReply(userId, 'Mit√§ laitetaan yl√§tekstiin?')
             .then(function(upperText) {
-                replys.sendMessageAndListenForReply(userId, 'Ent‰s alas?')
+                replys.sendMessageAndListenForReply(userId, 'Ent√§s alas?')
                 .then(function(bottomText) {
                     _generateMeme(memeObject.id, upperText, bottomText)
                     .then(function(imageUrl) {
@@ -36,11 +36,11 @@ controller.dispatch = function(userId) {
             });
 
         } else {
-            botApi.sendMessage(userId, 'Meemi‰ ' + _.startCase(memeType) + ' ei lˆytynyt!');
+            botApi.sendMessage(userId, 'Meemi√§ ' + _.startCase(memeType) + ' ei l√∂ytynyt!');
         }
     });
     Promise.onPossiblyUnhandledRejection(function(error){
-        console.log('Unhandled rejection on memeController, possibly user didn¥t response');
+        console.log('Unhandled rejection on memeController, possibly user didn¬¥t response');
     });
 };
 
