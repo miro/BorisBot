@@ -2,12 +2,12 @@
 var Promise = require('bluebird');
 var request = require('request');
 var moment  = require('moment-timezone');
-var winston = require('winston');
 
 var replys  = require('../replys');
 var cfg     = require('../config');
 var utils   = require('../utils');
 var botApi  = require('../botApi');
+var logger  = cfg.logger;
 
 // Set default timezone to bot timezone
 moment.tz.setDefault(cfg.botTimezone);
@@ -50,7 +50,7 @@ controller.dispatch = function(userId) {
     // .sendMessageAndListenForReply -function may return reject
     // if user hasn't replied to the question.
     Promise.onPossiblyUnhandledRejection(function(error){
-        winston.log('info', 'Unhandled rejection on memeController, possibly user didn´t response');
+        logger.log('info', 'Unhandled rejection on memeController, possibly user didn´t response');
     });
 };
 
@@ -72,7 +72,7 @@ controller.getMemes = function() {
                 return meme.name;
             });
         } else {
-            winston.log('error', 'Error when using ImgFlip.com API');
+            logger.log('error', 'Error when using ImgFlip.com API');
         }
     });
 };
