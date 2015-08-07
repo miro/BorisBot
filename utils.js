@@ -1,17 +1,21 @@
+var Promise     = require('bluebird');
 var request     = require('request');
 var fs          = require('fs');
-
 var cfg         = require('./config');
+var logger      = cfg.logger;
 
 
 var utils = {};
 
-utils.downloadFile = function(uri, filename, callback) {
-    request.head(uri, function(err, res, body) {
-        if (err) {
-            console.log('Error on file download!', err);
-        }
-        request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
+utils.downloadFile = function(uri, filename) {
+    return new Promise(function(resolve,reject) {
+        request.head(uri, function(err, res, body) {
+            if (err) {
+                logger.log('error','Error on file download!', err);
+                reject(err);
+            }
+            request(uri).pipe(fs.createWriteStream(filename)).on('close', resolve);
+        });
     });
 };
 

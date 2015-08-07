@@ -3,6 +3,7 @@ var cfg         = require('./config');
 var botApi      = require('./botApi');
 var db          = require('./database');
 var msgs        = require('./messageHistory');
+var logger      = cfg.logger;
 
 var Promise     = require('bluebird');
 var _           = require('lodash');
@@ -43,7 +44,8 @@ generic.webcam = function(userId, chatGroupId, eventIsFromGroup) {
             else {
                 // -> If we get here, we are good to go!
                 botApi.sendAction(targetId, 'upload_photo');
-                utils.downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg', function() {
+                utils.downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg')
+                .then(function() {
                     botApi.sendPhoto(targetId, cfg.webcamDirectory + 'webcam.jpg');
                     resolve();
                 });
@@ -54,10 +56,11 @@ generic.webcam = function(userId, chatGroupId, eventIsFromGroup) {
 
 generic.checkWebcamLightness = function() {
     return new Promise(function(resolve,reject) {
-        utils.downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg', function() {
+        utils.downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg')
+        .then(function() {
             getPixels(cfg.webcamDirectory + 'webcam.jpg', function(err,pixels) {
                 if (err) {
-                    console.log('Error when getting pixels!');
+                    logger.log('error', 'Error when getting pixels!');
                     resolve();
                     return;
                 }
@@ -86,7 +89,7 @@ generic.checkWebcamLightness = function() {
                 
                     // Lights on, check if they were already on
                     if (!generic.webcamLightsOn) {
-                        console.log('Webcam detected lights at clubroom, threshold: ' + threshold);
+                        logger.log('info', 'Webcam detected lights at clubroom, threshold: ' + threshold);
                         botApi.sendMessage(cfg.allowedGroups.mainChatId, 'Kerholla räpsähti valot päälle!');
                         generic.webcamLightsOn = true;
                     }
@@ -104,23 +107,23 @@ generic.checkWebcamLightness = function() {
 
 generic.webcamLightsOn = false;
 
-// Admin only!
+
 generic.talkAsBotToMainGroup = function(userId, msg) {
     // lazy version which talks to "main group" as a bot
     // TODO: convert this with a more generic one after we have info about groups
     // on the database
-    if (utils.userIsAdmin(userId)) {
+    if (_userHaveBotTalkRights(userId)) {
         botApi.sendMessage(cfg.allowedGroups.mainChatId, msg);
     }
     else {
-        console.log('Non-admin tried to talk as Boris!');
+        logger.log('info', 'Non-allowed user tried to talk as Boris!');
     }
 };
 
 generic.talkAsBotToUsersInMainGroup = function(userId, msg) {
 	return new Promise(function(resolve,reject) {
-        if (!utils.userIsAdmin(userId)) {
-			console.log('Non-admin tried to talk as Boris!');
+        if (!_userHaveBotTalkRights(userId)) {
+			logger.log('info', 'Non-allowed user tried to talk as Boris!');
 			resolve();
 		} else {
 			db.getUsersByPrimaryGroupId(cfg.allowedGroups.mainChatId)
@@ -154,12 +157,25 @@ generic.help = function(userId) {
     Jos annat komennon perään positiivisen numeron, rajaan kuvaajan\
     leveyden olemaan kyseisen numeron verran päiviä.\
     \n\
+    \n/kahvi - Kirjaan nauttimasi kupillisen tietokantaani.\
+    \n\
+    \n/kalja - Kirjaan nauttimasi ohrapirtelön tietokantaani.\
+    \n\
     \n/kippis - Kirjaan kilistelemäsi juoman ylös ja käytän sitä\
     myöhemmin erilaisiin toimintoihini.\
+    \n\
+    \n/kahvit - Printaan sinulle ryhmäsi tämänhetkisen kahvitilanteen.\
+    \n\
+    \n/kaljoja - Näytän kaikki nautitut alkoholilliset juomat.\
+    \n\
+    \n/luomeemi - Luon haluamasi meemin haluamillasi teksteillä.\
+    Tuetut meemit saat tietoosi /meemit komennolla.\
     \n\
     \n/luotunnus - Kirjoitan tietosi muistiin, jotta voin käyttää niitä\
     myöhemmin. Tarvitsen komennon perään myös painosi ja sukupuolesi\
     (lupaan että tietoja ei käytetä kaupallisiin tarkoituksiin).\
+    \n\
+    \n/meemit - Listaan meemi-generaattorissa tuetut meemit.\
     \n\
     \n/moro - Yhdistän käyttäjäsi ryhmään, mistä tämä komento lähetettiin. \
     Tämän avulla voin yhdistää tekemäsi kippikset ryhmän tilastoihin.\
@@ -175,9 +191,17 @@ generic.help = function(userId) {
     \n\
     \n/promillet - Tulostan ryhmän tämänhetkiset promilletasot.\
     \n\
+    \n/tee - Kirjaan nauttimasi kupillisen tietokantaani.\
+    \n\
+    \n/virvokkeita - Näytän kaikki nautitut alkoholittomat juomat.\
+    \n\
     \n/webcam - Lähetän tuoreen kuvan Spinnin kerhohuoneelta.\
     ';
     botApi.sendMessage(userId, msg);
+};
+
+var _userHaveBotTalkRights = function(userId) {
+    return cfg.botTalkUsers.indexOf(parseInt(userId, 10)) >= 0;
 };
 
 module.exports = generic;

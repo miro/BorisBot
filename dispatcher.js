@@ -11,10 +11,13 @@ var db          = require('./database');
 var botApi      = require('./botApi');
 var utils       = require('./utils');
 var generic     = require('./generic');
+var replys      = require('./replys');
+var logger      = cfg.logger;
 
 var userController      = require('./controllers/userController');
 var drinkController     = require('./controllers/drinkController');
 var ethanolController   = require('./controllers/ethanolController');
+var memeController      = require('./controllers/memeController');
 
 // set default timezone to bot timezone
 moment.tz.setDefault(cfg.botTimezone);
@@ -22,10 +25,10 @@ moment.tz.setDefault(cfg.botTimezone);
 
 module.exports = function dispatchTelegramEvent(msg) {
     return new Promise(function (resolve, reject) {
-        console.log('webhook event!', msg);
+        logger.log('info', 'Webhook event!', msg);
 
         if (!msg.text) {
-            console.log('no text on event, ignore');
+            logger.log('info', 'No text on event, ignore');
             resolve();
             return;
         }
@@ -45,11 +48,16 @@ module.exports = function dispatchTelegramEvent(msg) {
         var userIsIgnored = cfg.ignoredUsers.indexOf(userId) >= 0;
         if (userIsIgnored) {
             // do nothing
-            console.log('! Ignored user tried to trigger command');
+            logger.log('info', '! Ignored user tried to trigger command');
             resolve();
             return;
         }
 
+        if (msg.reply_to_message) {
+            replys.eventEmitter.emit(msg.reply_to_message.message_id, msg.text);
+            resolve();
+            return;
+        }
 
         // Parse command & possible parameters
         var userInput = msg.text.split(' ');
@@ -59,6 +67,26 @@ module.exports = function dispatchTelegramEvent(msg) {
 
         // Dispatch!
         switch (userCommand) {
+            
+            case '/kahvutti':
+            case '/sumppi':
+            case '/kahvi':
+            case emoji.get(':coffee:'):
+                drinkController.addDrink(msg.message_id, userId, userCallName, 'coffee',  0, eventIsFromGroup)
+                .then(resolve);
+            break;
+            
+            case '/tee':
+            case emoji.get(':tea:'):
+                drinkController.addDrink(msg.message_id, userId, userCallName, 'tea', 0, eventIsFromGroup)
+                .then(resolve);
+            break;
+            
+            case '/kahvit':
+                drinkController.sendHotBeverageStatusReportForUser(userId)
+                .then(resolve);
+            break;
+            
             case '/kippis':
                 drinkController.showDrinkKeyboard(userId, eventIsFromGroup)
                 .then(resolve);
@@ -97,7 +125,12 @@ module.exports = function dispatchTelegramEvent(msg) {
             break;
 
             case '/kaljoja':
-                drinkController.getDrinksAmount(userId, chatGroupId, chatGroupTitle, eventIsFromGroup)
+                drinkController.getDrinksAmount(userId, chatGroupId, chatGroupTitle, eventIsFromGroup, true)
+                .then(resolve);
+            break;
+            
+            case '/virvokkeita':
+                drinkController.getDrinksAmount(userId, chatGroupId, chatGroupTitle, eventIsFromGroup, false)
                 .then(resolve);
             break;
 
@@ -194,7 +227,7 @@ module.exports = function dispatchTelegramEvent(msg) {
             case '/promillet':
             case '/promille':
                 if (eventIsFromGroup) {
-                    drinkController.getGroupStatusReport(chatGroupId)
+                    drinkController.getGroupAlcoholStatusReport(chatGroupId)
                     .then(function(msg) {
                         botApi.sendMessage(chatGroupId, msg);
                         resolve();
@@ -209,8 +242,18 @@ module.exports = function dispatchTelegramEvent(msg) {
                 }
             break;
 
+            case '/meemit':
+                memeController.sendSupportedMemes(userId);
+                resolve();
+            break;
+            
+            case '/luomeemi':
+                memeController.dispatch(userId);
+                resolve();
+            break;
+            
             default:
-                console.log('! Unknown command', msg.text);
+                logger.log('info', '! Unknown command', msg.text);
                 resolve();
         }
     });

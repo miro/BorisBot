@@ -1,8 +1,8 @@
-var config = require('./config');
+var config      = require('./config');
 
-var Promise = require('bluebird');
-var knex = require('knex')(config.db);
-var bookshelf = require('bookshelf')(knex);
+var Promise     = require('bluebird');
+var knex        = require('knex')(config.db);
+var bookshelf   = require('bookshelf')(knex);
 
 
 // Database definitions

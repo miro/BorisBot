@@ -1,4 +1,5 @@
 var _           = require('lodash');
+var winston     = require('winston');
 
 var cfg = {}; // the cfg object which will be returned
 
@@ -48,9 +49,33 @@ else {
     cfg.db = dbConfigs[cfg.env];
 }
 
+// Logging config
+var logOptions = {};
+if (cfg.env === 'production') {
+    logOptions.transports = [
+        new (winston.transports.Console)()
+    ];
+} else if (cfg.env === 'test') {
+    logOptions.transports = [
+        new (winston.transports.File)({
+            name: 'info-file',
+            filename: 'testlog-info.log',
+            level: 'info'
+        }),
+        new (winston.transports.Console)({
+            level: 'error'
+        })
+    ]
+} else {
+    logOptions.transports = [
+        new (winston.transports.Console)()
+    ];
+}
+    
+cfg.logger = new (winston.Logger)(logOptions);
+
 // The timezone in which the bot outputs all the datetimes
 cfg.botTimezone = 'Europe/Helsinki';
-
 
 cfg.allowedGroups = {
     testChatId: -13232285, // "BorisTest"
@@ -59,6 +84,9 @@ cfg.allowedGroups = {
 
 // List of users who can execute "admin only" commands
 cfg.adminUsers = [24175254, 100100780];
+
+// List of users who can send messages through bot
+cfg.botTalkUsers = _.union(cfg.adminUsers, [73814886]);
 
 cfg.ignoredUsers = [50446519]; // users whom commands are ignored
 
@@ -76,10 +104,15 @@ cfg.webhookUrl = process.env.BORISBOT_PUBLIC_URL + '/api/webhook';
 cfg.plotlyUserName = process.env.BORISBOT_PLOTLY_USERNAME || "BorisBot";
 cfg.plotlyApiKey = process.env.BORISBOT_PLOTLY_APIKEY;
 
+// ImgFlip API configs
+cfg.imgFlipUserName = process.env.BORISBOT_IMGFLIP_USERNAME;
+cfg.imgFlipPassword = process.env.BORISBOT_IMGFLIP_PASSWORD;
+
 // Local directories for data storage
 cfg.plotlyDirectory = './plotly/';
 cfg.webcamDirectory = './webcam/';
-cfg.requiredDirectories = [cfg.plotlyDirectory, cfg.webcamDirectory]; // these folders will be made with mkdir
+cfg.memeDirectory = './memes/';
+cfg.requiredDirectories = [cfg.plotlyDirectory, cfg.webcamDirectory, cfg.memeDirectory]; // these folders will be made with mkdir
 
 // URL where webcam image will be downloaded
 cfg.webcamURL = process.env.BORISBOT_WEBCAM_URL;
