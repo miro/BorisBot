@@ -5,6 +5,7 @@ var fs              = require('fs');
 var mime            = require('mime');
 var path            = require('path');
 var Promise         = require('bluebird');
+var winston         = require('winston');
 
 var botApi = {};
 
@@ -26,7 +27,7 @@ botApi.sendMessage = function(chatId, text, replyMarkupObject) {
         }
 
         // Send the message to Telegram API
-        console.log(chatId + ' -> "' + text + '"');
+        winston.log('info', chatId + ' -> "' + text + '"');
         request.post(
             cfg.tgApiUrl + '/sendMessage',
             { form: data },

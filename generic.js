@@ -7,6 +7,7 @@ var msgs        = require('./messageHistory');
 var Promise     = require('bluebird');
 var _           = require('lodash');
 var getPixels   = require('get-pixels');
+var winston     = require('winston');
 
 var generic = {};
 
@@ -59,7 +60,7 @@ generic.checkWebcamLightness = function() {
         .then(function() {
             getPixels(cfg.webcamDirectory + 'webcam.jpg', function(err,pixels) {
                 if (err) {
-                    console.log('Error when getting pixels!');
+                    winston.log('error', 'Error when getting pixels!');
                     resolve();
                     return;
                 }
@@ -88,7 +89,7 @@ generic.checkWebcamLightness = function() {
                 
                     // Lights on, check if they were already on
                     if (!generic.webcamLightsOn) {
-                        console.log('Webcam detected lights at clubroom, threshold: ' + threshold);
+                        winston.log('info', 'Webcam detected lights at clubroom, threshold: ' + threshold);
                         botApi.sendMessage(cfg.allowedGroups.mainChatId, 'Kerholla räpsähti valot päälle!');
                         generic.webcamLightsOn = true;
                     }
@@ -115,14 +116,14 @@ generic.talkAsBotToMainGroup = function(userId, msg) {
         botApi.sendMessage(cfg.allowedGroups.mainChatId, msg);
     }
     else {
-        console.log('Non-admin tried to talk as Boris!');
+        winston.log('info', 'Non-allowed user tried to talk as Boris!');
     }
 };
 
 generic.talkAsBotToUsersInMainGroup = function(userId, msg) {
 	return new Promise(function(resolve,reject) {
         if (!_userHaveBotTalkRights(userId)) {
-			console.log('Non-admin tried to talk as Boris!');
+			winston.log('info', 'Non-allowed user tried to talk as Boris!');
 			resolve();
 		} else {
 			db.getUsersByPrimaryGroupId(cfg.allowedGroups.mainChatId)

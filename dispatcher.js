@@ -5,6 +5,7 @@ var request     = require('request');
 var moment      = require('moment-timezone');
 var _           = require('lodash');
 var emoji       = require('node-emoji');
+var winston     = require('winston');
 
 var cfg         = require('./config');
 var db          = require('./database');
@@ -24,10 +25,10 @@ moment.tz.setDefault(cfg.botTimezone);
 
 module.exports = function dispatchTelegramEvent(msg) {
     return new Promise(function (resolve, reject) {
-        console.log('webhook event!', msg);
+        winston.log('info', 'Webhook event!', msg);
 
         if (!msg.text) {
-            console.log('no text on event, ignore');
+            winston.log('info', 'No text on event, ignore');
             resolve();
             return;
         }
@@ -47,7 +48,7 @@ module.exports = function dispatchTelegramEvent(msg) {
         var userIsIgnored = cfg.ignoredUsers.indexOf(userId) >= 0;
         if (userIsIgnored) {
             // do nothing
-            console.log('! Ignored user tried to trigger command');
+            winston.log('info', '! Ignored user tried to trigger command');
             resolve();
             return;
         }
@@ -252,7 +253,7 @@ module.exports = function dispatchTelegramEvent(msg) {
             break;
             
             default:
-                console.log('! Unknown command', msg.text);
+                winston.log('info', '! Unknown command', msg.text);
                 resolve();
         }
     });
