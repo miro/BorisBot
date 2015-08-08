@@ -1,17 +1,20 @@
+// Set environment to test
 process.env['NODE_ENV'] = 'test';
 
-var db                  = require('../database');
-var cfg                 = require('../config');
+var db              = require('../database');
+var cfg             = require('../config');
 var schema          = require('../schema');
-var userController = require('../controllers/userController');
-var drinkController = require('../controllers/drinkController');
-var ethanolController = require('../controllers/ethanolController');
+var chai            = require('chai');
+var chaiAsPromised  = require('chai-as-promised');
+var Promise         = require('bluebird');
+var fs              = require('fs');
+var _               = require('lodash');
+var logger          = cfg.logger;
 
-var chai = require('chai');
-var chaiAsPromised = require('chai-as-promised');
-var Promise = require('bluebird');
-var fs          = require('fs');
-var _           = require('lodash');
+var userController      = require('../controllers/userController');
+var drinkController     = require('../controllers/drinkController');
+var ethanolController   = require('../controllers/ethanolController');
+var memeController      = require('../controllers/memeController');
 
 chai.use(chaiAsPromised);
 var expect = chai.expect;
@@ -29,17 +32,23 @@ var test = {
     },
     event: {
         drinks: [{
-            drinkType: 'kalja',
+            drinkType: 'beer',
             drinkValue: 12
         },{
-            drinkType: 'kalja',
+            drinkType: 'wine',
             drinkValue: 12
         },{
-            drinkType: 'kalja',
+            drinkType: 'shot',
             drinkValue: 12
         },{
-            drinkType: 'kalja',
-            drinkValue: 12
+            drinkType: 'long island icetea',
+            drinkValue: 16
+        },{
+            drinkType: 'coffee',
+            drinkValue: 0
+        },{
+            drinkType: 'tea',
+            drinkValue: 0
         }],
         inHours: 2
     }
@@ -48,12 +57,15 @@ var test = {
 describe('End-to-end', function() {
     before(function(done) {
         schema.bookshelf.knex.raw('DELETE FROM users; DELETE FROM drinks;')
-        .then(function() {done();});
+        .then(function() {
+            logger.log('info', 'Database cleared');
+            done();
+        });
     });
     it('should generate a user', function(done) {
         userController.newUserProcess(test.id, test.username, test.firstname, test.lastname, test.weight + ' ' + test.gender)
         .then(function() {
-            db.getUserById(123456)
+            db.getUserById(test.id)
             .then(function(model) {
                 expect(model).to.not.be.null;
                 expect(model.get('telegramId')).to.equal(test.id);
@@ -66,14 +78,22 @@ describe('End-to-end', function() {
             });
         });
     });
-    it('should register ' + test.event.drinks.length + ' drinks', function(done) {
+    it('should register ' + test.event.drinks.length + ' drinks for user', function(done) {
         var addDrinkPromises = [];
         _.times(test.event.drinks.length, function(n) {
             addDrinkPromises.push(drinkController.addDrink(0, test.id, test.username, test.event.drinks[n].drinkType, test.event.drinks[n].drinkValue, test.group.isTrue));
         });
         Promise.all(addDrinkPromises)
         .then(function() {
-            done()
+            db.getCount('drinks', {creatorId: test.id}, null, true)
+            .then(function(alcoholicDrinks) {
+                db.getCount('drinks', {creatorId: test.id}, null, false)
+                .then(function(nonAlcoholicDrinks) {
+                    var totalCount = parseInt(alcoholicDrinks) + parseInt(nonAlcoholicDrinks);
+                    expect(totalCount).to.equal(test.event.drinks.length);
+                    done();
+                });
+            });
         });
     });
 });
