@@ -21,14 +21,15 @@ var expect = chai.expect;
 
 var test = {
     id: 123456,
-    username: 'KaKu',
-    firstname: 'Kalervo',
-    lastname: 'Kummola',
+    username: 'test',
+    firstname: 'Firstname',
+    lastname: 'Secondname',
     weight: '90',
     isMale: true,
     gender: 'mies',
-    group: {
-        isTrue: false
+    mainGroup: {
+        id: -654321,
+        name: 'testGroup'
     },
     event: {
         drinks: [{
@@ -81,7 +82,7 @@ describe('End-to-end', function() {
     it('should register ' + test.event.drinks.length + ' drinks for user', function(done) {
         var addDrinkPromises = [];
         _.times(test.event.drinks.length, function(n) {
-            addDrinkPromises.push(drinkController.addDrink(0, test.id, test.username, test.event.drinks[n].drinkType, test.event.drinks[n].drinkValue, test.group.isTrue));
+            addDrinkPromises.push(drinkController.addDrink(0, test.id, test.username, test.event.drinks[n].drinkType, test.event.drinks[n].drinkValue, false));
         });
         Promise.all(addDrinkPromises)
         .then(function() {
@@ -93,6 +94,18 @@ describe('End-to-end', function() {
                     expect(totalCount).to.equal(test.event.drinks.length);
                     done();
                 });
+            });
+        });
+    });
+    it('should update user´s mainchat id', function(done) {
+        userController.setGroup(test.id, test.mainGroup.id, test.mainGroup.name, true)
+        .then(function() {
+            db.getUsersByPrimaryGroupId(test.mainGroup.id)
+            .then(function(collection) {
+                var user = collection.models[0];
+                expect(user).to.not.be.undefined;
+                expect(user.get('telegramId')).to.equal(test.id);
+                done();
             });
         });
     });
