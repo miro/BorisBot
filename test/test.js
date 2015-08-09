@@ -109,4 +109,14 @@ describe('End-to-end', function() {
             });
         });
     });
+    it('should remove user from database', function(done) {
+        userController.removeUser(test.id, test.username)
+        .then(function() {
+            db.getUserById(test.id)
+            .then(function(user) {
+                expect(user).to.be.null;
+                done();
+            });
+        });
+    });
 });
