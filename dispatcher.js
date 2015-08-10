@@ -156,8 +156,11 @@ module.exports = function dispatchTelegramEvent(msg) {
             // Takes one parameter, which changes the length of the graph
             case '/graafi':
             case '/histogrammi':
-                drinkController.drawGraph(userId, chatGroupId, eventIsFromGroup, userCommandParams)
-                .then(resolve);
+                // Disabled until Plotly fix their API
+                //      drinkController.drawGraph(userId, chatGroupId, eventIsFromGroup, userCommandParams)
+                //      .then(resolve);
+                botApi.sendMessage(userId, 'Poistettu käytöstä toistaiseksi.');
+                resolve();
             break;
 
             // Sends image of current state of Spänni's webcam
