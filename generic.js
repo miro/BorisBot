@@ -104,8 +104,8 @@ generic.checkWebcamLightness = function() {
     });
 }
 
-generic.webcamLightsOn = false;
-
+// Assume that lights are on, this prevents chat spamming if app shuts down
+generic.webcamLightsOn = true;
 
 generic.talkAsBotToMainGroup = function(userId, msg) {
     // lazy version which talks to "main group" as a bot
