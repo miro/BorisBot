@@ -146,6 +146,12 @@ module.exports = function dispatchTelegramEvent(msg) {
                 });
             break;
 
+            case '/kumpi':
+                var targetId = (eventIsFromGroup) ? chatGroupId : userId;
+                generic.whichOne(targetId, userCommandParams);
+                resolve();
+            break;
+            
             case '/help':
                 generic.help(userId);
                 resolve();

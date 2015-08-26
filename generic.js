@@ -168,6 +168,8 @@ generic.help = function(userId) {
     \n\
     \n/kaljoja - Näytän kaikki nautitut alkoholilliset juomat.\
     \n\
+    \n/kumpi - Päätän tärkeät valinnat puolestasi.\
+    \n\
     \n/luomeemi - Luon haluamasi meemin haluamillasi teksteillä.\
     Tuetut meemit saat tietoosi /meemit komennolla.\
     \n\
@@ -198,6 +200,28 @@ generic.help = function(userId) {
     \n/webcam - Lähetän tuoreen kuvan Spinnin kerhohuoneelta.\
     ';
     botApi.sendMessage(userId, msg);
+};
+
+generic.whichOne = function(targetId, userParams) {
+    var options = userParams.split(' ');
+    if (options.length != 2) {
+        botApi.sendMessage(targetId, 'Anna kaksi parametria!');
+        return;
+    } else {
+        var text;
+        var dice = Math.floor(Math.random() * 100);
+        if (dice === 99) {
+            text = 'Molemmat!';
+        } else if (dice === 98) {
+            text = 'Ei kumpikaan!';
+        } else if (dice < 48) {
+            text = options[0];
+        } else {
+            text = options[1];
+        }
+        botApi.sendMessage(targetId, text);
+        return;
+    }
 };
 
 var _userHaveBotTalkRights = function(userId) {
