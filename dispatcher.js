@@ -12,6 +12,7 @@ var botApi      = require('./botApi');
 var utils       = require('./utils');
 var generic     = require('./generic');
 var replys      = require('./replys');
+var logger      = cfg.logger;
 
 var userController      = require('./controllers/userController');
 var drinkController     = require('./controllers/drinkController');
@@ -24,10 +25,10 @@ moment.tz.setDefault(cfg.botTimezone);
 
 module.exports = function dispatchTelegramEvent(msg) {
     return new Promise(function (resolve, reject) {
-        console.log('webhook event!', msg);
+        logger.log('info', 'Webhook event!', msg);
 
         if (!msg.text) {
-            console.log('no text on event, ignore');
+            logger.log('info', 'No text on event, ignore');
             resolve();
             return;
         }
@@ -47,7 +48,7 @@ module.exports = function dispatchTelegramEvent(msg) {
         var userIsIgnored = cfg.ignoredUsers.indexOf(userId) >= 0;
         if (userIsIgnored) {
             // do nothing
-            console.log('! Ignored user tried to trigger command');
+            logger.log('info', '! Ignored user tried to trigger command');
             resolve();
             return;
         }
@@ -145,6 +146,12 @@ module.exports = function dispatchTelegramEvent(msg) {
                 });
             break;
 
+            case '/kumpi':
+                var targetId = (eventIsFromGroup) ? chatGroupId : userId;
+                generic.whichOne(targetId, userCommandParams);
+                resolve();
+            break;
+            
             case '/help':
                 generic.help(userId);
                 resolve();
@@ -255,7 +262,7 @@ module.exports = function dispatchTelegramEvent(msg) {
             break;
             
             default:
-                console.log('! Unknown command', msg.text);
+                logger.log('info', '! Unknown command', msg.text);
                 resolve();
         }
     });

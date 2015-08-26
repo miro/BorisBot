@@ -1,4 +1,5 @@
 var _           = require('lodash');
+var winston     = require('winston');
 
 var cfg = {}; // the cfg object which will be returned
 
@@ -34,9 +35,33 @@ else {
     cfg.db = dbConfigs[cfg.env];
 }
 
+// Logging config
+var logOptions = {};
+if (cfg.env === 'production') {
+    logOptions.transports = [
+        new (winston.transports.Console)()
+    ];
+} else if (cfg.env === 'test') {
+    logOptions.transports = [
+        new (winston.transports.File)({
+            name: 'info-file',
+            filename: 'testlog-info.log',
+            level: 'info'
+        }),
+        new (winston.transports.Console)({
+            level: 'error'
+        })
+    ]
+} else {
+    logOptions.transports = [
+        new (winston.transports.Console)()
+    ];
+}
+    
+cfg.logger = new (winston.Logger)(logOptions);
+
 // The timezone in which the bot outputs all the datetimes
 cfg.botTimezone = 'Europe/Helsinki';
-
 
 cfg.allowedGroups = {
     testChatId: -13232285, // "BorisTest"

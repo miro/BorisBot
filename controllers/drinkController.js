@@ -5,7 +5,7 @@ var utils               = require('../utils');
 var graph               = require('../graph');
 var userController      = require('./userController');
 var ethanolController   = require('./ethanolController');
-
+var logger              = cfg.logger;
 
 var Promise             = require('bluebird');
 var moment              = require('moment-timezone');
@@ -157,7 +157,7 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
                           
                     // Drink was something non-alcohol and unspecified
                     } else {
-                        console.log(drinkType);
+                        logger.log('info', 'Unknown drinkType: ', drinkType);
                         resolve();
                     }
                 });
@@ -372,7 +372,7 @@ controller.getGroupAlcoholStatusReport = function(chatGroupId) {
                     resolve(log);
                 })
                 .catch(function(err) {
-                    console.log('ERROR on status report function', err);
+                    logger.log('error', 'ERROR on status report function', err);
                     resolve(err);
                 });
             });

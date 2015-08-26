@@ -3,6 +3,7 @@ var cfg         = require('./config');
 var botApi      = require('./botApi');
 var db          = require('./database');
 var msgs        = require('./messageHistory');
+var logger      = cfg.logger;
 
 var Promise     = require('bluebird');
 var _           = require('lodash');
@@ -59,7 +60,7 @@ generic.checkWebcamLightness = function() {
         .then(function() {
             getPixels(cfg.webcamDirectory + 'webcam.jpg', function(err,pixels) {
                 if (err) {
-                    console.log('Error when getting pixels!');
+                    logger.log('error', 'Error when getting pixels!');
                     resolve();
                     return;
                 }
@@ -88,7 +89,7 @@ generic.checkWebcamLightness = function() {
                 
                     // Lights on, check if they were already on
                     if (!generic.webcamLightsOn) {
-                        console.log('Webcam detected lights at clubroom, threshold: ' + threshold);
+                        logger.log('info', 'Webcam detected lights at clubroom, threshold: ' + threshold);
                         botApi.sendMessage(cfg.allowedGroups.mainChatId, 'Kerholla räpsähti valot päälle!');
                         generic.webcamLightsOn = true;
                     }
@@ -115,14 +116,14 @@ generic.talkAsBotToMainGroup = function(userId, msg) {
         botApi.sendMessage(cfg.allowedGroups.mainChatId, msg);
     }
     else {
-        console.log('Non-admin tried to talk as Boris!');
+        logger.log('info', 'Non-allowed user tried to talk as Boris!');
     }
 };
 
 generic.talkAsBotToUsersInMainGroup = function(userId, msg) {
 	return new Promise(function(resolve,reject) {
         if (!_userHaveBotTalkRights(userId)) {
-			console.log('Non-admin tried to talk as Boris!');
+			logger.log('info', 'Non-allowed user tried to talk as Boris!');
 			resolve();
 		} else {
 			db.getUsersByPrimaryGroupId(cfg.allowedGroups.mainChatId)
@@ -167,6 +168,8 @@ generic.help = function(userId) {
     \n\
     \n/kaljoja - Näytän kaikki nautitut alkoholilliset juomat.\
     \n\
+    \n/kumpi - Päätän tärkeät valinnat puolestasi.\
+    \n\
     \n/luomeemi - Luon haluamasi meemin haluamillasi teksteillä.\
     Tuetut meemit saat tietoosi /meemit komennolla.\
     \n\
@@ -197,6 +200,28 @@ generic.help = function(userId) {
     \n/webcam - Lähetän tuoreen kuvan Spinnin kerhohuoneelta.\
     ';
     botApi.sendMessage(userId, msg);
+};
+
+generic.whichOne = function(targetId, userParams) {
+    var options = userParams.split(' ');
+    if (options.length != 2) {
+        botApi.sendMessage(targetId, 'Anna kaksi parametria!');
+        return;
+    } else {
+        var text;
+        var dice = Math.floor(Math.random() * 100);
+        if (dice === 99) {
+            text = 'Molemmat!';
+        } else if (dice === 98) {
+            text = 'Ei kumpikaan!';
+        } else if (dice < 48) {
+            text = options[0];
+        } else {
+            text = options[1];
+        }
+        botApi.sendMessage(targetId, text);
+        return;
+    }
 };
 
 var _userHaveBotTalkRights = function(userId) {

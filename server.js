@@ -11,6 +11,7 @@ var cfg             = require('./config');
 var msgHistory      = require('./messageHistory');
 var scheduler       = require('./scheduler');
 var memeController  = require('./controllers/memeController');
+var logger          = cfg.logger;
 
 var app         = express();
 
@@ -28,7 +29,7 @@ app.post('/api/webhook', function(req, res) {
 
     if (!msgHistory.startProcessingMsg(msg.message_id)) {
         // this message is already parsed
-        console.log('Message ignored due to messageHistory state!');
+        logger.log('info', 'Message ignored due to messageHistory state!');
         res.sendStatus(200);
         return;
     }
@@ -62,7 +63,7 @@ app.use(function handle404(err, req, res, next) { // 404
 });
 app.use(function genericErrorHandler(err, req, res, next) { // 500
     err.status = _.isUndefined(err.status) ? 500 : err.status;
-    console.log('Error catched by genericErrorHandler!', err);
+    logger.log('error', 'Error catched by genericErrorHandler!', err);
     res.status(err.status).send(err);
 });
 
@@ -73,7 +74,7 @@ _.each(cfg.requiredDirectories, function(directory) {
             var mkdir = 'mkdir -p ' + directory;
             var child = exec(mkdir, function(err,stdout,stderr) {
                 if (err) throw err;
-                console.log('Created folder: ' + directory);
+                logger.log('info', 'Created folder: ' + directory);
             });
         };
     });
@@ -81,14 +82,14 @@ _.each(cfg.requiredDirectories, function(directory) {
 
 // # Start the server
 app.listen(cfg.serverPort, function() {
-    console.log('BorisBot backend started at port', cfg.serverPort);
+    logger.log('info', 'BorisBot backend started at port', cfg.serverPort);
 });
 
 // Subscribe webhook
 request.post(cfg.tgApiUrl + '/setWebhook', { form: { url: cfg.webhookUrl }},
     function (error, response, body) {
-        if (error) console.log('ERROR when trying to reach Telegram API', error);
-        else console.log('Webhook updated successfully!');
+        if (error) logger.log('error', 'ERROR when trying to reach Telegram API', error);
+        else logger.log('info', 'Webhook updated successfully!');
     }
 );
 
@@ -98,7 +99,7 @@ request(cfg.tgApiUrl + '/getMe', function (error, res, body) {
     var botName = response.result.first_name;
     var botUserName = response.result.username;
 
-    console.log('I Am', botName + ' / @' + botUserName);
+    logger.log('info', 'I Am', botName + ' / @' + botUserName);
 });
 
 botApi.sendMessage(cfg.allowedGroups.testChatId, 'Reboot! ' + Date() + '\nWebhook set to ' + cfg.webhookUrl);
