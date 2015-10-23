@@ -250,18 +250,18 @@ controller.drawGraph = function(userId, chatGroupId, msgIsFromGroup, userCommand
 };
 
 
-controller.getDrinksAmount = function(userId, chatGroupId, chatGroupTitle, targetIsGroup, minDrinkValue) {
+controller.getDrinksAmount = function(userId, chatGroupId, chatGroupTitle, targetIsGroup, alcoholic) {
     return new Promise(function (resolve, reject) {
         
-        var drinkType = (minDrinkValue > 0) ? 'alkoholillista juomaa' : 'alkoholitonta juomaa';
+        var drinkType = (alcoholic) ? 'alkoholillista juomaa' : 'alkoholitonta juomaa';
         if (targetIsGroup) {
 
             var dbFetches = [];
 
             // all-time drinks for group
-            dbFetches.push(db.getCount('drinks', { chatGroupId: chatGroupId }, null, minDrinkValue));
-            dbFetches.push(db.getCount('drinks', { chatGroupId: chatGroupId,}, moment().subtract(1, 'days').toJSON(), minDrinkValue));
-            dbFetches.push(db.getCount('drinks', { chatGroupId: chatGroupId }, moment().subtract(2, 'days').toJSON(), minDrinkValue));
+            dbFetches.push(db.getCount('drinks', { chatGroupId: chatGroupId }, null, alcoholic));
+            dbFetches.push(db.getCount('drinks', { chatGroupId: chatGroupId,}, moment().subtract(1, 'days').toJSON(), alcoholic));
+            dbFetches.push(db.getCount('drinks', { chatGroupId: chatGroupId }, moment().subtract(2, 'days').toJSON(), alcoholic));
 
             Promise.all(dbFetches).then(function fetchOk(counts) {
                 var output = chatGroupTitle + ' on tuhonnut yhteensä ' + counts[0] + ' ' + drinkType + ', joista ';
@@ -272,7 +272,7 @@ controller.getDrinksAmount = function(userId, chatGroupId, chatGroupTitle, targe
             });
         }
         else {
-            db.getCount('drinks', null, null, minDrinkValue)
+            db.getCount('drinks', null, null, alcoholic)
             .then(function fetchOk(drinkCount) {
                 botApi.sendMessage(userId, 'Kaikenkaikkiaan juotu ' + drinkCount + ' ' + drinkType + '.' );
                 resolve();
@@ -367,7 +367,7 @@ controller.getGroupAlcoholStatusReport = function(chatGroupId) {
 
                     _.eachRight(drinkersArray, function(userLog) {
                         log += _.padRight(userLog.userName, paddingLength, '.') + ' ' + userLog.alcoLevel + ' \u2030';
-                        log += ' (' + userLog.drinkCount24h + ' kpl / ' + userLog.drinkCount48h + ' kpl)\n';
+                        log += ' (' + userLog.drinkCount24h + ' / ' + userLog.drinkCount48h + ')\n';
                     });
                     resolve(log);
                 })
