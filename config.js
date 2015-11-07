@@ -6,58 +6,30 @@ var cfg = {}; // the cfg object which will be returned
 
 cfg.env = process.env.NODE_ENV || 'development';
 
-// Environment specific database configs
-var dbConfigs = {
-    development: {
-        client: 'postgresql',
-        connection: {
-            host: 'localhost',
-            user: 'borisbot',
-            port: 5432,
-            password: 'borisbot',
-            database: 'borisbot',
-            charset: 'utf8'
-        },
-        pool: { min: 0, max: 5 }
-    },
-
-    production: {
-        client: 'postgresql',
-        connection: process.env.DATABASE_URL
-    }
+// Database configs
+var dbPass = process.env.BORISBOT_DATABASE_PASSWORD || 'borisbot';
+var dbLocalConnection = {
+	host: 'localhost',
+	user: 'borisbot',
+	port: 5432,
+	password: dbPass,
+	database: 'borisbot',
+	charset: 'utf8'
 };
+var dbConnection = process.env.DATABASE_URL || dbLocalConnection;
 
-// Determine the correct database config
-if (_.isUndefined(dbConfigs[cfg.env])) {
-    cfg.db = dbConfigs.development;
-}
-else {
-    cfg.db = dbConfigs[cfg.env];
-}
+cfg.db = {
+    client: 'postgresql',
+    connection: dbConnection,
+	pool: { min: 0, max: 5 }
+};
 
 // Logging config
 var logOptions = {};
-if (cfg.env === 'production') {
-    logOptions.transports = [
-        new (winston.transports.Console)()
-    ];
-} else if (cfg.env === 'test') {
-    logOptions.transports = [
-        new (winston.transports.File)({
-            name: 'info-file',
-            filename: 'testlog-info.log',
-            level: 'info'
-        }),
-        new (winston.transports.Console)({
-            level: 'error'
-        })
-    ]
-} else {
-    logOptions.transports = [
-        new (winston.transports.Console)()
-    ];
-}
-    
+logOptions.transports = [
+    new (winston.transports.Console)()
+];
+
 cfg.logger = new (winston.Logger)(logOptions);
 
 // The timezone in which the bot outputs all the datetimes
@@ -85,6 +57,7 @@ cfg.tgApiUrl = 'https://api.telegram.org/bot' + cfg.tgApiKey;
 
 // URL where the Telegram webhook will send POST requests
 cfg.webhookUrl = process.env.BORISBOT_PUBLIC_URL + '/api/webhook';
+cfg.certificateFile = process.env.BORISBOT_PUBLIC_CERTIFICATE || null;
 
 // Plotly API configs
 cfg.plotlyUserName = process.env.BORISBOT_PLOTLY_USERNAME || "BorisBot";
