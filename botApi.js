@@ -63,7 +63,34 @@ botApi.sendPhoto = function (chatId, photo, options) {
     request.post(cfg.tgApiUrl + '/sendPhoto', opts);
 };
 
-
+botApi.setWebhook = function (webhookUrl, certificateFile) {
+	
+	// Delete old webhook
+	request.post(cfg.tgApiUrl + '/setWebhook', { form: {url: ''}}, function (error, response, body) {
+		if (error) logger.log('error', 'ERROR when trying to reach Telegram API', error);
+		else {
+			logger.log('debug', 'Webhook deleted! Response: ' + body);
+			
+			// Subscribe new webhook
+			certificateFile = typeof certificateFile !== 'undefined' ? certificateFile : null;
+			var opts = {
+				qs: {
+					url: webhookUrl
+				}
+			};
+			if (certificateFile) {
+				var content = _formatSendData('certificate', certificateFile);
+				opts.formData = content.formData;
+				opts.qs.certificate = content.formData;
+			}
+			request.post(cfg.tgApiUrl + '/setWebhook', opts, function (error, response, body) {
+					if (error) logger.log('error', 'ERROR when trying to reach Telegram API', error);
+					else logger.log('info', 'Webhook updated successfully! Response: ' + body);
+				}
+			);
+		}
+	});
+};
 
 // ## Internal functions
 //
