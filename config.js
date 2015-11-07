@@ -27,7 +27,7 @@ cfg.db = {
 // Logging config
 var logOptions = {};
 logOptions.transports = [
-    new (winston.transports.Console)()
+    new (winston.transports.Console)({'timestamp':true})
 ];
 
 cfg.logger = new (winston.Logger)(logOptions);
