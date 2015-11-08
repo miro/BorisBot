@@ -25,7 +25,7 @@ moment.tz.setDefault(cfg.botTimezone);
 
 module.exports = function dispatchTelegramEvent(msg) {
     return new Promise(function (resolve, reject) {
-        logger.log('info', 'Webhook event!', msg);
+        logger.log('debug', 'Webhook event! ', msg);
 
         if (!msg.text) {
             logger.log('info', 'No text on event, ignore');
@@ -163,11 +163,8 @@ module.exports = function dispatchTelegramEvent(msg) {
             // Takes one parameter, which changes the length of the graph
             case '/graafi':
             case '/histogrammi':
-                // Disabled until Plotly fix their API
-                //      drinkController.drawGraph(userId, chatGroupId, eventIsFromGroup, userCommandParams)
-                //      .then(resolve);
-                botApi.sendMessage(userId, 'Poistettu käytöstä toistaiseksi.');
-                resolve();
+                drinkController.drawGraph(userId, chatGroupId, eventIsFromGroup, userCommandParams)
+                .then(resolve);
             break;
 
             // Sends image of current state of Spänni's webcam
@@ -219,16 +216,6 @@ module.exports = function dispatchTelegramEvent(msg) {
                 .then(resolve);
             break;
 
-            case '/bottalk':
-                generic.talkAsBotToMainGroup(userId, userCommandParams);
-                resolve();
-            break;
-
-            case '/botprivatetalk':
-                generic.talkAsBotToUsersInMainGroup(userId, userCommandParams)
-                .then(resolve);
-            break;
-
             case '/jono':
                 generic.commandCount(userId).then(resolve);
             break;
@@ -259,6 +246,23 @@ module.exports = function dispatchTelegramEvent(msg) {
             case '/luomeemi':
                 memeController.dispatch(userId);
                 resolve();
+            break;
+
+            // Admin commands
+            
+            case '/bottalk':
+                generic.talkAsBotToMainGroup(userId, userCommandParams);
+                resolve();
+            break;
+
+            case '/botprivatetalk':
+                generic.talkAsBotToUsersInMainGroup(userId, userCommandParams)
+                .then(resolve);
+            break;
+            
+            case '/logs':
+                generic.sendLog(userId, userCommandParams)
+                .then(resolve);
             break;
             
             default:

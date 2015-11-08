@@ -1,5 +1,6 @@
 var _           = require('lodash');
 var winston     = require('winston');
+var moment      = require('moment-timezone');
 
 var cfg = {}; // the cfg object which will be returned
 
@@ -25,10 +26,30 @@ cfg.db = {
 };
 
 // Logging config
+cfg.logLocation = process.env.BORISBOT_LOGFILE || './logs/output.log';
+
 var logOptions = {};
-logOptions.transports = [
-    new (winston.transports.Console)({'timestamp':true})
-];
+if (cfg.env === 'production') {
+    logOptions.transports = [
+        new (winston.transports.File)({
+                filename: cfg.logLocation,
+                level: 'info',
+				timestamp: function() {
+					return moment().format('YYYY-MM-DD::HH:mm:SS');
+				},
+				formatter: function(options) {
+                    return options.timestamp() +'--'+ options.level.toUpperCase() +'--'+ (undefined !== options.message ? options.message : '');
+                },
+				maxsize: 15000000,
+				json: false
+				
+        })
+    ];
+} else {
+    logOptions.transports = [
+        new (winston.transports.Console)({'timestamp':true})
+    ];
+}
 
 cfg.logger = new (winston.Logger)(logOptions);
 
@@ -71,7 +92,8 @@ cfg.imgFlipPassword = process.env.BORISBOT_IMGFLIP_PASSWORD;
 cfg.plotlyDirectory = './plotly/';
 cfg.webcamDirectory = './webcam/';
 cfg.memeDirectory = './memes/';
-cfg.requiredDirectories = [cfg.plotlyDirectory, cfg.webcamDirectory, cfg.memeDirectory]; // these folders will be made with mkdir
+cfg.logDirectory = './logs/';
+cfg.requiredDirectories = [cfg.plotlyDirectory, cfg.webcamDirectory, cfg.memeDirectory, cfg.logDirectory]; // these folders will be made with mkdir
 
 // URL where webcam image will be downloaded
 cfg.webcamURL = process.env.BORISBOT_WEBCAM_URL;

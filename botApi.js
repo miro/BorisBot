@@ -17,6 +17,7 @@ botApi.sendMessage = function(chatId, text, replyMarkupObject) {
         var data = {};
         data.chat_id = chatId;
         data.text = text;
+        data.parse_mode = 'Markdown';
 
         // Is there a reply markup set?
         if (replyMarkupObject) {
@@ -27,7 +28,7 @@ botApi.sendMessage = function(chatId, text, replyMarkupObject) {
         }
 
         // Send the message to Telegram API
-        logger.log('info', chatId + ' -> "' + text + '"');
+        logger.log('debug', chatId + ' -> "' + text + '"');
         request.post(
             cfg.tgApiUrl + '/sendMessage',
             { form: data },
@@ -85,7 +86,10 @@ botApi.setWebhook = function (webhookUrl, certificateFile) {
 			}
 			request.post(cfg.tgApiUrl + '/setWebhook', opts, function (error, response, body) {
 					if (error) logger.log('error', 'ERROR when trying to reach Telegram API', error);
-					else logger.log('info', 'Webhook updated successfully! Response: ' + body);
+					else {
+						logger.log('info', 'Webhook updated successfully!')
+						logger.log('debug', 'Webhook response' + body);
+					}
 				}
 			);
 		}
