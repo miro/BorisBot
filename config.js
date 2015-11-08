@@ -1,63 +1,56 @@
 var _           = require('lodash');
 var winston     = require('winston');
+var moment      = require('moment-timezone');
 
 var cfg = {}; // the cfg object which will be returned
 
 
 cfg.env = process.env.NODE_ENV || 'development';
 
-// Environment specific database configs
-var dbConfigs = {
-    development: {
-        client: 'postgresql',
-        connection: {
-            host: 'localhost',
-            user: 'borisbot',
-            port: 5432,
-            password: 'borisbot',
-            database: 'borisbot',
-            charset: 'utf8'
-        },
-        pool: { min: 0, max: 5 }
-    },
+// Database configs
+var dbPass = process.env.BORISBOT_DATABASE_PASSWORD || 'borisbot';
+var dbLocalConnection = {
+	host: 'localhost',
+	user: 'borisbot',
+	port: 5432,
+	password: dbPass,
+	database: 'borisbot',
+	charset: 'utf8'
+};
+var dbConnection = process.env.DATABASE_URL || dbLocalConnection;
 
-    production: {
-        client: 'postgresql',
-        connection: process.env.DATABASE_URL
-    }
+cfg.db = {
+    client: 'postgresql',
+    connection: dbConnection,
+	pool: { min: 0, max: 5 }
 };
 
-// Determine the correct database config
-if (_.isUndefined(dbConfigs[cfg.env])) {
-    cfg.db = dbConfigs.development;
-}
-else {
-    cfg.db = dbConfigs[cfg.env];
-}
-
 // Logging config
+cfg.logLocation = process.env.BORISBOT_LOGFILE || './logs/output.log';
+
 var logOptions = {};
 if (cfg.env === 'production') {
     logOptions.transports = [
-        new (winston.transports.Console)()
-    ];
-} else if (cfg.env === 'test') {
-    logOptions.transports = [
         new (winston.transports.File)({
-            name: 'info-file',
-            filename: 'testlog-info.log',
-            level: 'info'
-        }),
-        new (winston.transports.Console)({
-            level: 'error'
+                filename: cfg.logLocation,
+                level: 'info',
+				timestamp: function() {
+					return moment().format('YYYY-MM-DD::HH:mm:SS');
+				},
+				formatter: function(options) {
+                    return options.timestamp() +'--'+ options.level.toUpperCase() +'--'+ (undefined !== options.message ? options.message : '');
+                },
+				maxsize: 15000000,
+				json: false
+				
         })
-    ]
+    ];
 } else {
     logOptions.transports = [
-        new (winston.transports.Console)()
+        new (winston.transports.Console)({'timestamp':true})
     ];
 }
-    
+
 cfg.logger = new (winston.Logger)(logOptions);
 
 // The timezone in which the bot outputs all the datetimes
@@ -85,6 +78,7 @@ cfg.tgApiUrl = 'https://api.telegram.org/bot' + cfg.tgApiKey;
 
 // URL where the Telegram webhook will send POST requests
 cfg.webhookUrl = process.env.BORISBOT_PUBLIC_URL + '/api/webhook';
+cfg.certificateFile = process.env.BORISBOT_PUBLIC_CERTIFICATE || null;
 
 // Plotly API configs
 cfg.plotlyUserName = process.env.BORISBOT_PLOTLY_USERNAME || "BorisBot";
@@ -98,7 +92,8 @@ cfg.imgFlipPassword = process.env.BORISBOT_IMGFLIP_PASSWORD;
 cfg.plotlyDirectory = './plotly/';
 cfg.webcamDirectory = './webcam/';
 cfg.memeDirectory = './memes/';
-cfg.requiredDirectories = [cfg.plotlyDirectory, cfg.webcamDirectory, cfg.memeDirectory]; // these folders will be made with mkdir
+cfg.logDirectory = './logs/';
+cfg.requiredDirectories = [cfg.plotlyDirectory, cfg.webcamDirectory, cfg.memeDirectory, cfg.logDirectory]; // these folders will be made with mkdir
 
 // URL where webcam image will be downloaded
 cfg.webcamURL = process.env.BORISBOT_WEBCAM_URL;

@@ -8,6 +8,7 @@ var logger      = cfg.logger;
 var Promise     = require('bluebird');
 var _           = require('lodash');
 var getPixels   = require('get-pixels');
+var fs          = require('fs');
 
 var generic = {};
 
@@ -222,6 +223,33 @@ generic.whichOne = function(targetId, userParams) {
         botApi.sendMessage(targetId, text);
         return;
     }
+};
+
+generic.sendLog= function(targetId, userParams) {
+    return new Promise(function(resolve, reject) {
+        if (utils.userIsAdmin(targetId)) {
+            fs.readFile(cfg.logLocation, function (err,data) {
+                if (err) {
+                    botApi.sendMessage(targetId, 'Lokia ei voitu avata!' + err);
+                    resolve();
+                } else {
+                    var message = '```';
+                    var linesToRead = parseInt(userParams) || 50;
+                    var lines = data.toString('utf-8').split('\n');
+                    var lastLine = (lines.length - linesToRead > 0) ? lines.length - linesToRead : 0;
+                    for(var i=lastLine; i<lines.length; i+=1) {
+                        message += lines[i];
+                        message += '\n';
+                    }
+                    message += '```';
+                    botApi.sendMessage(targetId, message);
+                    resolve();
+                }
+            });
+        } else {
+            resolve();
+        }
+    });
 };
 
 var _userHaveBotTalkRights = function(userId) {

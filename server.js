@@ -53,9 +53,6 @@ app.get('*', function(req, res, next) {
     next(err);
 });
 
-
-
-
 // # Error handlers
 app.use(function handle404(err, req, res, next) { // 404
     if (err.status !== 404) return next(err);
@@ -86,12 +83,7 @@ app.listen(cfg.serverPort, function() {
 });
 
 // Subscribe webhook
-request.post(cfg.tgApiUrl + '/setWebhook', { form: { url: cfg.webhookUrl }},
-    function (error, response, body) {
-        if (error) logger.log('error', 'ERROR when trying to reach Telegram API', error);
-        else logger.log('info', 'Webhook updated successfully!');
-    }
-);
+botApi.setWebhook(cfg.webhookUrl, cfg.certificateFile);
 
 // Run test sequence
 request(cfg.tgApiUrl + '/getMe', function (error, res, body) {
