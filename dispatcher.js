@@ -25,7 +25,7 @@ moment.tz.setDefault(cfg.botTimezone);
 
 module.exports = function dispatchTelegramEvent(msg) {
     return new Promise(function (resolve, reject) {
-        logger.log('debug', 'Webhook event! ', msg);
+        logger.log('info', 'Webhook event from id: %s, command: %s', msg.from.id, msg.text);
 
         if (!msg.text) {
             logger.log('info', 'No text on event, ignore');
@@ -266,7 +266,7 @@ module.exports = function dispatchTelegramEvent(msg) {
             break;
             
             default:
-                logger.log('info', '! Unknown command', msg.text);
+                logger.log('info', 'Unknown command: ' + msg.text);
                 resolve();
         }
     });

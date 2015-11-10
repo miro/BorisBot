@@ -85,6 +85,7 @@ generic.checkWebcamLightness = function() {
                 
                 // Calculate whole average
                 var threshold = Math.round(sum / x);
+                logger.log('debug', 'Clubroom lightness value: %d', threshold);
                 
                 if (threshold > 80) {   // TODO: Explore more specific thresholds
                 

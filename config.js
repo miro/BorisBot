@@ -4,6 +4,11 @@ var moment      = require('moment-timezone');
 
 var cfg = {}; // the cfg object which will be returned
 
+// The timezone in which the bot outputs all the datetimes
+cfg.botTimezone = 'Europe/Helsinki';
+
+// set default timezone to bot timezone
+moment.tz.setDefault(cfg.botTimezone);
 
 cfg.env = process.env.NODE_ENV || 'development';
 
@@ -35,7 +40,7 @@ if (cfg.env === 'production') {
                 filename: cfg.logLocation,
                 level: 'info',
 				timestamp: function() {
-					return moment().format('YYYY-MM-DD::HH:mm:SS');
+					return moment().format('YYYY-MM-DDTHH:mm:SS');
 				},
 				formatter: function(options) {
                     return options.timestamp() +'--'+ options.level.toUpperCase() +'--'+ (undefined !== options.message ? options.message : '');
@@ -47,14 +52,15 @@ if (cfg.env === 'production') {
     ];
 } else {
     logOptions.transports = [
-        new (winston.transports.Console)({'timestamp':true})
+        new (winston.transports.Console)({
+			timestamp: function() {
+				return moment().format('YYYY-MM-DDTHH:mm:SS');
+			},
+			level: 'debug'})
     ];
 }
 
 cfg.logger = new (winston.Logger)(logOptions);
-
-// The timezone in which the bot outputs all the datetimes
-cfg.botTimezone = 'Europe/Helsinki';
 
 cfg.allowedGroups = {
     testChatId: -13232285, // "BorisTest"

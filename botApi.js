@@ -1,11 +1,12 @@
-var cfg             = require('./config');
-var request         = require('request');
-var stream          = require('stream');
-var fs              = require('fs');
-var mime            = require('mime');
-var path            = require('path');
-var Promise         = require('bluebird');
-var logger          = cfg.logger;
+var cfg     = require('./config');
+var request = require('request');
+var stream  = require('stream');
+var fs      = require('fs');
+var mime    = require('mime');
+var path    = require('path');
+var Promise = require('bluebird');
+var _       = require('lodash');
+var logger  = cfg.logger;
 
 var botApi = {};
 
@@ -28,14 +29,16 @@ botApi.sendMessage = function(chatId, text, replyMarkupObject) {
         }
 
         // Send the message to Telegram API
-        logger.log('debug', chatId + ' -> "' + text + '"');
         request.post(
             cfg.tgApiUrl + '/sendMessage',
             { form: data },
             function(err, httpResponse, body) {
-                if (!err) {
+                if (!err && JSON.parse(body).ok) {
+                    logger.log('info', 'botApi: sending message to %s: "%s..."', chatId, text.substring(0, parseInt(text.length*0.2)));
                     resolve(body);
                 } else {
+                    logger.log('error', 'botApi: error when sending message: ' + err);
+                    logger.debug(body);
                     resolve(err);
                 }
             }
@@ -52,48 +55,41 @@ botApi.sendAction = function (chatId, action) {
     });
 };
 
-botApi.sendPhoto = function (chatId, photo, options) {
-    var opts = {
-        qs: options || {}
-    };
-    opts.qs.chat_id = chatId;
-    var content = _formatSendData('photo', photo);
+botApi.sendSticker = function (chatId, sticker, options) {
+    _sendFile('sticker', chatId, sticker, options);
+};
 
-    opts.formData = content.formData;
-    opts.qs.photo = content.file;
-    request.post(cfg.tgApiUrl + '/sendPhoto', opts);
+botApi.sendVideo = function (chatId, video, options) {
+    _sendFile('video', chatId, video, options);
+};
+
+botApi.sendPhoto = function (chatId, photo, options) {
+    _sendFile('photo', chatId, photo, options);
 };
 
 botApi.setWebhook = function (webhookUrl, certificateFile) {
-	
-	// Delete old webhook
-	request.post(cfg.tgApiUrl + '/setWebhook', { form: {url: ''}}, function (error, response, body) {
-		if (error) logger.log('error', 'ERROR when trying to reach Telegram API', error);
-		else {
-			logger.log('debug', 'Webhook deleted! Response: ' + body);
-			
-			// Subscribe new webhook
-			certificateFile = typeof certificateFile !== 'undefined' ? certificateFile : null;
-			var opts = {
-				qs: {
-					url: webhookUrl
-				}
-			};
-			if (certificateFile) {
-				var content = _formatSendData('certificate', certificateFile);
-				opts.formData = content.formData;
-				opts.qs.certificate = content.formData;
-			}
-			request.post(cfg.tgApiUrl + '/setWebhook', opts, function (error, response, body) {
-					if (error) logger.log('error', 'ERROR when trying to reach Telegram API', error);
-					else {
-						logger.log('info', 'Webhook updated successfully!')
-						logger.log('debug', 'Webhook response' + body);
-					}
-				}
-			);
-		}
-	});
+
+    // Delete old webhook
+    request.post(cfg.tgApiUrl + '/setWebhook', { form: {url: ''}}, function (error, response, body) {
+        if (error) logger.log('error', 'Telegram API unreachable: ', error);
+        else {
+            logger.log('debug', 'botApi: webhook deleted! Response: ' + body);
+            
+            // Subscribe new webhook
+            certificateFile = typeof certificateFile !== 'undefined' ? certificateFile : null;
+            
+            var opts = (certificateFile) ? _getFileOpts('certificate', certificateFile, {url: webhookUrl}) : { form: { url: webhookUrl } };
+            request.post(cfg.tgApiUrl + '/setWebhook', opts, function (error, response, body) {
+                    if (!error && JSON.parse(body).ok) {
+                        logger.log('info', 'botApi: webhook updated successfully!')
+                        logger.log('debug', 'botApi: webhook response' + body);
+                    }
+                    else {
+                        logger.log('error', 'Telegram API unreachable: ', error);
+                    }
+            });
+        }
+    });
 };
 
 // ## Internal functions
@@ -131,6 +127,25 @@ var _formatSendData = function (type, data) {
         formData: formData,
         file: fileId
     };
+};
+
+var _sendFile = function (type, chatId, file, options) {
+    var opts = {
+        qs: options || {}
+    };
+    var content = _formatSendData(type, file);
+    opts.formData = content.formData;
+    opts.qs[type] = content.file;
+    opts.qs.chat_id = chatId;
+    
+    request.post(cfg.tgApiUrl + '/send' + _.camelCase(type), opts, function(err, httpResponse, body) {
+        if (!err && JSON.parse(body).ok) {
+            logger.log('info', 'botApi: sent ' + type + ' to ' + chatId);
+        } else {
+            var errmsg = (err) ? ('Telegram API unreachable: ' + err) : ('botApi: error when sending' + type + ': ' + JSON.parse(body).description);
+            logger.log('error', errmsg);
+        }
+    });
 };
 
 module.exports = botApi;
