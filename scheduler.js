@@ -59,12 +59,13 @@ scheduler.addJob({
 });
 
 // "If there is lights on at clubroom"
-scheduler.addJob({
-    cronTime: '00 */5 * * * *',
-    onTick: function checkClubRoomStatus() {
-        generic.checkWebcamLightness();
-    },
-    timeZone: cfg.botTimezone
-});
+// BROKEN BY UNKNONWN REASON
+//scheduler.addJob({
+//    cronTime: '00 */5 * * * *',
+//    onTick: function checkClubRoomStatus() {
+//        generic.checkWebcamLightness();
+//    },
+//    timeZone: cfg.botTimezone
+//});
 
 module.exports = scheduler;
