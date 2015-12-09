@@ -248,6 +248,11 @@ module.exports = function dispatchTelegramEvent(msg) {
                 resolve();
             break;
 
+            case '/tili':
+                botApi.sendMessage(chatGroupId, 'FI78 1439 3500 0219 70');
+                resolve();
+            break;
+
             // Admin commands
             
             case '/bottalk':
@@ -264,7 +269,7 @@ module.exports = function dispatchTelegramEvent(msg) {
                 generic.sendLog(userId, userCommandParams)
                 .then(resolve);
             break;
-            
+
             default:
                 logger.log('info', 'Unknown command: ' + msg.text);
                 resolve();

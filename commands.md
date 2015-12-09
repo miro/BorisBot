@@ -8,3 +8,4 @@ otinko - juomalogi
 promillet - kavereidesi ja itsesi tila
 cam - Kerthon tila
 help - kaikki, mitä sinun tarvitsee tietää
+tili - Spinnin tilinumero
