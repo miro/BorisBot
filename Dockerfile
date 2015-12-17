@@ -4,8 +4,7 @@ RUN     apt-get update
 RUN     apt-get install -y nodejs npm
 
 COPY    package.json /src/package.json
-RUN     cd /src
-RUN     npm install
+RUN     cd /src; npm install
 
 COPY    . /src
 
