@@ -13,12 +13,11 @@ moment.tz.setDefault(cfg.botTimezone);
 cfg.env = process.env.NODE_ENV || 'development';
 
 // Database configs
-var dbPass = process.env.BORISBOT_DATABASE_PASSWORD || 'borisbot';
 var dbLocalConnection = {
-	host: 'localhost',
+	host: process.env.POSTGRES_PORT_5432_TCP_ADDR || 'localhost',
 	user: 'borisbot',
-	port: 5432,
-	password: dbPass,
+	port: process.env.POSTGRES_PORT_5432_TCP_PORT || 5432,
+	password: process.env.BORISBOT_DATABASE_PASSWORD || 'borisbot',
 	database: 'borisbot',
 	charset: 'utf8'
 };
