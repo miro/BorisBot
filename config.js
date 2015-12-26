@@ -38,7 +38,7 @@ if (cfg.env === 'production') {
     logOptions.transports = [
         new (winston.transports.File)({
                 filename: cfg.logLocation,
-                level: 'info',
+                level: 'error',
 				timestamp: function() {
 					return moment().format('YYYY-MM-DDTHH:mm:SS');
 				},
