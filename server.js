@@ -94,7 +94,9 @@ request(cfg.tgApiUrl + '/getMe', function (error, res, body) {
     logger.log('info', 'I Am', botName + ' / @' + botUserName);
 });
 
-botApi.sendMessage(cfg.allowedGroups.testChatId, 'Reboot! ' + Date() + '\nWebhook set to ' + cfg.webhookUrl);
+if (cfg.env !== 'production') {
+    botApi.sendMessage(cfg.allowedGroups.testChatId, 'Reboot! ' + Date() + '\nWebhook set to ' + cfg.webhookUrl);
+}
 
 // Download meme-object
 memeController.getMemes();
