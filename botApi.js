@@ -81,7 +81,6 @@ botApi.setWebhook = function (webhookUrl, certificateFile) {
             if (certificateFile) {
                 opts.formData = _formatSendData('certificate', certificateFile).formData;
             }
-            var opts = (certificateFile) ? _getFileOpts('certificate', certificateFile, {url: webhookUrl}) : { form: { url: webhookUrl } };
             request.post(cfg.tgApiUrl + '/setWebhook', opts, function (error, response, body) {
                     if (!error && JSON.parse(body).ok) {
                         logger.log('info', 'botApi: webhook updated successfully!')
