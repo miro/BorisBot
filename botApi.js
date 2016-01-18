@@ -12,12 +12,12 @@ var botApi = {};
 // ## Public functions
 //
 
-botApi.sendMessage = function(chatId, text, replyMarkupObject) {
+botApi.sendMessage = function(chatId, text, replyMarkupObject, parseMode) {
     return new Promise(function(resolve, reject) {
         var data = {};
         data.chat_id = chatId;
         data.text = text;
-        data.parse_mode = 'Markdown';
+        data.parse_mode = parseMode || '';
 
         // Is there a reply markup set?
         if (replyMarkupObject) {
