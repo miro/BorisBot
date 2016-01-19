@@ -271,7 +271,7 @@ module.exports = function dispatchTelegramEvent(msg) {
             break;
 
             default:
-                logger.log('info', 'Unknown command: ' + msg.text);
+                logger.log('debug', 'Unknown command: ' + msg.text);
                 resolve();
         }
     });
