@@ -60,7 +60,7 @@ module.exports = function dispatchTelegramEvent(msg) {
 
         // Check if event was not command
         if (msg.text.charAt(0) !== '/') {
-            textController.addMessage(msg.text);
+            textController.addMessage(chatGroupId, msg.text);
             return resolve();
         }
         
@@ -263,7 +263,7 @@ module.exports = function dispatchTelegramEvent(msg) {
                     botApi.sendMessage(userId, 'Tämä komento toimii vain ryhmästä!');
                     resolve();
                 } else {
-                    botApi.sendMessage(chatGroupId, textController.getSummary());
+                    botApi.sendMessage(chatGroupId, textController.getSummary(chatGroupId));
                     resolve();
                 }
             break;

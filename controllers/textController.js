@@ -8,25 +8,29 @@ var logger  = cfg.logger;
 var controller = {};
 
 controller.hoursToExpire = 24;
-controller.history = [];
+controller.history = {};
 
-controller.addMessage = function(msg) {
-    if (msg === '') {
-        logger.log('debug', 'textController: message is empty');
+controller.addMessage = function(chatId, msg) {
+    if (_.isNull(chatId) || msg === '') {
+        logger.log('debug', 'textController: message was empty or didn´t come from group chat');
         return false;
     } else {
-        controller.history.unshift([moment().unix(), msg]);
+        if (_.isUndefined(controller.history[chatId])) {
+            controller.history[chatId] = [];
+        }
+        controller.history[chatId].unshift([moment().unix(), msg]);
         return true;
     }
 }
 
-controller.getSummary = function() {
-    if (_.isEmpty(controller.history)) {
-        return 'Tiivistettävää ei löydy.'
+controller.getSummary = function(chatId) {
+    logger.log('debug', controller.history);
+    if (_.isUndefined(controller.history[chatId]) || _.isEmpty(controller.history[chatId])) {
+        return 'Tiivistettävää ei löydy.';
     } else {
         // TODO: Create more complex algorithm
-        var dice = Math.floor(Math.random() * controller.history.length)
-        return controller.history[dice][1];
+        var dice = Math.floor(Math.random() * controller.history[chatId].length)
+        return controller.history[chatId][dice][1];
     }
 }
 
@@ -35,13 +39,15 @@ controller.deleteExpired = function() {
         return;
     } else {
         var expired = moment().unix() - (controller.hoursToExpire*3600);
-        for (i=controller.history.length-1; i>=0; i--) {
-            if (controller.history[i][0] < expired) {
-                controller.history.pop();
-            } else {
-                return;
+        _.forEach(controller.history, function(groupMsgs) {
+            for (i=groupMsgs.length-1; i>=0; i--) {
+                if (groupMsgs[i][0] < expired) {
+                    groupMsgs.pop();
+                } else {
+                    return;
+                }
             }
-        }
+        });
         return;
     }
 }
