@@ -18,6 +18,7 @@ var userController      = require('./controllers/userController');
 var drinkController     = require('./controllers/drinkController');
 var ethanolController   = require('./controllers/ethanolController');
 var memeController      = require('./controllers/memeController');
+var textController      = require('./controllers/textController');
 
 // set default timezone to bot timezone
 moment.tz.setDefault(cfg.botTimezone);
@@ -25,12 +26,11 @@ moment.tz.setDefault(cfg.botTimezone);
 
 module.exports = function dispatchTelegramEvent(msg) {
     return new Promise(function (resolve, reject) {
-        logger.log('info', 'Webhook event from id: %s, command: %s', msg.from.id, msg.text);
+        logger.log('debug', 'Webhook event from id: %s, message: %s', msg.from.id, msg.text);
 
         if (!msg.text) {
-            logger.log('info', 'No text on event, ignore');
-            resolve();
-            return;
+            logger.log('debug', 'No text on event, ignore');
+            return resolve();
         }
 
         // Parse metadata from the message
@@ -48,17 +48,22 @@ module.exports = function dispatchTelegramEvent(msg) {
         var userIsIgnored = cfg.ignoredUsers.indexOf(userId) >= 0;
         if (userIsIgnored) {
             // do nothing
-            logger.log('info', '! Ignored user tried to trigger command');
-            resolve();
-            return;
+            logger.log('warn', 'Ignored user tried to use bot, username: %s', userCallName);
+            return resolve();
         }
-
+        
+        // check if message was reply to bot's message
         if (msg.reply_to_message) {
             replys.eventEmitter.emit(msg.reply_to_message.message_id, msg.text);
-            resolve();
-            return;
+            return resolve();
         }
 
+        // Check if event was not command
+        if (msg.text.charAt(0) !== '/') {
+            textController.addMessage(msg.text);
+            return resolve();
+        }
+        
         // Parse command & possible parameters
         var userInput = msg.text.split(' ');
         var userCommand = userInput.shift().toLowerCase().split('@')[0];
@@ -252,7 +257,17 @@ module.exports = function dispatchTelegramEvent(msg) {
                 botApi.sendMessage(chatGroupId, 'FI78 1439 3500 0219 70');
                 resolve();
             break;
-
+            
+            case '/tiivista':
+                if (!eventIsFromGroup) {
+                    botApi.sendMessage(userId, 'Tämä komento toimii vain ryhmästä!');
+                    resolve();
+                } else {
+                    botApi.sendMessage(chatGroupId, textController.getSummary());
+                    resolve();
+                }
+            break;
+            
             // Admin commands
             
             case '/bottalk':

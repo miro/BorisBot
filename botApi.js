@@ -73,7 +73,7 @@ botApi.setWebhook = function (webhookUrl, certificateFile) {
     request.post(cfg.tgApiUrl + '/setWebhook', { form: {url: ''}}, function (error, response, body) {
         if (error) logger.log('error', 'Telegram API unreachable: ', error);
         else {
-            logger.log('debug', 'botApi: webhook deleted! Response: ' + body);
+            logger.log('debug', 'botApi: previous webhook deleted, response: ' + body);
             
             // Subscribe new webhook
             certificateFile = typeof certificateFile !== 'undefined' ? certificateFile : null;

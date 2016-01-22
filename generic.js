@@ -57,6 +57,10 @@ generic.webcam = function(userId, chatGroupId, eventIsFromGroup) {
 
 generic.checkWebcamLightness = function() {
     return new Promise(function(resolve,reject) {
+        if (_.isUndefined(cfg.webcamURL)) {
+            logger.log('warn', 'Unable to calculate clubroom lightness, webcamURL is undefined');
+            return resolve();
+        }
         utils.downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg')
         .then(function() {
             getPixels(cfg.webcamDirectory + 'webcam.jpg', function(err,pixels) {
@@ -196,6 +200,8 @@ generic.help = function(userId) {
     \n/promillet - Tulostan ryhmän tämänhetkiset promilletasot.\
     \n\
     \n/tee - Kirjaan nauttimasi kupillisen tietokantaani.\
+    \n\
+    \n/tili - Lähetän sinulle Spinnin tilinumeron\
     \n\
     \n/virvokkeita - Näytän kaikki nautitut alkoholittomat juomat.\
     \n\

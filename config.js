@@ -63,8 +63,8 @@ cfg.logger = new (winston.Logger)(logOptions);
 
 cfg.allowedGroups = {
     testChatId: -13232285, // "BorisTest"
-    mainChatId: -8573374, // "SpänniMobi"
-};
+    mainChatId: (cfg.env === 'production') ? -8573374 : -13232285   // if env is production, main chat is "SpänniMobi"
+};                                                                  // else main chat is "BorisTest"
 
 // List of users who can execute "admin only" commands
 cfg.adminUsers = [24175254, 100100780];

@@ -58,13 +58,31 @@ scheduler.addJob({
     timeZone: cfg.botTimezone
 });
 
-// "If there is lights on at clubroom"
+// "Check clubroom's lightness value on weekdays"
 scheduler.addJob({
-    cronTime: '00 */5 * * * *',
+    cronTime: '00 */5 0-8,15-23 * * 1-5',
     onTick: function checkClubRoomStatus() {
         generic.checkWebcamLightness();
     },
     timeZone: cfg.botTimezone
+});
+
+// "Check clubroom's lightness value on weekends"
+scheduler.addJob({
+    cronTime: '00 */5 * * * 6-7',
+    onTick: function checkClubRoomStatus() {
+        generic.checkWebcamLightness();
+    },
+    timeZone: cfg.botTimeZone
+});
+
+// "Delete expired messages from textController
+scheduler.addJob({
+    cronTime: '00 00 * * * *',
+    onTick: function deleteExpiredMessages() {
+        textController.deleteExpired();
+    },
+    timeZone: cfg.botTimeZone
 });
 
 module.exports = scheduler;
