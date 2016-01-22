@@ -8,6 +8,7 @@ var botApi          = require('./botApi');
 var cfg             = require('./config');
 var generic         = require('./generic');
 var drinkController = require('./controllers/drinkController');
+var textController  = require('./controllers/textController');
 
 // set default timezone to bot timezone
 moment.tz.setDefault(cfg.botTimezone);
