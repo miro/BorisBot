@@ -9,6 +9,7 @@ var Promise     = require('bluebird');
 var _           = require('lodash');
 var getPixels   = require('get-pixels');
 var fs          = require('fs');
+var emoji       = require('node-emoji');
 
 var generic = {};
 
@@ -96,7 +97,8 @@ generic.checkWebcamLightness = function() {
                     // Lights on, check if they were already on
                     if (!generic.webcamLightsOn) {
                         logger.log('info', 'Webcam detected lights at clubroom, threshold: ' + threshold);
-                        botApi.sendMessage(cfg.allowedGroups.mainChatId, 'Kerholla räpsähti valot päälle!');
+                        var bulb = emoji.get(':bulb:');
+                        botApi.sendMessage(cfg.allowedGroups.mainChatId, bulb+bulb+bulb);
                         generic.webcamLightsOn = true;
                     }
                     resolve();
