@@ -4,16 +4,20 @@ var moment      = require('moment-timezone');
 
 var cfg = {}; // the cfg object which will be returned
 
+// The timezone in which the bot outputs all the datetimes
+cfg.botTimezone = 'Europe/Helsinki';
+
+// set default timezone to bot timezone
+moment.tz.setDefault(cfg.botTimezone);
 
 cfg.env = process.env.NODE_ENV || 'development';
 
 // Database configs
-var dbPass = process.env.BORISBOT_DATABASE_PASSWORD || 'borisbot';
 var dbLocalConnection = {
-	host: 'localhost',
+	host: process.env.POSTGRES_PORT_5432_TCP_ADDR || 'localhost',
 	user: 'borisbot',
-	port: 5432,
-	password: dbPass,
+	port: process.env.POSTGRES_PORT_5432_TCP_PORT || 5432,
+	password: process.env.BORISBOT_DATABASE_PASSWORD || 'borisbot',
 	database: 'borisbot',
 	charset: 'utf8'
 };
@@ -33,9 +37,9 @@ if (cfg.env === 'production') {
     logOptions.transports = [
         new (winston.transports.File)({
                 filename: cfg.logLocation,
-                level: 'info',
+                level: 'error',
 				timestamp: function() {
-					return moment().format('YYYY-MM-DD::HH:mm:SS');
+					return moment().format('YYYY-MM-DDTHH:mm:SS');
 				},
 				formatter: function(options) {
                     return options.timestamp() +'--'+ options.level.toUpperCase() +'--'+ (undefined !== options.message ? options.message : '');
@@ -47,19 +51,20 @@ if (cfg.env === 'production') {
     ];
 } else {
     logOptions.transports = [
-        new (winston.transports.Console)({'timestamp':true})
+        new (winston.transports.Console)({
+			timestamp: function() {
+				return moment().format('YYYY-MM-DDTHH:mm:SS');
+			},
+			level: 'debug'})
     ];
 }
 
 cfg.logger = new (winston.Logger)(logOptions);
 
-// The timezone in which the bot outputs all the datetimes
-cfg.botTimezone = 'Europe/Helsinki';
-
 cfg.allowedGroups = {
     testChatId: -13232285, // "BorisTest"
-    mainChatId: -8573374, // "SpänniMobi"
-};
+    mainChatId: (cfg.env === 'production') ? -8573374 : -13232285   // if env is production, main chat is "SpänniMobi"
+};                                                                  // else main chat is "BorisTest"
 
 // List of users who can execute "admin only" commands
 cfg.adminUsers = [24175254, 100100780];

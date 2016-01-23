@@ -9,6 +9,7 @@ var Promise     = require('bluebird');
 var _           = require('lodash');
 var getPixels   = require('get-pixels');
 var fs          = require('fs');
+var emoji       = require('node-emoji');
 
 var generic = {};
 
@@ -57,6 +58,10 @@ generic.webcam = function(userId, chatGroupId, eventIsFromGroup) {
 
 generic.checkWebcamLightness = function() {
     return new Promise(function(resolve,reject) {
+        if (_.isUndefined(cfg.webcamURL)) {
+            logger.log('warn', 'Unable to calculate clubroom lightness, webcamURL is undefined');
+            return resolve();
+        }
         utils.downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg')
         .then(function() {
             getPixels(cfg.webcamDirectory + 'webcam.jpg', function(err,pixels) {
@@ -85,13 +90,15 @@ generic.checkWebcamLightness = function() {
                 
                 // Calculate whole average
                 var threshold = Math.round(sum / x);
+                logger.log('debug', 'Clubroom lightness value: %d', threshold);
                 
                 if (threshold > 80) {   // TODO: Explore more specific thresholds
                 
                     // Lights on, check if they were already on
                     if (!generic.webcamLightsOn) {
                         logger.log('info', 'Webcam detected lights at clubroom, threshold: ' + threshold);
-                        botApi.sendMessage(cfg.allowedGroups.mainChatId, 'Kerholla räpsähti valot päälle!');
+                        var bulb = emoji.get(':bulb:');
+                        botApi.sendMessage(cfg.allowedGroups.mainChatId, bulb+bulb+bulb);
                         generic.webcamLightsOn = true;
                     }
                     resolve();
@@ -194,7 +201,11 @@ generic.help = function(userId) {
     \n\
     \n/promillet - Tulostan ryhmän tämänhetkiset promilletasot.\
     \n\
+    \n/puhelin - Tulostan Spinnin puhelinnumeron.\
+    \n\
     \n/tee - Kirjaan nauttimasi kupillisen tietokantaani.\
+    \n\
+    \n/tili - Lähetän sinulle Spinnin tilinumeron.\
     \n\
     \n/virvokkeita - Näytän kaikki nautitut alkoholittomat juomat.\
     \n\
@@ -230,7 +241,7 @@ generic.sendLog= function(targetId, userParams) {
         if (utils.userIsAdmin(targetId)) {
             fs.readFile(cfg.logLocation, function (err,data) {
                 if (err) {
-                    botApi.sendMessage(targetId, 'Lokia ei voitu avata!' + err);
+                    botApi.sendMessage(targetId, 'Lokia ei voitu avata! ' + err);
                     resolve();
                 } else {
                     var message = '```';
@@ -242,7 +253,7 @@ generic.sendLog= function(targetId, userParams) {
                         message += '\n';
                     }
                     message += '```';
-                    botApi.sendMessage(targetId, message);
+                    botApi.sendMessage(targetId, message, null, 'Markdown');
                     resolve();
                 }
             });
