@@ -199,9 +199,11 @@ generic.help = function(userId) {
     \n\
     \n/promillet - Tulostan ryhmän tämänhetkiset promilletasot.\
     \n\
+    \n/puhelin - Tulostan Spinnin puhelinnumeron.\
+    \n\
     \n/tee - Kirjaan nauttimasi kupillisen tietokantaani.\
     \n\
-    \n/tili - Lähetän sinulle Spinnin tilinumeron\
+    \n/tili - Lähetän sinulle Spinnin tilinumeron.\
     \n\
     \n/virvokkeita - Näytän kaikki nautitut alkoholittomat juomat.\
     \n\

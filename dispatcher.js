@@ -253,8 +253,18 @@ module.exports = function dispatchTelegramEvent(msg) {
                 resolve();
             break;
 
+            case '/pankkitili':
+            case '/tilinumero':
             case '/tili':
-                botApi.sendMessage(chatGroupId, 'FI78 1439 3500 0219 70');
+                var targetId = (eventIsFromGroup) ? chatGroupId : userId;
+                botApi.sendMessage(targetId, 'FI78 1439 3500 0219 70');
+                resolve();
+            break;
+            
+            case '/puhelin':
+            case '/puh':
+                var targetId = (eventIsFromGroup) ? chatGroupId : userId;
+                botApi.sendMessage(targetId, '041 369 2262');
                 resolve();
             break;
             
