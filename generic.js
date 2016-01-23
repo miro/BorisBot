@@ -239,7 +239,7 @@ generic.sendLog= function(targetId, userParams) {
         if (utils.userIsAdmin(targetId)) {
             fs.readFile(cfg.logLocation, function (err,data) {
                 if (err) {
-                    botApi.sendMessage(targetId, 'Lokia ei voitu avata!' + err);
+                    botApi.sendMessage(targetId, 'Lokia ei voitu avata! ' + err);
                     resolve();
                 } else {
                     var message = '```';
@@ -251,7 +251,7 @@ generic.sendLog= function(targetId, userParams) {
                         message += '\n';
                     }
                     message += '```';
-                    botApi.sendMessage(targetId, message);
+                    botApi.sendMessage(targetId, message, null, 'Markdown');
                     resolve();
                 }
             });
