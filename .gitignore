@@ -29,8 +29,8 @@ node_modules
 # Sublime stuff
 *.sublime-*
 
-# Plotly work dir
-plotly
+# Editor config
+.editorconfig
 
-# Webcam dir
-webcam
+# Bot's resource folder
+resources
