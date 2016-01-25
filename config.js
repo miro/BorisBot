@@ -43,7 +43,7 @@ logOptions.transports = [
 
 // Add logs also to file if env is production
 if (cfg.env === 'production') {
-    logOptions.transports = [
+    logOptions.transports.push(
         new (winston.transports.File)({
                 filename: cfg.logLocation,
                 level: 'info',
@@ -56,7 +56,7 @@ if (cfg.env === 'production') {
 				maxsize: 10000000,
 				json: false
         })
-    ];
+    );
 }
 
 cfg.logger = new (winston.Logger)(logOptions);
