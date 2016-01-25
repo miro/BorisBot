@@ -1,0 +1,61 @@
+{
+    "hertsi" : {
+        "name": "Hertsi",
+        "url": "http://www.sodexo.fi/ruokalistat/output/daily_json/12812/",
+        "open": {
+            "from": 1030,
+            "to": 1500
+        }
+        
+    },
+
+    "juvenes" : {
+        "url": "http://www.juvenes.fi/DesktopModules/Talents.LunchMenu/LunchMenuServices.asmx/GetMenuByDate",
+        "newton" : {
+            "name": "Newton",
+            "open": {
+                "from": 1030,
+                "to": 1500
+            }
+        },
+
+        "sååsbar" : {
+            "name": "Sååsbar",
+            "open": {
+                "from": 1500,
+                "to": 1900
+            }
+        },
+
+        "fusion" : {
+            "name": "Fusion",
+            "open": {
+                "from": 1030,
+                "to": 1900
+            }
+        },
+
+        "konehuone" : {
+            "name": "Konehuone",
+            "open": {
+                "from": 1030,
+                "to": 1430
+            }
+        }
+    },
+
+    "reaktori" : {
+        "name": "Reaktori",
+        "url": "http://www.amica.fi/modules/json/json/Index",
+        "open": [
+            {
+                "from": 1030,
+                "to": 1500
+            },
+            {
+                "from": 1600,
+                "to": 1800
+            }
+        ]
+    }
+}

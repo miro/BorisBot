@@ -32,5 +32,3 @@ node_modules
 # Editor config
 .editorconfig
 
-# Bot's resource folder
-resources
