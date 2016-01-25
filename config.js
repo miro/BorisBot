@@ -33,29 +33,29 @@ cfg.db = {
 cfg.logLocation = process.env.BORISBOT_LOGFILE || './logs/output.log';
 
 var logOptions = {};
+logOptions.transports = [
+    new (winston.transports.Console)({
+        timestamp: function() {
+            return moment().format('YYYY-MM-DDTHH:mm:SS');
+        },
+        level: 'debug'})
+];
+
+// Add logs also to file if env is production
 if (cfg.env === 'production') {
     logOptions.transports = [
         new (winston.transports.File)({
                 filename: cfg.logLocation,
-                level: 'error',
+                level: 'info',
 				timestamp: function() {
 					return moment().format('YYYY-MM-DDTHH:mm:SS');
 				},
 				formatter: function(options) {
                     return options.timestamp() +'--'+ options.level.toUpperCase() +'--'+ (undefined !== options.message ? options.message : '');
                 },
-				maxsize: 15000000,
+				maxsize: 10000000,
 				json: false
-				
         })
-    ];
-} else {
-    logOptions.transports = [
-        new (winston.transports.Console)({
-			timestamp: function() {
-				return moment().format('YYYY-MM-DDTHH:mm:SS');
-			},
-			level: 'debug'})
     ];
 }
 
