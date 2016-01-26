@@ -9,9 +9,9 @@ controller = {};
 
 controller.getString = function () {
     return new Promise(function(resolve,reject)  {
-        reaktori.getMeals()
+        juvenes.getMeals()
         .then(function(meals) {
-            var s = '*Reaktori:* ' + meals.join(', ');
+            var s = '*Juvenes:* ' + meals.join(', ');
             return resolve(s);
         });
     });

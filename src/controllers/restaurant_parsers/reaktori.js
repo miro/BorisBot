@@ -22,7 +22,7 @@ parser.getMeals = function () {
             })
             .error(function(error) {
                 logger.log('error', 'Error when requesting Reaktori JSON: %s', error);
-                return resolve('Virhe haettaessa Reaktorin ruokalistaa!');
+                return resolve(['Virhe haettaessa Reaktorin ruokalistaa!']);
             });
         } else {
             return resolve(parser.meals);
