@@ -1,10 +1,10 @@
-var restaurant  = require('../../../resources/restaurants').hertsi;
-var cfg         = require('../../config');
-var logger      = cfg.logger;
-
 var request     = require('request');
 var moment      = require('moment-timezone');
 var Promise     = require('bluebird');
+
+var restaurant  = require('../../../resources/restaurants').hertsi;
+var cfg         = require('../../config');
+var logger      = cfg.logger;
 
 moment.tz.setDefault(cfg.botTimezone);
 

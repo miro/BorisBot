@@ -1,11 +1,11 @@
-var restaurant  = require('../../../resources/restaurants').reaktori;
-var cfg         = require('../../config');
-var logger      = cfg.logger;
-
 var request     = require('request');
 var moment      = require('moment-timezone');
 var _           = require('lodash');
 var Promise     = require('bluebird');
+
+var restaurant  = require('../../../resources/restaurants').reaktori;
+var cfg         = require('../../config');
+var logger      = cfg.logger;
 
 moment.tz.setDefault(cfg.botTimezone);
 
@@ -82,8 +82,7 @@ var _parseMenu = function (menu) {
     var meals = [];
     for (var i in menu) {
         if (categories.indexOf(menu[i].Name) < 0) continue; // skip the unwanted categories
-        var meal = menu[i].Components[0];
-        meals.push(_cleaner(meal));
+        meals.push(_cleaner(menu[i].Components[0]));
     };
     return meals;
 };
@@ -93,11 +92,9 @@ var _cleaner = function (meal) {
 
     // some restaurants include (M,G) -stuff in
     // the names of meals, this removes them
-    var split = meal.split('(');
 
     // also some names of meals had useless whitespace
-    var output = split[0].trim();
-    return output;
+    return meal.split('(')[0].trim();
 };
 
 module.exports = parser;

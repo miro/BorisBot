@@ -1,17 +1,24 @@
-var juvenes  = require('./restaurant_parsers/juvenes');
-var hertsi   = require('./restaurant_parsers/hertsi');
-var reaktori = require('./restaurant_parsers/reaktori');
-
 var Promise = require('bluebird');
 var _       = require('lodash');
 
+var juvenes     = require('./restaurant_parsers/juvenes');
+var hertsi      = require('./restaurant_parsers/hertsi');
+var reaktori    = require('./restaurant_parsers/reaktori');
+
 controller = {};
 
-controller.getString = function () {
+controller.getAllMenusForToday = function () {
     return new Promise(function(resolve,reject)  {
-        hertsi.getMeals()
-        .then(function(meals) {
-            var s = '*Hertsi:* ' + meals.join(', ');
+        
+        var restaurantPromises = []
+        restaurantPromises.push(reaktori.getMeals());
+        restaurantPromises.push(juvenes.getMeals('newton'));
+        restaurantPromises.push(hertsi.getMeals());
+        
+        Promise.all(restaurantPromises).then(function(meals) {
+            var s = '*Reaktori:* ' + meals[0].join(', ') + '\n\n'
+                + '*Juvenes:* ' + meals[1].join(', ') + '\n\n'
+                + '*Hertsi:* ' + meals[2].join(', ');
             return resolve(s);
         });
     });

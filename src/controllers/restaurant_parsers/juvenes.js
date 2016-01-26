@@ -1,10 +1,10 @@
-var restaurant  = require('../../../resources/restaurants').juvenes;
-var cfg         = require('../../config');
-var logger      = cfg.logger;
-
 var request     = require('request');
 var moment      = require('moment-timezone');
 var Promise     = require('bluebird');
+
+var restaurant  = require('../../../resources/restaurants').juvenes;
+var cfg         = require('../../config');
+var logger      = cfg.logger;
 
 moment.tz.setDefault(cfg.botTimezone);
 
@@ -35,9 +35,9 @@ var parser = {
     }
 };
 
-parser.getMeals = function() {
+parser.getMeals = function(restaurant) {
     return new Promise(function(resolve,reject) {
-        _parser(parser.newton.id)
+        _parser(parser[restaurant].id)
         .then(function(meals) {
             return resolve(meals);
         })
