@@ -1,7 +1,7 @@
-
-var restaurant = require('../resources/restaurants').juvenes;
-var request    = require('request');
-var moment     = require('moment-timezone');
+var restaurant  = require('../../../resources/restaurants').juvenes;
+var cfg         = require('../../config');
+var request     = require('request');
+var moment      = require('moment-timezone');
 
 moment.tz.setDefault(cfg.botTimezone);
 

@@ -14,11 +14,12 @@ var generic     = require('./generic');
 var replys      = require('./replys');
 var logger      = cfg.logger;
 
-var userController      = require('./controllers/userController');
-var drinkController     = require('./controllers/drinkController');
-var ethanolController   = require('./controllers/ethanolController');
-var memeController      = require('./controllers/memeController');
-var textController      = require('./controllers/textController');
+var userController          = require('./controllers/userController');
+var drinkController         = require('./controllers/drinkController');
+var ethanolController       = require('./controllers/ethanolController');
+var memeController          = require('./controllers/memeController');
+var textController          = require('./controllers/textController');
+var restaurantController    = require('./controllers/restaurantController');
 
 // set default timezone to bot timezone
 moment.tz.setDefault(cfg.botTimezone);
@@ -276,6 +277,14 @@ module.exports = function dispatchTelegramEvent(msg) {
                     botApi.sendMessage(chatGroupId, textController.getSummary(chatGroupId));
                     resolve();
                 }
+            break;
+            
+            case '/menu':
+                restaurantController.getString()
+                .then(function(meals) {
+                    botApi.sendMessage(userId, meals, null, 'Markdown');
+                    resolve();
+                });
             break;
             
             // Admin commands
