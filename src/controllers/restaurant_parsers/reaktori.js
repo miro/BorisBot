@@ -3,38 +3,17 @@ var moment      = require('moment-timezone');
 var _           = require('lodash');
 var Promise     = require('bluebird');
 
-var restaurant  = require('../../../resources/restaurants').reaktori;
+var reaktori    = require('../../../resources/restaurants').reaktori;
 var cfg         = require('../../config');
 var logger      = cfg.logger;
 
 moment.tz.setDefault(cfg.botTimezone);
 
-var parser = {};
-
-parser.meals = [];
-
-parser.getMeals = function () {
-    return new Promise(function(resolve,reject) {
-        if (_.isEmpty(parser.meals)) {
-            _parseMeals()
-            .then(function(){
-                return resolve(parser.meals);
-            })
-            .error(function(error) {
-                logger.log('error', 'Error when requesting Reaktori JSON: %s', error);
-                return resolve(['Virhe haettaessa Reaktorin ruokalistaa!']);
-            });
-        } else {
-            return resolve(parser.meals);
-        }
-    });
-}
-
-var _parseMeals = function() {
+parser = function() {
     return new Promise(function(resolve,reject) {
         var date = moment().format('YYYY-MM-DD');
         var opt = {
-            url: restaurant.url +
+            url: reaktori.url +
                 '?costNumber=0812&firstDay=' +
                 date + '&language=fi',
             json: true
@@ -52,9 +31,7 @@ var _parseMeals = function() {
                         break;
                     }
                 };
-                
-                parser.meals = meals;
-                return resolve();
+                return resolve(meals);
             } else {
                 return reject(error);
             }
@@ -82,19 +59,9 @@ var _parseMenu = function (menu) {
     var meals = [];
     for (var i in menu) {
         if (categories.indexOf(menu[i].Name) < 0) continue; // skip the unwanted categories
-        meals.push(_cleaner(menu[i].Components[0]));
+        meals.push((menu[i].Components[0]).split('(')[0].trim());
     };
     return meals;
-};
-
-// little function to make output prettier
-var _cleaner = function (meal) {
-
-    // some restaurants include (M,G) -stuff in
-    // the names of meals, this removes them
-
-    // also some names of meals had useless whitespace
-    return meal.split('(')[0].trim();
 };
 
 module.exports = parser;

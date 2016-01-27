@@ -253,7 +253,7 @@ generic.sendLog= function(targetId, userParams) {
                         message += '\n';
                     }
                     message += '```';
-                    botApi.sendMessage(targetId, message, null, 'Markdown');
+                    botApi.sendMessage(targetId, message, 'Markdown');
                     resolve();
                 }
             });

@@ -2,53 +2,13 @@ var request     = require('request');
 var moment      = require('moment-timezone');
 var Promise     = require('bluebird');
 
-var restaurant  = require('../../../resources/restaurants').juvenes;
+var juvenes  = require('../../../resources/restaurants').juvenes;
 var cfg         = require('../../config');
 var logger      = cfg.logger;
 
 moment.tz.setDefault(cfg.botTimezone);
 
-var parser = {
-    newton: {
-        id: {
-            id: 6,
-            menu: 60
-        }
-    },
-    sååsbar: {
-        id: {
-            id: 6,
-            menu: 77
-        }
-    },
-    fusion: {
-        id: {
-            id: 60038,
-            menu: 3
-        }
-    },
-    konehuone: {
-        id: {
-            id: 60038,
-            menu: 74
-        }
-    }
-};
-
-parser.getMeals = function(restaurant) {
-    return new Promise(function(resolve,reject) {
-        _parser(parser[restaurant].id)
-        .then(function(meals) {
-            return resolve(meals);
-        })
-        .error(function(e) {
-            logger.log('error', 'Error when requesting Juvenes JSON: %s', error);
-            return resolve(['Virhe haettaessa Juveneksen ruokalistaa!']);
-        });
-    });
-};
-
-var _parser = function(kitchen) {
+var _fetchKitchenMenus = function(kitchen) {
     return new Promise(function(resolve,reject) {
         // juvenes' API doesn't offer 100% valid json
         // so we download the json as a string,
@@ -58,7 +18,7 @@ var _parser = function(kitchen) {
         var date = moment().format('YYYY-MM-DD');
 
         var opt = {
-            url: restaurant.url +
+            url: juvenes.url +
                 "?KitchenId=" + kitchen.id +
                 "&MenuTypeId=" + kitchen.menu + 
                 "&date='" + date +
@@ -79,12 +39,21 @@ var _parser = function(kitchen) {
                     var meal = json.MealOptions[i].MenuItems[0].Name;
                     meals.push(meal.trim());
                 }
+                
                 return resolve(meals);
+                
             } else {
                 return reject(error);
             }
         });
     });
+};
+
+var parser = {
+    newton: _fetchKitchenMenus({id: 6, menu: 60}),
+    sååsbar: _fetchKitchenMenus({id: 6, menu: 77}),
+    fusion: _fetchKitchenMenus({id: 60038,menu: 3}),
+    konehuone: _fetchKitchenMenus({id: 60038, menu: 74})
 };
 
 // check http://www.juvenes.fi/DesktopModules/Talents.LunchMenu/LunchMenuServices.asmx

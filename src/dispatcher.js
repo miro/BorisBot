@@ -281,9 +281,9 @@ module.exports = function dispatchTelegramEvent(msg) {
             
             case '/menu':
                 var targetId = (eventIsFromGroup) ? chatGroupId : userId; 
-                restaurantController.getAllMenusForToday()
+                restaurantController.getAllMenusForToday(eventIsFromGroup)
                 .then(function(meals) {
-                    botApi.sendMessage(targetId, meals, null, 'Markdown');
+                    botApi.sendMessage(targetId, meals, 'Markdown', true);
                     resolve();
                 });
             break;
