@@ -32,23 +32,29 @@ var diners = {
 controller.getAllMenusForToday = function (isFromGroup) {
     return new Promise(function(resolve,reject)  {
         
+        // Process only three diners if message is from group
+        var validDiners = (isFromGroup) ? {
+            reaktori: diners.reaktori,
+            newton: diners.newton,
+            hertsi: diners.hertsi
+        } : diners;
+        
         // Remove diners which aren't open
-        openDiners = diners;
-        _.forEach(diners, function(diner, name) {
+        _.forEach(validDiners, function(diner, name) {
             if (!_isDinerOpen(diner)) {
-                _.unset(openDiners, name);
+                _.unset(validDiners, name);
             }
         });
         
         // Check if every diner is closed
-        if (_.isEmpty(openDiners)) {
-            resolve('Ei ravintoloita auki :(');
+        if (_.isEmpty(validDiners)) {
+            resolve('Ei ravintoloita auki.');
             return;
         }
         
         // Choose right parsers
         var validParsers = {}
-        _.forEach(openDiners, function(diner,name) {
+        _.forEach(validDiners, function(diner,name) {
             validParsers[name] = parsers[name];
         })
         
@@ -60,7 +66,7 @@ controller.getAllMenusForToday = function (isFromGroup) {
         Promise.props(validParsers)
         .then(function(fetchedParsers) {    
             var s = new String();     
-            _.forEach(openDiners, function(diner, name) {
+            _.forEach(validDiners, function(diner, name) {
                 s += '[' + diner.name + '](' + diner.homepage + '): '; 
                 s += style(fetchedParsers[name]) + '\n';
             });
