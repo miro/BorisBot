@@ -14,11 +14,12 @@ var generic     = require('./generic');
 var replys      = require('./replys');
 var logger      = cfg.logger;
 
-var userController      = require('./controllers/userController');
-var drinkController     = require('./controllers/drinkController');
-var ethanolController   = require('./controllers/ethanolController');
-var memeController      = require('./controllers/memeController');
-var textController      = require('./controllers/textController');
+var userController          = require('./controllers/userController');
+var drinkController         = require('./controllers/drinkController');
+var ethanolController       = require('./controllers/ethanolController');
+var memeController          = require('./controllers/memeController');
+var textController          = require('./controllers/textController');
+var restaurantController    = require('./controllers/restaurantController');
 
 // set default timezone to bot timezone
 moment.tz.setDefault(cfg.botTimezone);
@@ -44,7 +45,7 @@ module.exports = function dispatchTelegramEvent(msg) {
         var chatGroupId = eventIsFromGroup ? msg.chat.id : null;
         var chatGroupTitle = eventIsFromGroup ? msg.chat.title : null;
 
-        // check if user is ignored
+        // Check if user is ignored
         var userIsIgnored = cfg.ignoredUsers.indexOf(userId) >= 0;
         if (userIsIgnored) {
             // do nothing
@@ -52,7 +53,7 @@ module.exports = function dispatchTelegramEvent(msg) {
             return resolve();
         }
         
-        // check if message was reply to bot's message
+        // Check if message was reply to bot's message
         if (msg.reply_to_message) {
             replys.eventEmitter.emit(msg.reply_to_message.message_id, msg.text);
             return resolve();
@@ -70,7 +71,7 @@ module.exports = function dispatchTelegramEvent(msg) {
         var userCommandParams = userInput.join(' ');
 
 
-        // Dispatch!
+        // Dispatch command!
         switch (userCommand) {
             
             case '/kahvutti':
@@ -276,6 +277,16 @@ module.exports = function dispatchTelegramEvent(msg) {
                     botApi.sendMessage(chatGroupId, textController.getSummary(chatGroupId));
                     resolve();
                 }
+            break;
+            
+            case '/menu':
+                var targetId = (eventIsFromGroup) ? chatGroupId : userId; 
+                restaurantController.getAllMenusForToday(eventIsFromGroup)
+                .then(function(msg) {
+                    botApi.sendMessage(targetId, msg, 'Markdown', true);
+                    resolve();
+                })
+                .error(resolve);
             break;
             
             // Admin commands

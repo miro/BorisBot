@@ -39,6 +39,9 @@ controller.showDrinkKeyboard = function(userId, eventIsFromGroup) {
         botApi.sendMessage(
             userId,
             msg,
+            null, //parse_mode
+            null, //disable_web_page_preview
+            null, //reply_to_message_id
             {
                 keyboard: keyboard,
                 resize_keyboard: true,

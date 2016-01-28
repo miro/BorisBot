@@ -1,0 +1,65 @@
+{
+    "hertsi" : {
+        "name": "Hertsi",
+        "url": "http://www.sodexo.fi/ruokalistat/output/daily_json/12812/",
+        "homepage": "http://www.sodexo.fi/tty-tietotalo",
+        "open": {
+            "from": 1030,
+            "to": 1500
+        }
+        
+    },
+
+    "juvenes" : {
+        "url": "http://www.juvenes.fi/DesktopModules/Talents.LunchMenu/LunchMenuServices.asmx/GetMenuByDate",
+        "newton" : {
+            "name": "Newton",
+            "homepage": "http://www.juvenes.fi/fi-fi/ravintolatjakahvilat/opiskelijaravintolat/ttykampus/newton.aspx",
+            "open": {
+                "from": 1030,
+                "to": 1500
+            }
+        },
+
+        "sååsbar" : {
+            "name": "Sååsbar",
+            "homepage": "http://www.juvenes.fi/fi-fi/ravintolatjakahvilat/opiskelijaravintolat/ttykampus/caf%C3%A9konehuone/s%C3%A5%C3%A5sbar.aspx",
+            "open": {
+                "from": 1500,
+                "to": 1900
+            }
+        },
+
+        "fusion" : {
+            "name": "Fusion",
+            "homepage": "http://www.juvenes.fi/fi-fi/ravintolatjakahvilat/opiskelijaravintolat/ttykampus/caf%C3%A9konehuone/fusionkitchen.aspx",
+            "open": {
+                "from": 1030,
+                "to": 1900
+            }
+        },
+
+        "konehuone" : {
+            "name": "Konehuone",
+            "homepage": "http://www.juvenes.fi/fi-fi/ravintolatjakahvilat/opiskelijaravintolat/ttykampus/caf%C3%A9konehuone.aspx",
+            "open": {
+                "from": 1030,
+                "to": 1430
+            }
+        }
+    },
+
+    "reaktori" : {
+        "name": "Reaktori",
+        "url": "http://www.amica.fi/modules/json/json/Index",
+        "homepage": "http://www.amica.fi/ravintolat/ravintolat-kaupungeittain/tampere/reaktori/",
+        "open": {
+            "from": 1030,
+            "pause": {
+                "from": 1500,
+                "to": 1600
+            },
+            "to": 1800
+        }
+    }
+}
