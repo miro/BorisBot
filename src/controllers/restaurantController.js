@@ -34,11 +34,11 @@ controller.getAllMenusForToday = function (isFromGroup) {
         
         // Remove diners which aren't open
         openDiners = diners;
-        /*_.forEach(diners, function(diner, name) {
+        _.forEach(diners, function(diner, name) {
             if (!_isDinerOpen(diner)) {
                 _.unset(openDiners, name);
             }
-        });*/
+        });
         
         // Check if every diner is closed
         if (_.isEmpty(openDiners)) {
