@@ -72,7 +72,7 @@ controller.getAllMenusForToday = function (isFromGroup) {
             });
             resolve(s);
         })
-        .error(function(e) {
+        .catch(function(e) {
             logger.log('error', 'restaurantController: %s', e);
             reject();
         });

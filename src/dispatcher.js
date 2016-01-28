@@ -5,6 +5,7 @@ var request     = require('request');
 var moment      = require('moment-timezone');
 var _           = require('lodash');
 var emoji       = require('node-emoji');
+var emojiRegex  = require('emoji-regex');
 
 var cfg         = require('./config');
 var db          = require('./database');
@@ -60,7 +61,7 @@ module.exports = function dispatchTelegramEvent(msg) {
         }
 
         // Check if event was not command
-        if (msg.text.charAt(0) !== '/') {
+        if (msg.text.charAt(0) !== '/' && !emojiRegex().test(msg.text.split()[0])) {
             textController.addMessage(chatGroupId, msg.text);
             return resolve();
         }
@@ -240,6 +241,10 @@ module.exports = function dispatchTelegramEvent(msg) {
                     .then(function(msg) {
                         botApi.sendMessage(userId, msg + ' \u2030');
                         resolve();
+                    })
+                    .catch(function(e) {
+                        botApi.sendMessage(userId, e);
+                        resolve();
                     });
                 }
             break;
@@ -285,7 +290,7 @@ module.exports = function dispatchTelegramEvent(msg) {
                     botApi.sendMessage(targetId, msg, 'Markdown', true);
                     resolve();
                 })
-                .error(resolve);
+                .catch(resolve);
             break;
             
             // Admin commands

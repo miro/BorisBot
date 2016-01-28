@@ -166,7 +166,7 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
                 });
             });
         })
-        .error(function(e) {
+        .catch(function(e) {
             botApi.sendMessage(userId, 'Kippistely epäonnistui, yritä myöhemmin uudelleen');
             resolve();
         });
@@ -369,13 +369,13 @@ controller.getGroupAlcoholStatusReport = function(chatGroupId) {
                          ' –––– ' + '(24h/48h)\n';
 
                     _.eachRight(drinkersArray, function(userLog) {
-                        log += _.padRight(userLog.userName, paddingLength, '.') + ' ' + userLog.alcoLevel + ' \u2030';
+                        log += _.padEnd(userLog.userName, paddingLength, '.') + ' ' + userLog.alcoLevel + ' \u2030';
                         log += ' (' + userLog.drinkCount24h + ' / ' + userLog.drinkCount48h + ')\n';
                     });
                     resolve(log);
                 })
                 .catch(function(err) {
-                    logger.log('error', 'ERROR on status report function', err);
+                    logger.log('error', 'ERROR on status report function %s', err);
                     resolve(err);
                 });
             });

@@ -33,6 +33,7 @@
     "moment": "~2.10.3",
     "moment-timezone": "~0.4.0",
     "cron": "~1.0.9",
+    "emoji-regex": "^6.0.0",
     "plotly": "~1.0.2",
     "fs": "0.0.2",
     "stream": "0.0.2",
