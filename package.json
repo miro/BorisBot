@@ -23,7 +23,7 @@
   "homepage": "https://github.com/miro/BorisBot",
   "dependencies": {
     "express": "~4.13.0",
-    "lodash": "~3.9.3",
+    "lodash": "~4.0.1",
     "body-parser": "~1.13.1",
     "request": "~2.58.0",
     "bluebird": "~2.9.30",

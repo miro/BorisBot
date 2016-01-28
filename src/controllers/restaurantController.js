@@ -11,88 +11,90 @@ var logger          = cfg.logger;
 
 controller = {};
 
+var parsers = {
+    reaktori: parserReaktori(),
+    newton: parserJuvenes.newton,
+    hertsi: parserHertsi(),
+    sååsbar: parserJuvenes.sååsbar,
+    fusion: parserJuvenes.fusion,
+    konehuone: parserJuvenes.konehuone
+}
+
 var diners = {
-    reaktori: {
-        parser: parserReaktori(),
-        info: resources.reaktori
-    },
-    newton: {
-        parser: parserJuvenes.newton,
-        info: resources.juvenes.newton
-    },
-    hertsi: {
-        parser: parserHertsi(),
-        info: resources.hertsi
-    },
-    sååsbar: {
-        parser: parserJuvenes.sååsbar,
-        info: resources.juvenes.sååsbar
-    },
-    fusion: {
-        parser: parserJuvenes.fusion,
-        info: resources.juvenes.fusion
-    },
-    konehuone: {
-        parser: parserJuvenes.konehuone,
-        info: resources.juvenes.konehuone
-    }
+    reaktori: resources.reaktori,
+    newton: resources.juvenes.newton,
+    hertsi: resources.hertsi,
+    sååsbar: resources.juvenes.sååsbar,
+    fusion: resources.juvenes.fusion,
+    konehuone: resources.juvenes.konehuone
 };
 
 controller.getAllMenusForToday = function (isFromGroup) {
     return new Promise(function(resolve,reject)  {
         
-        Promise.props(diners).then(function(fetchedDiners) {
-            
-            // Remove diners which aren't open
-            _.remove(fetchedDiners, function(diner) {
-                return _isDinerOpen(diner);
-            });
-            
-            var s = '';
-            if (isFromGroup) {
-                _.forEach(fetchedDiners, function(diner) {
-                    s = s + _markdownLink(diner.info) + diner.parser._settledValue.join(', ') + '\n';
-                });
-            } else {
-                _.forEach(fetchedDiners, function(diner) {
-                    s = s + _markdownLink(diner.info) + _splitMealsToRows(diner.parser._settledValue) + '\n';
-                });
+        // Remove diners which aren't open
+        openDiners = diners;
+        /*_.forEach(diners, function(diner, name) {
+            if (!_isDinerOpen(diner)) {
+                _.unset(openDiners, name);
             }
-            return resolve(s);
+        });*/
+        
+        // Check if every diner is closed
+        if (_.isEmpty(openDiners)) {
+            resolve('Ei ravintoloita auki :(');
+            return;
+        }
+        
+        // Choose right parsers
+        var validParsers = {}
+        _.forEach(openDiners, function(diner,name) {
+            validParsers[name] = parsers[name];
+        })
+        
+        // Use shorter presentation if event is from group
+        var style = (!isFromGroup) ? _splitMealsToRows : 
+                                    function(x) {return x.join(', ');}
+
+        // Fetch new menus
+        Promise.props(validParsers)
+        .then(function(fetchedParsers) {    
+            var s = new String();     
+            _.forEach(openDiners, function(diner, name) {
+                s += '[' + diner.name + '](' + diner.homepage + '): '; 
+                s += style(fetchedParsers[name]) + '\n';
+            });
+            resolve(s);
         })
         .error(function(e) {
             logger.log('error', 'restaurantController: %s', e);
+            reject();
         });
     });
 };
 
+var _splitMealsToRows = function(meals) {
+    var s = new String();
+    _.forEach(meals, function(meal) {
+        s += '\n  \u2022 ' + meal;
+    });
+    return s;
+};
+
 var _isDinerOpen = function(diner) {
     var now = moment();
-    var openTo = moment(diner.info.open.to, 'HHmm');
+    var openTo = moment(diner.open.to, 'HHmm');
     
-    if (_.isUndefined(diner.info.open.pause)) {
+    if (_.isUndefined(diner.open.pause)) {
         return now.isBefore(openTo);
     } else {
-        if (now.isAfter(moment(diner.info.open.pause.from, 'HHmm'))
-            && now.isBefore(moment(diner.info.open.pause.to, 'HHmm'))) {
+        if (now.isAfter(moment(diner.open.pause.from, 'HHmm'))
+            && now.isBefore(moment(diner.open.pause.to, 'HHmm'))) {
                 return false; // Diner is on pause right now
         } else {
             return now.isBefore(openTo);
         }
     }
 };
-
-var _markdownLink = function(restaurant) {
-    return '[' + restaurant.name + '](' + restaurant.homepage + '): ';
-};
-
-var _splitMealsToRows = function(meals) {
-    var s = '';
-    _.forEach(meals, function(meal) {
-        s = s + '\n  \u2022 ' + meal;
-    });
-    return s;
-};
-
 
 module.exports = controller;

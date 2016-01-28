@@ -9,7 +9,7 @@ var logger      = cfg.logger;
 
 moment.tz.setDefault(cfg.botTimezone);
 
-parser = function() {
+module.exports = function() {
     return new Promise(function(resolve,reject) {
         var date = moment().format('YYYY-MM-DD');
         var opt = {
@@ -31,9 +31,9 @@ parser = function() {
                         break;
                     }
                 };
-                return resolve(meals);
+                resolve(meals);
             } else {
-                return reject(error);
+                reject(error);
             }
         });
     });
@@ -63,5 +63,3 @@ var _parseMenu = function (menu) {
     };
     return meals;
 };
-
-module.exports = parser;

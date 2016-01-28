@@ -27,23 +27,21 @@ var _fetchKitchenMenus = function(kitchen) {
 
         request(opt, function (error, resp, html) {
             if (!error) {
-                var meals = [];
 
                 // make valid json
-                html = html.slice(7, -4);
-                html = html.replace(/\\"/g, '"');
-                var json = JSON.parse(html);
+                var json = JSON.parse(html.slice(7, -4).replace(/\\"/g, '"'));
 
                 // search the titles of meals
+                var meals = [];
                 for (var i in json.MealOptions) {
                     var meal = json.MealOptions[i].MenuItems[0].Name;
                     meals.push(meal.trim());
                 }
                 
-                return resolve(meals);
+                resolve(meals);
                 
             } else {
-                return reject(error);
+                reject(error);
             }
         });
     });

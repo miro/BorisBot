@@ -282,10 +282,11 @@ module.exports = function dispatchTelegramEvent(msg) {
             case '/menu':
                 var targetId = (eventIsFromGroup) ? chatGroupId : userId; 
                 restaurantController.getAllMenusForToday(eventIsFromGroup)
-                .then(function(meals) {
-                    botApi.sendMessage(targetId, meals, 'Markdown', true);
+                .then(function(msg) {
+                    botApi.sendMessage(targetId, msg, 'Markdown', true);
                     resolve();
-                });
+                })
+                .error(resolve);
             break;
             
             // Admin commands
