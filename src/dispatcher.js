@@ -70,6 +70,7 @@ module.exports = function dispatchTelegramEvent(msg) {
         var userCommand = userInput.shift().toLowerCase().split('@')[0];
         var userCommandParams = userInput.join(' ');
 
+        var targetId = (eventIsFromGroup) ? chatGroupId : userId;
 
         // Dispatch command!
         switch (userCommand) {
@@ -153,7 +154,6 @@ module.exports = function dispatchTelegramEvent(msg) {
             break;
 
             case '/kumpi':
-                var targetId = (eventIsFromGroup) ? chatGroupId : userId;
                 generic.whichOne(targetId, userCommandParams);
                 resolve();
             break;
@@ -257,14 +257,12 @@ module.exports = function dispatchTelegramEvent(msg) {
             case '/pankkitili':
             case '/tilinumero':
             case '/tili':
-                var targetId = (eventIsFromGroup) ? chatGroupId : userId;
                 botApi.sendMessage(targetId, 'FI78 1439 3500 0219 70');
                 resolve();
             break;
             
             case '/puhelin':
             case '/puh':
-                var targetId = (eventIsFromGroup) ? chatGroupId : userId;
                 botApi.sendMessage(targetId, '041 369 2262');
                 resolve();
             break;
@@ -279,8 +277,9 @@ module.exports = function dispatchTelegramEvent(msg) {
                 }
             break;
             
+            case '/ravintolat':
+            case '/raflat':
             case '/menu':
-                var targetId = (eventIsFromGroup) ? chatGroupId : userId; 
                 restaurantController.getAllMenusForToday(eventIsFromGroup)
                 .then(function(msg) {
                     botApi.sendMessage(targetId, msg, 'Markdown', true);
