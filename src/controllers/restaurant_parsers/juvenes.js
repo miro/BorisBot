@@ -48,10 +48,10 @@ var _fetchKitchenMenus = function(kitchen) {
 };
 
 var parser = {
-    newton: _fetchKitchenMenus({id: 6, menu: 60}),
-    sååsbar: _fetchKitchenMenus({id: 6, menu: 77}),
-    fusion: _fetchKitchenMenus({id: 60038,menu: 3}),
-    konehuone: _fetchKitchenMenus({id: 60038, menu: 74})
+    newton: function() {return _fetchKitchenMenus({id: 6, menu: 60})},
+    sååsbar: function() {return _fetchKitchenMenus({id: 6, menu: 77})},
+    fusion: function() {return _fetchKitchenMenus({id: 60038,menu: 3})},
+    konehuone: function() {return _fetchKitchenMenus({id: 60038, menu: 74})}
 };
 
 // check http://www.juvenes.fi/DesktopModules/Talents.LunchMenu/LunchMenuServices.asmx

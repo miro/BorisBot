@@ -4,8 +4,8 @@
         "url": "http://www.sodexo.fi/ruokalistat/output/daily_json/12812/",
         "homepage": "http://www.sodexo.fi/tty-tietotalo",
         "open": {
-            "from": 1030,
-            "to": 1500
+            "from": "10:30",
+            "to": "15:00"
         }
         
     },
@@ -16,8 +16,8 @@
             "name": "Newton",
             "homepage": "http://www.juvenes.fi/fi-fi/ravintolatjakahvilat/opiskelijaravintolat/ttykampus/newton.aspx",
             "open": {
-                "from": 1030,
-                "to": 1500
+                "from": "10:30",
+                "to": "15:00"
             }
         },
 
@@ -25,8 +25,8 @@
             "name": "Sååsbar",
             "homepage": "http://www.juvenes.fi/fi-fi/ravintolatjakahvilat/opiskelijaravintolat/ttykampus/caf%C3%A9konehuone/s%C3%A5%C3%A5sbar.aspx",
             "open": {
-                "from": 1500,
-                "to": 1900
+                "from": "15:00",
+                "to": "19:00"
             }
         },
 
@@ -34,8 +34,8 @@
             "name": "Fusion",
             "homepage": "http://www.juvenes.fi/fi-fi/ravintolatjakahvilat/opiskelijaravintolat/ttykampus/caf%C3%A9konehuone/fusionkitchen.aspx",
             "open": {
-                "from": 1030,
-                "to": 1900
+                "from": "10:30",
+                "to": "19:00"
             }
         },
 
@@ -43,8 +43,8 @@
             "name": "Konehuone",
             "homepage": "http://www.juvenes.fi/fi-fi/ravintolatjakahvilat/opiskelijaravintolat/ttykampus/caf%C3%A9konehuone.aspx",
             "open": {
-                "from": 1030,
-                "to": 1430
+                "from": "10:30",
+                "to": "14:30"
             }
         }
     },
@@ -54,12 +54,12 @@
         "url": "http://www.amica.fi/modules/json/json/Index",
         "homepage": "http://www.amica.fi/ravintolat/ravintolat-kaupungeittain/tampere/reaktori/",
         "open": {
-            "from": 1030,
+            "from": "10:30",
             "pause": {
-                "from": 1500,
-                "to": 1600
+                "from": "15:00",
+                "to": "16:00"
             },
-            "to": 1800
+            "to": "18:00"
         }
     }
 }

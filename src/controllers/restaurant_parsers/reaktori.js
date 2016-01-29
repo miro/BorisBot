@@ -21,7 +21,8 @@ module.exports = function() {
         // request the json
         request(opt, function (error, resp, json) {
             if (!error) {
-                var meals = [];          
+                var meals = [];     
+                
                 // looping json to find right date
                 for (var i in json.MenusForDays) {
                     var menudate = json.MenusForDays[i].Date;
@@ -45,7 +46,7 @@ var _parseMenu = function (menu) {
     var categories = [
         'Linjasto',
         'Kasvislounas',
-        'Keittolounas',
+        'Keittolounas'
         /*'Leipäateria',
         'Salaattilounas',
         'Special',
@@ -54,12 +55,14 @@ var _parseMenu = function (menu) {
         'A´la carte',*/
     ];   
     // offer only 'iltaruoka' if time is over 16
-    if (moment().format('HHmm') >= 1600) categories = ['Iltaruoka'];
+    if (moment().isAfter(moment(1600, 'HHmm'))) {categories = ['Iltaruoka']};
     
     var meals = [];
-    for (var i in menu) {
-        if (categories.indexOf(menu[i].Name) < 0) continue; // skip the unwanted categories
-        meals.push((menu[i].Components[0]).split('(')[0].trim());
-    };
+    _.forEach(menu, function(category) {
+        // Skip the unwanted categories
+        if (!(_.indexOf(categories, category.Name) < 0)) {
+            meals.push((category.Components[0]).split('(')[0].trim());
+        }
+    });
     return meals;
 };
