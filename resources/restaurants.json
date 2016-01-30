@@ -1,0 +1,69 @@
+{
+    "hertsi" : {
+        "name": "Hertsi",
+        "url": "http://www.sodexo.fi/ruokalistat/output/daily_json/12812/",
+        "homepage": "http://www.sodexo.fi/tty-tietotalo",
+        "open": {
+            "from": "10:30",
+            "to": "15:00"
+        }
+        
+    },
+
+    "juvenes" : {
+        "url": "http://www.juvenes.fi/DesktopModules/Talents.LunchMenu/LunchMenuServices.asmx/GetMenuByDate",
+        "newton" : {
+            "name": "Newton",
+            "homepage": "http://www.juvenes.fi/fi-fi/ravintolatjakahvilat/opiskelijaravintolat/ttykampus/newton.aspx",
+            "open": {
+                "from": "10:30",
+                "to": "15:00"
+            }
+        },
+
+        "sååsbar" : {
+            "name": "Sååsbar",
+            "homepage": "http://www.juvenes.fi/fi-fi/ravintolatjakahvilat/opiskelijaravintolat/ttykampus/caf%C3%A9konehuone/s%C3%A5%C3%A5sbar.aspx",
+            "open": {
+                "from": "15:00",
+                "to": "19:00"
+            }
+        },
+
+        "fusion" : {
+            "name": "Fusion",
+            "homepage": "http://www.juvenes.fi/fi-fi/ravintolatjakahvilat/opiskelijaravintolat/ttykampus/caf%C3%A9konehuone/fusionkitchen.aspx",
+            "open": {
+                "from": "10:30",
+                "to": "19:00"
+            }
+        },
+
+        "konehuone" : {
+            "name": "Konehuone",
+            "homepage": "http://www.juvenes.fi/fi-fi/ravintolatjakahvilat/opiskelijaravintolat/ttykampus/caf%C3%A9konehuone.aspx",
+            "open": {
+                "from": "10:30",
+                "to": "14:30"
+            }
+        }
+    },
+
+    "reaktori" : {
+        "name": "Reaktori",
+        "url": "http://www.amica.fi/modules/json/json/Index",
+        "homepage": "http://www.amica.fi/ravintolat/ravintolat-kaupungeittain/tampere/reaktori/",
+        "open": {
+            "from": "10:30",
+            "pause": {
+                "from": "15:00",
+                "to": "16:00"
+            },
+            "to": "18:00",
+            "saturday": {
+                "from": "11:00",
+                "to": "14:00"
+            }
+        }
+    }
+}

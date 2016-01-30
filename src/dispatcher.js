@@ -5,6 +5,7 @@ var request     = require('request');
 var moment      = require('moment-timezone');
 var _           = require('lodash');
 var emoji       = require('node-emoji');
+var emojiRegex  = require('emoji-regex');
 
 var cfg         = require('./config');
 var db          = require('./database');
@@ -14,11 +15,12 @@ var generic     = require('./generic');
 var replys      = require('./replys');
 var logger      = cfg.logger;
 
-var userController      = require('./controllers/userController');
-var drinkController     = require('./controllers/drinkController');
-var ethanolController   = require('./controllers/ethanolController');
-var memeController      = require('./controllers/memeController');
-var textController      = require('./controllers/textController');
+var userController          = require('./controllers/userController');
+var drinkController         = require('./controllers/drinkController');
+var ethanolController       = require('./controllers/ethanolController');
+var memeController          = require('./controllers/memeController');
+var textController          = require('./controllers/textController');
+var restaurantController    = require('./controllers/restaurantController');
 
 // set default timezone to bot timezone
 moment.tz.setDefault(cfg.botTimezone);
@@ -44,7 +46,7 @@ module.exports = function dispatchTelegramEvent(msg) {
         var chatGroupId = eventIsFromGroup ? msg.chat.id : null;
         var chatGroupTitle = eventIsFromGroup ? msg.chat.title : null;
 
-        // check if user is ignored
+        // Check if user is ignored
         var userIsIgnored = cfg.ignoredUsers.indexOf(userId) >= 0;
         if (userIsIgnored) {
             // do nothing
@@ -52,14 +54,14 @@ module.exports = function dispatchTelegramEvent(msg) {
             return resolve();
         }
         
-        // check if message was reply to bot's message
+        // Check if message was reply to bot's message
         if (msg.reply_to_message) {
             replys.eventEmitter.emit(msg.reply_to_message.message_id, msg.text);
             return resolve();
         }
 
         // Check if event was not command
-        if (msg.text.charAt(0) !== '/') {
+        if (msg.text.charAt(0) !== '/' && !emojiRegex().test(msg.text.split()[0])) {
             textController.addMessage(chatGroupId, msg.text);
             return resolve();
         }
@@ -69,8 +71,9 @@ module.exports = function dispatchTelegramEvent(msg) {
         var userCommand = userInput.shift().toLowerCase().split('@')[0];
         var userCommandParams = userInput.join(' ');
 
+        var targetId = (eventIsFromGroup) ? chatGroupId : userId;
 
-        // Dispatch!
+        // Dispatch command!
         switch (userCommand) {
             
             case '/kahvutti':
@@ -152,7 +155,6 @@ module.exports = function dispatchTelegramEvent(msg) {
             break;
 
             case '/kumpi':
-                var targetId = (eventIsFromGroup) ? chatGroupId : userId;
                 generic.whichOne(targetId, userCommandParams);
                 resolve();
             break;
@@ -239,6 +241,10 @@ module.exports = function dispatchTelegramEvent(msg) {
                     .then(function(msg) {
                         botApi.sendMessage(userId, msg + ' \u2030');
                         resolve();
+                    })
+                    .catch(function(e) {
+                        botApi.sendMessage(userId, e);
+                        resolve();
                     });
                 }
             break;
@@ -256,14 +262,12 @@ module.exports = function dispatchTelegramEvent(msg) {
             case '/pankkitili':
             case '/tilinumero':
             case '/tili':
-                var targetId = (eventIsFromGroup) ? chatGroupId : userId;
                 botApi.sendMessage(targetId, 'FI78 1439 3500 0219 70');
                 resolve();
             break;
             
             case '/puhelin':
             case '/puh':
-                var targetId = (eventIsFromGroup) ? chatGroupId : userId;
                 botApi.sendMessage(targetId, '041 369 2262');
                 resolve();
             break;
@@ -276,6 +280,17 @@ module.exports = function dispatchTelegramEvent(msg) {
                     botApi.sendMessage(chatGroupId, textController.getSummary(chatGroupId));
                     resolve();
                 }
+            break;
+            
+            case '/ravintolat':
+            case '/raflat':
+            case '/menu':
+                restaurantController.getAllMenusForToday(eventIsFromGroup)
+                .then(function(msg) {
+                    botApi.sendMessage(targetId, msg, 'Markdown', true);
+                    resolve();
+                })
+                .catch(resolve);
             break;
             
             // Admin commands

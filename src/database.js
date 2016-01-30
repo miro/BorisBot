@@ -67,7 +67,7 @@ db.getCount = function(tableName, whereObject, minTimestamp, alcoholic) {
         .then(function(result) {
             resolve(result[0].count);
         })
-        .error(reject);
+        .catch(reject);
     });
 };
 

@@ -18,13 +18,17 @@ controller.addMessage = function(chatId, msg) {
         if (_.isUndefined(controller.history[chatId])) {
             controller.history[chatId] = [];
         }
+        var maxSize = 5000; // Max size of message list
+        if (controller.history[chatId].length >= maxSize) {
+            logger.log('warn', 'textController: maximum list size (%d) reached on chatId %s', maxSize, chatId)
+            controller.history[chatId].pop();
+        }
         controller.history[chatId].unshift([moment().unix(), msg]);
         return true;
     }
 }
 
 controller.getSummary = function(chatId) {
-    logger.log('debug', controller.history);
     if (_.isUndefined(controller.history[chatId]) || _.isEmpty(controller.history[chatId])) {
         return 'Tiivistettävää ei löydy.';
     } else {

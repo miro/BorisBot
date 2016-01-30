@@ -4,11 +4,12 @@ var moment          = require('moment-timezone');
 var _               = require('lodash');
 var CronJob         = require('cron').CronJob;
 
-var botApi          = require('./botApi');
-var cfg             = require('./config');
-var generic         = require('./generic');
-var drinkController = require('./controllers/drinkController');
-var textController  = require('./controllers/textController');
+var botApi                  = require('./botApi');
+var cfg                     = require('./config');
+var generic                 = require('./generic');
+var drinkController         = require('./controllers/drinkController');
+var textController          = require('./controllers/textController');
+var restaurantController    = require('./controllers/restaurantController');
 
 // set default timezone to bot timezone
 moment.tz.setDefault(cfg.botTimezone);
@@ -85,5 +86,14 @@ scheduler.addJob({
     },
     timeZone: cfg.botTimeZone
 });
+
+// "Update restaurant menus"
+scheduler.addJob({
+    cronTime: '00 00 3 * * *',
+    onTick: function updateMenus() {
+        restaurantController.updateMenus();
+    },
+    timeZone: cfg.botTimeZone
+})
 
 module.exports = scheduler;

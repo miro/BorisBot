@@ -29,38 +29,6 @@ cfg.db = {
 	pool: { min: 0, max: 5 }
 };
 
-// Logging config
-cfg.logLocation = process.env.BORISBOT_LOGFILE || './logs/output.log';
-
-var logOptions = {};
-if (cfg.env === 'production') {
-    logOptions.transports = [
-        new (winston.transports.File)({
-                filename: cfg.logLocation,
-                level: 'error',
-				timestamp: function() {
-					return moment().format('YYYY-MM-DDTHH:mm:SS');
-				},
-				formatter: function(options) {
-                    return options.timestamp() +'--'+ options.level.toUpperCase() +'--'+ (undefined !== options.message ? options.message : '');
-                },
-				maxsize: 15000000,
-				json: false
-				
-        })
-    ];
-} else {
-    logOptions.transports = [
-        new (winston.transports.Console)({
-			timestamp: function() {
-				return moment().format('YYYY-MM-DDTHH:mm:SS');
-			},
-			level: 'debug'})
-    ];
-}
-
-cfg.logger = new (winston.Logger)(logOptions);
-
 cfg.allowedGroups = {
     testChatId: -13232285, // "BorisTest"
     mainChatId: (cfg.env === 'production') ? -8573374 : -13232285   // if env is production, main chat is "SpänniMobi"
@@ -94,14 +62,47 @@ cfg.imgFlipUserName = process.env.BORISBOT_IMGFLIP_USERNAME;
 cfg.imgFlipPassword = process.env.BORISBOT_IMGFLIP_PASSWORD;
 
 // Local directories for data storage
-cfg.plotlyDirectory = './plotly/';
-cfg.webcamDirectory = './webcam/';
-cfg.memeDirectory = './memes/';
-cfg.logDirectory = './logs/';
-cfg.requiredDirectories = [cfg.plotlyDirectory, cfg.webcamDirectory, cfg.memeDirectory, cfg.logDirectory]; // these folders will be made with mkdir
+cfg.resourceDirectory = '../resources/';
+cfg.plotlyDirectory = cfg.resourceDirectory + 'plotly/';
+cfg.webcamDirectory = cfg.resourceDirectory + 'webcam/';
+cfg.memeDirectory = cfg.resourceDirectory + 'memes/';
+cfg.logDirectory = '../logs/';
+cfg.requiredDirectories = [cfg.resourceDirectory, cfg.plotlyDirectory, cfg.webcamDirectory, cfg.memeDirectory, cfg.logDirectory]; // these folders will be made with mkdir
 
 // URL where webcam image will be downloaded
 cfg.webcamURL = process.env.BORISBOT_WEBCAM_URL;
+
+// Logging config
+cfg.logLocation = process.env.BORISBOT_LOGFILE || cfg.logDirectory + 'output.log';
+
+var logOptions = {};
+logOptions.transports = [
+    new (winston.transports.Console)({
+        timestamp: function() {
+            return moment().format('YYYY-MM-DDTHH:mm:SS');
+        },
+        level: 'debug'})
+];
+
+// Add logs also to file if env is production
+if (cfg.env === 'production') {
+    logOptions.transports.push(
+        new (winston.transports.File)({
+                filename: cfg.logLocation,
+                level: 'info',
+                timestamp: function() {
+                    return moment().format('YYYY-MM-DDTHH:mm:SS');
+                },
+                formatter: function(options) {
+                    return options.timestamp() +'--'+ options.level.toUpperCase() +'--'+ (undefined !== options.message ? options.message : '');
+                },
+                maxsize: 10000000,
+                json: false
+        })
+    );
+}
+
+cfg.logger = new (winston.Logger)(logOptions);
 
 
 module.exports = cfg;
