@@ -65,14 +65,16 @@ module.exports = function dispatchTelegramEvent(msg) {
             textController.addMessage(chatGroupId, msg.text);
             return resolve();
         }
-        
+
         // Parse command & possible parameters
         var userInput = msg.text.split(' ');
         var userCommand = userInput.shift().toLowerCase().split('@')[0];
         var userCommandParams = userInput.join(' ');
 
         var targetId = (eventIsFromGroup) ? chatGroupId : userId;
-
+        
+        logger.log('info', 'Command %s from id %s', userCommand, msg.from.id);
+        
         // Dispatch command!
         switch (userCommand) {
             
@@ -284,6 +286,7 @@ module.exports = function dispatchTelegramEvent(msg) {
             
             case '/ravintolat':
             case '/raflat':
+            case '/ruoka':
             case '/menu':
                 restaurantController.getAllMenusForToday(eventIsFromGroup)
                 .then(function(msg) {
