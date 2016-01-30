@@ -145,7 +145,7 @@ var _isDinerOpen = function(diner) {
     }
     
     // Check if diner have a pause middle of the day
-    if (_.isUndefined(diner.open.pause)) {
+    if (_.isUndefined(diner.info.open.pause)) {
         return now.isBefore(openTo);
     } else {
         if (now.isAfter(moment(diner.info.open.pause.from, 'HH:mm'))
