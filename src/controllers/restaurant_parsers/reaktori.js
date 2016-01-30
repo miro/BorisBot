@@ -21,20 +21,27 @@ module.exports = function() {
         // request the json
         request(opt, function (error, resp, json) {
             if (!error) {
-                var meals = [];     
                 
-                // looping json to find right date
-                for (var i in json.MenusForDays) {
-                    var menudate = json.MenusForDays[i].Date;
-                    var menus = json.MenusForDays[i].SetMenus;
-                    if (menudate.substring(0, 10) == date) {
-                        meals = _parseMenu(menus);
-                        break;
-                    }
-                };
-                resolve(meals);
+                var meals = [];     
+                try {
+                    // looping json to find right date
+                    _.forEach(json.MenusForDays, function(MenusForDays) {
+                        var menudate = MenusForDays.Date;
+                        var menus = MenusForDays.SetMenus;
+                        if (menudate.substring(0, 10) == date) {
+                            meals = _parseMenu(menus);
+                            return;
+                        }
+                    });
+                    resolve(meals);
+                }
+                catch(err) {
+                    logger.log('error', 'Error when parsing reaktori: %s', s);
+                    resolve();
+                }
             } else {
-                reject(error);
+                logger.log('error', 'Error when requesting Reaktori JSON: %s', error);
+                resolve();
             }
         });
     });
@@ -54,8 +61,10 @@ var _parseMenu = function (menu) {
         'Jälkiruoka',
         'A´la carte',*/
     ];   
-    // offer only 'iltaruoka' if time is over 16
-    if (moment().isAfter(moment(1600, 'HHmm'))) {categories = ['Iltaruoka']};
+    // offer only 'iltaruoka' if time is over 16 and its not saturday
+    if (moment().isAfter(moment(1600, 'HHmm')) && moment().weekday() !== 6) {
+        categories = ['Iltaruoka'];
+    }
     
     var meals = [];
     _.forEach(menu, function(category) {

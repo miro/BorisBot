@@ -31,19 +31,23 @@ module.exports = function() {
                     'Vitality',*/
                     'Vegetarian'
                 ];
+                try {
+                    // search the titles of meals
+                    _.forEach(json.courses, function(menu) {
 
-                // search the titles of meals
-                for (var i in json.courses) {
-                    var menu = json.courses[i];
-                    
-                    // skip the unwanted categories
-                    if (categories.indexOf(menu.category) < 0) continue;
-
-                    meals.push(menu.title_fi.trim());
-                };
-                resolve(meals);
+                        // skip the unwanted categories
+                        if (categories.indexOf(menu.category) >= 0) {
+                            meals.push(menu.title_fi.trim());
+                        }
+                    });
+                    resolve(meals);
+                }
+                catch(err) {
+                    logger.log('error', 'Error when parsing Hertsi: %s', err);
+                }
             } else {
-                reject(error);
+                logger.log('error', 'Error when requesting Hertsi JSON: %s', error);
+                resolve();
             }
         });
     });

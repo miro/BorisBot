@@ -12,12 +12,30 @@ var logger          = cfg.logger;
 controller = {};
 
 var diners = {
-    reaktori: resources.reaktori,
-    newton: resources.juvenes.newton,
-    hertsi: resources.hertsi,
-    sååsbar: resources.juvenes.sååsbar,
-    fusion: resources.juvenes.fusion,
-    konehuone: resources.juvenes.konehuone
+    reaktori: {
+        info: resources.reaktori,
+        parser: parserReaktori
+    },
+    newton: {
+        info: resources.juvenes.newton,
+        parser: parserJuvenes.newton
+    },
+    hertsi: {
+        info: resources.hertsi,
+        parser: parserHertsi
+    },
+    sååsbar: {
+        info: resources.juvenes.sååsbar,
+        parser: parserJuvenes.sååsbar
+    },
+    fusion: {
+        info: resources.juvenes.fusion,
+        parser: parserJuvenes.fusion
+    },
+    konehuone: {
+        info: resources.juvenes.konehuone,
+        parser: parserJuvenes.konehuone
+    }
 };
 
 controller.getAllMenusForToday = function (isFromGroup) {
@@ -46,11 +64,24 @@ controller.getAllMenusForToday = function (isFromGroup) {
         // Use shorter presentation if event is from group
         var style = (!isFromGroup) ? _splitMealsToRows : 
                                     function(x) {return x.join(', ');}
-        
+                                    
+        // On saturday display right opening hours
+        if (moment().weekday() === 6) {
+            _.forEach(validDiners, function(diner) {
+                if (!_.isUndefined(diner.info.open.saturday)) {
+                    diner.info.open = diner.info.open.saturday;
+                }
+            });
+        }
+
         var s = new String();     
         _.forEach(validDiners, function(diner, name) {
-            s += '[' + diner.name + '](' + diner.homepage + ') '
-            s += '`[' + diner.open.from + '-' + diner.open.to + ']`: '; 
+            
+            // Print diner info
+            s += '[' + diner.info.name + '](' + diner.info.homepage + ') ';
+            s += '`[' + diner.info.open.from + '-' + diner.info.open.to + ']`: ';
+            
+            // Print menus if they exists
             if (!_.isEmpty(diner.menu)) {
                 s += style(diner.menu) + '\n';
             } else {
@@ -63,30 +94,34 @@ controller.getAllMenusForToday = function (isFromGroup) {
 
 controller.updateMenus = function () {
     return new Promise(function(resolve,reject) {
-        _clearMenus();
-        Promise.props({
-            reaktori: parserReaktori(),
-            newton: parserJuvenes.newton(),
-            hertsi: parserHertsi(),
-            sååsbar: parserJuvenes.sååsbar(),
-            fusion: parserJuvenes.fusion(),
-            konehuone: parserJuvenes.konehuone()
-        }).then(function(result) {
-            _.forEach(result, function(menu, name) {
-                diners[name].menu = menu;
+        
+        // Delete old menus
+        _.forEach(diners, function(diner) {
+            diner.menu = [];
+        });
+        
+        // Choose only relevant diners
+        var validDiners = diners;
+        var validParsers = [];
+        _.forEach(diners, function(diner,name) {
+            if (_isDinerOpenToday(diner)) {
+                validParsers.push(diner.parser());
+            }
+        });
+        
+        // Fetch new ones
+        Promise.all(validParsers)
+        .then(function(result) {
+            var i = 0;
+            _.forEach(validDiners, function(diner) {
+                diner.menu = result[i];
+                i++;
             });
             resolve();
         }).catch(function(e) {
             reject(e);
         });
     });
-};
-
-var _clearMenus = function() {
-    _.forEach(diners, function(diner) {
-        diner.menu = [];
-    });
-    return;
 };
 
 var _splitMealsToRows = function(meals) {
@@ -98,20 +133,47 @@ var _splitMealsToRows = function(meals) {
 };
 
 var _isDinerOpen = function(diner) {
-    var now = moment();
-    var openTo = moment(diner.open.to, 'HH:mm');
     
+    if (!_isDinerOpenToday(diner)) {return false;}
+    
+    var now = moment();
+    var openTo = moment(diner.info.open.to, 'HH:mm');
+    
+    // Check if diner is open at saturday
+    if (!_.isUndefined(diner.info.open.saturday) && moment().weekday() === 5) {
+        return now.isBefore(diner.info.saturday.to, 'HH:mm');
+    }
+    
+    // Check if diner have a pause middle of the day
     if (_.isUndefined(diner.open.pause)) {
         return now.isBefore(openTo);
     } else {
-        if (now.isAfter(moment(diner.open.pause.from, 'HH:mm'))
-            && now.isBefore(moment(diner.open.pause.to, 'HH:mm'))) {
+        if (now.isAfter(moment(diner.info.open.pause.from, 'HH:mm'))
+            && now.isBefore(moment(diner.info.open.pause.to, 'HH:mm'))) {
                 return false; // Diner is on pause right now
         } else {
             return now.isBefore(openTo);
         }
     }
 };
+
+var _isDinerOpenToday = function(diner) {
+    var now = moment();
+    
+    // No diners open at sunday
+    if (now.weekday() === 7) {
+        return false;
+        
+    } else if (now.weekday() === 6) {
+        if (!_.isUndefined(diner.info.open.saturday)) {
+            return true;
+        } else {
+            return false
+        }
+    } else {
+        return true;
+    }
+}
 
 // Update menus when controller is initialized
 controller.updateMenus()

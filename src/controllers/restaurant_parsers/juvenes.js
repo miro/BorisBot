@@ -23,25 +23,31 @@ var _fetchKitchenMenus = function(kitchen) {
                 "&MenuTypeId=" + kitchen.menu + 
                 "&date='" + date +
                 "'&format=json&lang='fi'"
-        }
+        };
 
         request(opt, function (error, resp, html) {
             if (!error) {
+                try {
+                    // make valid json
+                    var json = JSON.parse(html.slice(7, -4).replace(/\\"/g, '"'));
 
-                // make valid json
-                var json = JSON.parse(html.slice(7, -4).replace(/\\"/g, '"'));
-
-                // search the titles of meals
-                var meals = [];
-                for (var i in json.MealOptions) {
-                    var meal = json.MealOptions[i].MenuItems[0].Name;
-                    meals.push(meal.trim());
+                    // search the titles of meals
+                    var meals = [];
+                    for (var i in json.MealOptions) {
+                        var meal = json.MealOptions[i].MenuItems[0].Name;
+                        meals.push(meal.trim());
+                    }
+                    
+                    resolve(meals);
+                }
+                catch(err) {
+                    logger.log('error', 'Error when parsing Juvenes kitchen: %s', err);
+                    resolve()
                 }
                 
-                resolve(meals);
-                
             } else {
-                reject(error);
+                logger.log('error', 'Error when requesting Juvenes HTML: %s', error);
+                resolve();
             }
         });
     });
