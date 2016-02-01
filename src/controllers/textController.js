@@ -28,12 +28,12 @@ controller.addMessage = function(chatId, msg) {
     }
 }
 
-controller.getSummary = function(chatId) {
+controller.getSummary = function(chatId, n) {
     if (_.isUndefined(controller.history[chatId]) || _.isEmpty(controller.history[chatId])) {
         return 'Tiivistettävää ei löydy.';
     } else {
         // TODO: Create more complex algorithm
-        var dice = Math.floor(Math.random() * controller.history[chatId].length)
+        var dice = _.ceil(Math.random() * n);
         return controller.history[chatId][dice][1];
     }
 }

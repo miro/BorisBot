@@ -61,7 +61,7 @@ module.exports = function dispatchTelegramEvent(msg) {
         }
 
         // Check if event was not command
-        if (msg.text.charAt(0) !== '/' && !emojiRegex().test(msg.text.split()[0])) {
+        if (msg.text.charAt(0) !== '/' && !emojiRegex().test(msg.text.split(' ')[0])) {
             textController.addMessage(chatGroupId, msg.text);
             return resolve();
         }
@@ -279,7 +279,8 @@ module.exports = function dispatchTelegramEvent(msg) {
                     botApi.sendMessage(userId, 'Tämä komento toimii vain ryhmästä!');
                     resolve();
                 } else {
-                    botApi.sendMessage(chatGroupId, textController.getSummary(chatGroupId));
+                    var param = (_.isFinite(userCommand.split(' ')[0])) ? userCommand.split(' ')[0] : 1000;
+                    botApi.sendMessage(chatGroupId, textController.getSummary(chatGroupId, param));
                     resolve();
                 }
             break;
@@ -287,6 +288,8 @@ module.exports = function dispatchTelegramEvent(msg) {
             case '/ravintolat':
             case '/raflat':
             case '/ruoka':
+            case '/safka':
+            case '/safkat':
             case '/menu':
                 restaurantController.getAllMenusForToday(eventIsFromGroup)
                 .then(function(msg) {

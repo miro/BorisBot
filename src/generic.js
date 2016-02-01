@@ -66,7 +66,7 @@ generic.checkWebcamLightness = function() {
         .then(function() {
             getPixels(cfg.webcamDirectory + 'webcam.jpg', function(err,pixels) {
                 if (err) {
-                    logger.log('error', 'Error when getting pixels!');
+                    logger.log('error', 'Error when getting webcam pixels: %s', err);
                     resolve();
                     return;
                 }
@@ -90,7 +90,7 @@ generic.checkWebcamLightness = function() {
                 
                 // Calculate whole average
                 var threshold = Math.round(sum / x);
-                logger.log('debug', 'Clubroom lightness value: %d', threshold);
+                logger.log('debug', 'Webcam lightness value: %d', threshold);
                 
                 if (threshold > 80) {   // TODO: Explore more specific thresholds
                 
