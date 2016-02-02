@@ -13,7 +13,7 @@ var botApi = {};
 // ## Public functions
 //
 
-botApi.sendMessage = function(chatId, text, parseMode, disableWebPagePreview, replyToMessageId, replyMarkupObject ) {
+botApi.sendMessage = function(chatId, text, parseMode, disableWebPagePreview, replyToMessageId, replyMarkupObject) {
     return new Promise(function(resolve, reject) {
         var data = {};
         data.chat_id = chatId;
@@ -29,7 +29,7 @@ botApi.sendMessage = function(chatId, text, parseMode, disableWebPagePreview, re
         else {
             data.hide_keyboard = true;
         }
-
+        logger.debug(text);
         // Send the message to Telegram API
         request.post(
             cfg.tgApiUrl + '/sendMessage',

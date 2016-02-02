@@ -112,4 +112,6 @@ var _generateMeme = function(templateId, topText, bottomText) {
     });
 };
 
+controller.getMemes(); 
+
 module.exports = controller;

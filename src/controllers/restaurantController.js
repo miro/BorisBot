@@ -1,6 +1,7 @@
 var Promise = require('bluebird');
 var _       = require('lodash');
 var moment  = require('moment-timezone');
+var emoji   = require('node-emoji')
 
 var parserJuvenes   = require('./restaurant_parsers/juvenes');
 var parserHertsi    = require('./restaurant_parsers/hertsi');
@@ -9,7 +10,9 @@ var resources       = require('../../resources/restaurants');
 var cfg             = require('../config');
 var logger          = cfg.logger;
 
-controller = {};
+moment.tz.setDefault(cfg.botTimezone);
+
+var controller = {};
 
 var diners = {
     reaktori: {
@@ -41,13 +44,13 @@ var diners = {
 controller.getAllMenusForToday = function (isFromGroup) {
     return new Promise(function(resolve,reject)  {
         
-        // Process only three diners if message is from group
-        var validDiners = (isFromGroup) ? {
+        // Process only three main diners if message is from group
+        var validDiners = (isFromGroup && moment().isBefore(moment('15:00', 'HH:mm'))) ? {
             reaktori: diners.reaktori,
             newton: diners.newton,
             hertsi: diners.hertsi
         } : diners;
-        
+
         // Remove diners which aren't open
         _.forEach(validDiners, function(diner, name) {
             if (!_isDinerOpen(diner)) {
@@ -60,7 +63,6 @@ controller.getAllMenusForToday = function (isFromGroup) {
             resolve('Ei ravintoloita auki.');
             return;
         }
-        
         // Use shorter presentation if event is from group
         var style = (!isFromGroup) ? _splitMealsToRows : 
                                     function(x) {return x.join(', ');}
@@ -74,12 +76,19 @@ controller.getAllMenusForToday = function (isFromGroup) {
             });
         }
 
-        var s = new String();     
+        // Choose the right closing time if diner have pause
+        _.forEach(validDiners, function(diner, name) {
+            if (!_.isUndefined(diner.info.open.pause) && moment().isBefore(moment(diner.info.open.pause.from, 'HH:mm'))) {
+                diner.info.open.to = diner.info.open.pause.from;
+            }
+        });
+
+        var s = new String();
         _.forEach(validDiners, function(diner, name) {
             
             // Print diner info
-            s += '[' + diner.info.name + '](' + diner.info.homepage + ') ';
-            s += '`[' + diner.info.open.from + '-' + diner.info.open.to + ']`: ';
+            s += '[' + diner.info.name + '](' + diner.info.homepage + ')';
+            s +=  _timeToCloseOrOpen(diner) + ': ';
             
             // Print menus if they exists
             if (!_.isEmpty(diner.menu)) {
@@ -106,6 +115,8 @@ controller.updateMenus = function () {
         _.forEach(diners, function(diner,name) {
             if (_isDinerOpenToday(diner)) {
                 validParsers.push(diner.parser());
+            } else {
+                _.unset(validDiners, name);
             }
         });
         
@@ -124,6 +135,47 @@ controller.updateMenus = function () {
     });
 };
 
+var _timeToCloseOrOpen = function(diner) {
+    var now = moment();
+    var s = '';
+
+    var timeleft = moment(diner.info.open.to, 'HH:mm').diff(now, 'minutes');
+
+    // Check if diner won't be open in a hour
+    if (timeleft >= 60 || timeleft < 0) { 
+        var timeTo = moment(diner.info.open.from, 'HH:mm').diff(now, 'minutes');
+
+        // Check if diner isn't open yet
+        if (timeTo > 0) {
+            s += ' ' + '`(Aukeamiseen aikaa '
+
+            // Is there only minutes
+            if (timeTo <= 60) {
+                s += timeTo + ' minuutti';
+                if (timeTo !== 1) {
+                    s += 'a'
+                }
+            } else {
+                var hours = _.floor(timeTo / 60);
+                s += hours + ' tunti';
+                if (hours !== 1) { s += 'a'; }
+
+                var minutes = timeTo - hours * 60;
+                if (minutes > 0) {
+                    s += ' ja ' + minutes + ' minuutti';
+                    if (minutes !== 1) { s += 'a'; }
+                }
+            }
+            s += ')`';
+        }
+    } else {
+        s += ' ' + emoji.get(':exclamation:') + ' `(Auki vielä ' + timeleft + ' minuutti';
+        if (timeleft !== 1) { s += 'a'; }
+        s += ')`';
+    }
+    return s;
+}
+
 var _splitMealsToRows = function(meals) {
     var s = new String();
     _.forEach(meals, function(meal) {
@@ -141,7 +193,7 @@ var _isDinerOpen = function(diner) {
     
     // Check if diner is open at saturday
     if (!_.isUndefined(diner.info.open.saturday) && moment().weekday() === 5) {
-        return now.isBefore(diner.info.saturday.to, 'HH:mm');
+        return now.isBefore(moment(diner.info.saturday.to, 'HH:mm'));
     }
     
     // Check if diner have a pause middle of the day
@@ -159,11 +211,10 @@ var _isDinerOpen = function(diner) {
 
 var _isDinerOpenToday = function(diner) {
     var now = moment();
-    
+
     // No diners open at sunday
     if (now.weekday() === 7) {
         return false;
-        
     } else if (now.weekday() === 6) {
         if (!_.isUndefined(diner.info.open.saturday)) {
             return true;

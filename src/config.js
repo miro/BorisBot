@@ -76,13 +76,6 @@ cfg.webcamURL = process.env.BORISBOT_WEBCAM_URL;
 cfg.logLocation = process.env.BORISBOT_LOGFILE || cfg.logDirectory + 'output.log';
 
 var logOptions = {};
-logOptions.transports = [
-    new (winston.transports.Console)({
-        timestamp: function() {
-            return moment().format('YYYY-MM-DDTHH:mm:SS');
-        },
-        level: 'debug'})
-];
 
 // Add logs also to file if env is production
 if (cfg.env === 'production') {
@@ -100,6 +93,14 @@ if (cfg.env === 'production') {
                 json: false
         })
     );
+} else {
+    logOptions.transports = [
+    new (winston.transports.Console)({
+        timestamp: function() {
+            return moment().format('YYYY-MM-DDTHH:mm:SS');
+        },
+        level: 'debug'})
+    ];
 }
 
 cfg.logger = new (winston.Logger)(logOptions);
