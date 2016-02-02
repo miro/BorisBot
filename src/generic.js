@@ -244,7 +244,6 @@ generic.sendLog= function(targetId, userParams) {
                     botApi.sendMessage(targetId, 'Lokia ei voitu avata! ' + err);
                     resolve();
                 } else {
-                    var message = '```';
                     var linesToRead = parseInt(userParams) || 50;
                     var lines = data.toString('utf-8').split('\n');
                     var lastLine = (lines.length - linesToRead > 0) ? lines.length - linesToRead : 0;
@@ -252,8 +251,7 @@ generic.sendLog= function(targetId, userParams) {
                         message += lines[i];
                         message += '\n';
                     }
-                    message += '```';
-                    botApi.sendMessage(targetId, message, 'Markdown');
+                    botApi.sendMessage(targetId, message);
                     resolve();
                 }
             });

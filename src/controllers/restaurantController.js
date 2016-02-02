@@ -10,7 +10,9 @@ var resources       = require('../../resources/restaurants');
 var cfg             = require('../config');
 var logger          = cfg.logger;
 
-controller = {};
+moment.tz.setDefault(cfg.botTimezone);
+
+var controller = {};
 
 var diners = {
     reaktori: {
@@ -42,8 +44,8 @@ var diners = {
 controller.getAllMenusForToday = function (isFromGroup) {
     return new Promise(function(resolve,reject)  {
         
-        // Process only three diners if message is from group
-        var validDiners = (isFromGroup) ? {
+        // Process only three main diners if message is from group
+        var validDiners = (isFromGroup && moment().isBefore(moment('15:00', 'HH:mm'))) ? {
             reaktori: diners.reaktori,
             newton: diners.newton,
             hertsi: diners.hertsi
@@ -61,7 +63,6 @@ controller.getAllMenusForToday = function (isFromGroup) {
             resolve('Ei ravintoloita auki.');
             return;
         }
-        
         // Use shorter presentation if event is from group
         var style = (!isFromGroup) ? _splitMealsToRows : 
                                     function(x) {return x.join(', ');}
@@ -87,7 +88,7 @@ controller.getAllMenusForToday = function (isFromGroup) {
             
             // Print diner info
             s += '[' + diner.info.name + '](' + diner.info.homepage + ')';
-            s +=  _timeToClose(diner) + ': ';
+            s +=  _timeToCloseOrOpen(diner) + ': ';
             
             // Print menus if they exists
             if (!_.isEmpty(diner.menu)) {
@@ -134,14 +135,44 @@ controller.updateMenus = function () {
     });
 };
 
-var _timeToClose = function(diner) {
+var _timeToCloseOrOpen = function(diner) {
+    var now = moment();
+    var s = '';
 
-    var timeleft = moment(diner.info.open.to, 'HH:mm').diff(moment(), 'minutes');
-    if (timeleft >= 60 || timeleft < 0) { return '';}
+    var timeleft = moment(diner.info.open.to, 'HH:mm').diff(now, 'minutes');
 
-    var s = ' ' + emoji.get(':exclamation:') + ' `[Auki vielä ' + timeleft + ' minuutti';
-    if (timeleft !== 1) { s += 'a'; }
-    s += ']`';
+    // Check if diner won't be open in a hour
+    if (timeleft >= 60 || timeleft < 0) { 
+        var timeTo = moment(diner.info.open.from, 'HH:mm').diff(now, 'minutes');
+
+        // Check if diner isn't open yet
+        if (timeTo > 0) {
+            s += ' ' + '`(Aukeamiseen aikaa '
+
+            // Is there only minutes
+            if (timeTo <= 60) {
+                s += timeTo + ' minuutti';
+                if (timeTo !== 1) {
+                    s += 'a'
+                }
+            } else {
+                var hours = _.floor(timeTo / 60);
+                s += hours + ' tunti';
+                if (hours !== 1) { s += 'a'; }
+
+                var minutes = timeTo - hours * 60;
+                if (minutes > 0) {
+                    s += ' ja ' + minutes + ' minuutti';
+                    if (minutes !== 1) { s += 'a'; }
+                }
+            }
+            s += ')`';
+        }
+    } else {
+        s += ' ' + emoji.get(':exclamation:') + ' `(Auki vielä ' + timeleft + ' minuutti';
+        if (timeleft !== 1) { s += 'a'; }
+        s += ')`';
+    }
     return s;
 }
 
