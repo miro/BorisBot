@@ -22,7 +22,8 @@ controller.process = function processEvent(event) {
         return Promise.resolve();
     }
 
-    const link = controller.findLink(event.rawInput);
+    const rawInput = event.rawInput.toLowerCase();
+    const link = controller.findLink(rawInput);
 
     if (!link) {
         return Promise.resolve();
