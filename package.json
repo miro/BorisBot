@@ -15,7 +15,8 @@
     "telegram",
     "bot"
   ],
-  "author": "Miro Nieminen",
+  "author": "Miro Nieminen <miro.nieminen@gmail.com>",
+  "contributors": ["Antti Kivimäki"],
   "license": "BSD-2-Clause",
   "bugs": {
     "url": "https://github.com/miro/BorisBot/issues"

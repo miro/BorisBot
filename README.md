@@ -19,7 +19,7 @@ This repository consists of NodeJS web server, which subscribes and understands 
 1. Clone this repository and run `npm install`
 2. Create local database (see instructions below) 
 3. Create your own bot via Telegram's [@BotFather](https://telegram.me/botfather)
-4. Install ngrok, set it running to port 3000 with command `ngrok 3000`
+4. Install ngrok, set it running to port 3000 with command `ngrok http 3000`
 5. Configure required environment variables (see instructions below), especially these:
   * `BORISBOT_PUBLIC_URL`: this is the URL where from Telegram tries to contact your bot. Set this to the <x>.ngrok.com address where your ngrok tunnel is located
   * `BORISBOT_TELEGRAM_APIKEY`: this is the API-token you can retrieve via @BotFather
