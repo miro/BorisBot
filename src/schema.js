@@ -4,6 +4,10 @@ var Promise     = require('bluebird');
 var knex        = require('knex')(config.db);
 var bookshelf   = require('bookshelf')(knex);
 
+// TODO:
+// - it would be more postgres-y if all the column names would be snake_case (or wth it is).
+//   For now I am creating new columns with that style, it will mix up the codebase but...
+
 
 // Database definitions
 bookshelf.knex.schema.hasTable('drinks').then(function(exists) {
@@ -56,10 +60,52 @@ bookshelf.knex.schema.hasTable('users').then(function(exists) {
     }
 });
 
+bookshelf.knex.schema.hasTable('groups').then(function(exists) {
+    if (!exists) {
+        return bookshelf.knex.schema.createTable('groups', function(t) {
+            t.increments('id').primary();
+            t.timestamp('found_at').defaultTo(knex.raw('now()'));
+
+            t.string('name', 400);
+            t.integer('telegram_group_id').unique();
+        });
+    }
+});
+
+bookshelf.knex.schema.hasTable('links').then(function(exists) {
+    if (!exists) {
+        return bookshelf.knex.schema.createTable('links', function(t) {
+            t.increments('id').primary();
+            t.timestamp('timestamp').defaultTo(knex.raw('now()'));
+
+            t.string('url', 400);
+            t.integer('original_link_message_id');
+
+            t.integer('times_linked').defaultTo(1); // NOTE: group-based
+
+            t.integer('group_id')
+                .unsigned()
+                .references('id')
+                .inTable('groups')
+                .onDelete('SET NULL');
+
+            t.integer('telegram_group_id');
+
+            t.unique(['url', 'group_id']);
+
+            t.integer('linker_telegram_id');
+        });
+    }
+});
+
 
 
 // Model definitions
 var models = {};
+
+models.Group = bookshelf.Model.extend({
+    tableName: 'groups'
+});
 models.Drink = bookshelf.Model.extend({
     tableName: 'drinks'
 });
@@ -68,6 +114,15 @@ models.Expl = bookshelf.Model.extend({
 });
 models.User = bookshelf.Model.extend({
     tableName: 'users'
+});
+models.Link = bookshelf.Model.extend({
+    tableName: 'links',
+    group: function() {
+        return this.belongsTo(models.Group, 'group_id');
+    },
+    linker: function() {
+        return this.belongsTo(models.User, 'linker_id');
+    }
 });
 
 
