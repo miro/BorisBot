@@ -4,6 +4,8 @@ var moment      = require('moment-timezone');
 
 var cfg = {}; // the cfg object which will be returned
 
+// TODO: remove the log stuff to independent module
+
 // The timezone in which the bot outputs all the datetimes
 cfg.botTimezone = 'Europe/Helsinki';
 
