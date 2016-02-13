@@ -10,14 +10,20 @@ var _           = require('lodash');
 var emoji       = require('node-emoji');
 var emojiRegex  = require('emoji-regex');
 
-var textController          = require('./controllers/textController');
+var textController      = require('./controllers/textController');
+var linkController      = require('./controllers/linkController');
 
 
 
-module.exports = function (event) {
+module.exports = function(event) {
     return new Promise(function (resolve, reject) {
 
+        // Add this message to our "history"
         textController.addMessage(event.chatGroupId, event.rawInput);
+
+        // Check for possible links
+        linkController.process(event);
+
 
         resolve();
     });
