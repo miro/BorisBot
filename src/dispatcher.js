@@ -21,7 +21,7 @@ module.exports = function parseTelegramEvent(msg) {
 
     if (!msg.text) {
         logger.log('debug', 'No text on event, ignore');
-        return resolve();
+        return Promise.resolve();
     }
 
     event.rawInput = msg.text;
@@ -44,7 +44,7 @@ module.exports = function parseTelegramEvent(msg) {
     if (userIsIgnored) {
         // do nothing
         logger.log('warn', 'Ignored user tried to use bot, username: %s', event.userCallName);
-        return resolve();
+        return Promise.resolve();
     }
 
 
@@ -63,7 +63,7 @@ module.exports = function parseTelegramEvent(msg) {
     if (msg.reply_to_message) {
         logger.log('debug', 'Got reply to previous message, passing handling to replys-module');
         replys.eventEmitter.emit(msg.reply_to_message.message_id, event.rawInput);
-        return resolve();
+        return Promise.resolve();
     } else if (event.isCommand) {
         return talkbox(event);
     } else {
