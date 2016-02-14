@@ -247,6 +247,7 @@ generic.sendLog= function(targetId, userParams) {
                     var linesToRead = parseInt(userParams) || 50;
                     var lines = data.toString('utf-8').split('\n');
                     var lastLine = (lines.length - linesToRead > 0) ? lines.length - linesToRead : 0;
+                    var message = '';
                     for(var i=lastLine; i<lines.length; i+=1) {
                         message += lines[i];
                         message += '\n';

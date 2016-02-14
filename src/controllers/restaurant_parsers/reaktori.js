@@ -21,8 +21,8 @@ module.exports = function() {
         // request the json
         request(opt, function (error, resp, json) {
             if (!error) {
-                
-                var meals = [];     
+
+                var meals = [];
                 try {
                     // looping json to find right date
                     _.forEach(json.MenusForDays, function(MenusForDays) {
@@ -35,8 +35,8 @@ module.exports = function() {
                     });
                     resolve(meals);
                 }
-                catch(err) {
-                    logger.log('error', 'Error when parsing reaktori: %s', s);
+                catch (catchedError) {
+                    logger.log('error', 'Error when parsing reaktori: %s', catchedError);
                     resolve();
                 }
             } else {
@@ -48,7 +48,7 @@ module.exports = function() {
 }
 
 var _parseMenu = function (menu) {
-    
+
     // we don't want to include all the meals
     var categories = [
         'Linjasto',
@@ -60,12 +60,12 @@ var _parseMenu = function (menu) {
         'Iltaruoka',
         'Jälkiruoka',
         'A´la carte',*/
-    ];   
+    ];
     // offer only 'iltaruoka' if time is over 16 and its not saturday
     if (moment().isAfter(moment(1600, 'HHmm')) && moment().weekday() !== 6) {
         categories = ['Iltaruoka'];
     }
-    
+
     var meals = [];
     _.forEach(menu, function(category) {
         // Skip the unwanted categories

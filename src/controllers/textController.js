@@ -1,4 +1,4 @@
-﻿var cfg     = require('../config');
+var cfg     = require('../config');
 
 var _       = require('lodash');
 var moment  = require('moment-timezone');
@@ -6,6 +6,8 @@ var moment  = require('moment-timezone');
 var logger  = cfg.logger;
 
 var controller = {};
+
+// TODO: rename this to something more describing... logController?
 
 controller.hoursToExpire = 24;
 controller.history = {};
@@ -44,7 +46,7 @@ controller.deleteExpired = function() {
     } else {
         var expired = moment().unix() - (controller.hoursToExpire*3600);
         _.forEach(controller.history, function(groupMsgs) {
-            for (i=groupMsgs.length-1; i>=0; i--) {
+            for (var i = groupMsgs.length-1; i >= 0; i--) {
                 if (groupMsgs[i][0] < expired) {
                     groupMsgs.pop();
                 } else {
