@@ -9,17 +9,13 @@
 var Promise     = require('bluebird');
 var request     = require('request');
 
-var moment      = require('moment-timezone');
 var _           = require('lodash');
 var emoji       = require('node-emoji');
 var emojiRegex  = require('emoji-regex');
 
 var cfg         = require('./config');
-var db          = require('./database');
 var botApi      = require('./botApi');
-var utils       = require('./utils');
 var generic     = require('./generic');
-var replys      = require('./replys');
 var logger      = cfg.logger;
 
 var userController          = require('./controllers/userController');
