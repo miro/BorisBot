@@ -20,7 +20,7 @@ controller.addMessage = function(chatId, msg) {
         if (_.isUndefined(controller.history[chatId])) {
             controller.history[chatId] = [];
         }
-        var maxSize = 5000; // Max size of message list
+        var maxSize = 2000; // Max size of message list
         if (controller.history[chatId].length >= maxSize) {
             logger.log('warn', 'textController: maximum list size (%d) reached on chatId %s', maxSize, chatId)
             controller.history[chatId].pop();

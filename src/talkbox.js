@@ -10,13 +10,15 @@ var _           = require('lodash');
 var emoji       = require('node-emoji');
 var emojiRegex  = require('emoji-regex');
 
-var textController      = require('./controllers/textController');
-var linkController      = require('./controllers/linkController');
-
+var textController  = require('./controllers/textController');
+var linkController  = require('./controllers/linkController');
+var logger          = require('./config').logger;	
 
 
 module.exports = function(event) {
     return new Promise(function (resolve, reject) {
+
+        logger.log('debug', 'Text "%s" event from user %s', event.rawInput, event.userCallName);
 
         // Add this message to our "history"
         textController.addMessage(event.chatGroupId, event.rawInput);

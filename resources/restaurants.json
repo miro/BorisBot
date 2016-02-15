@@ -17,7 +17,7 @@
             "homepage": "http://www.juvenes.fi/fi-fi/ravintolatjakahvilat/opiskelijaravintolat/ttykampus/newton.aspx",
             "open": {
                 "from": "10:30",
-                "to": "15:00"
+                "to": "16:00"
             }
         },
 
@@ -25,7 +25,11 @@
             "name": "Sååsbar",
             "homepage": "http://www.juvenes.fi/fi-fi/ravintolatjakahvilat/opiskelijaravintolat/ttykampus/caf%C3%A9konehuone/s%C3%A5%C3%A5sbar.aspx",
             "open": {
-                "from": "15:00",
+                "from": "10:30",
+                "pause": {
+                    "from": "14:45",
+                    "to": "15:00"
+                },
                 "to": "19:00"
             }
         },

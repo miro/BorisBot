@@ -31,9 +31,6 @@ botApi.sendMessage = function(chatId, text, parseMode, disableWebPagePreview, re
         else {
             data.hide_keyboard = true;
         }
-
-        logger.debug(text);
-
         // Send the message to Telegram API
         request.post(
             cfg.tgApiUrl + '/sendMessage',
@@ -80,7 +77,7 @@ botApi.setWebhook = function (webhookUrl, certificateFile) {
         if (error) logger.log('error', 'Telegram API unreachable: ', error);
         else {
             logger.log('debug', 'botApi: previous webhook deleted, response: ' + body);
-
+            
             // Subscribe new webhook
             certificateFile = typeof certificateFile !== 'undefined' ? certificateFile : null;
             var opts = { qs: { url: webhookUrl } };
@@ -145,7 +142,7 @@ var _sendFile = function (type, chatId, file, options) {
     opts.formData = content.formData;
     opts.qs[type] = content.file;
     opts.qs.chat_id = chatId;
-
+    
     request.post(cfg.tgApiUrl + '/send' + _.camelCase(type), opts, function(err, httpResponse, body) {
         if (!err && JSON.parse(body).ok) {
             logger.log('info', 'botApi: sent ' + type + ' to ' + chatId);

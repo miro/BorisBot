@@ -45,7 +45,7 @@ cfg.botTalkUsers = _.union(cfg.adminUsers, [73814886]);
 cfg.ignoredUsers = [50446519]; // users whom commands are ignored
 
 // Port which the Boris server will listen to
-cfg.serverPort = process.env.PORT || 3000;
+cfg.serverPort = process.env.BORISBOT_PORT || 3000;
 
 // Telegram API configs
 cfg.tgApiKey = process.env.BORISBOT_TELEGRAM_APIKEY;

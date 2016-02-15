@@ -29,6 +29,8 @@ var restaurantController    = require('./controllers/restaurantController');
 module.exports = function (event) {
     return new Promise(function (resolve, reject) {
 
+        logger.log('debug', 'Command %s from user %s', event.userCommand, event.userCallName);
+
         // Dispatch command!
         switch (event.userCommand) {
 
@@ -36,13 +38,13 @@ module.exports = function (event) {
             case '/sumppi':
             case '/kahvi':
             case emoji.get(':coffee:'):
-                drinkController.addDrink(event.eventId, event.userId, event.userCallName, 'coffee',  0, event.eventIsFromGroup)
+                drinkController.addDrink(event.eventId, event.userId, event.userCallName, 'coffee',  0, event.isFromGroup)
                 .then(resolve);
             break;
 
             case '/tee':
             case emoji.get(':tea:'):
-                drinkController.addDrink(event.eventId, event.userId, event.userCallName, 'tea', 0, event.eventIsFromGroup)
+                drinkController.addDrink(event.eventId, event.userId, event.userCallName, 'tea', 0, event.isFromGroup)
                 .then(resolve);
             break;
 
@@ -52,7 +54,7 @@ module.exports = function (event) {
             break;
 
             case '/kippis':
-                drinkController.showDrinkKeyboard(event.userId, event.eventIsFromGroup)
+                drinkController.showDrinkKeyboard(event.userId, event.isFromGroup)
                 .then(resolve);
             break;
 
@@ -62,8 +64,8 @@ module.exports = function (event) {
             case emoji.get(':wine_glass:'):
             case emoji.get(':cocktail:'):
 
-                if (event.eventIsFromGroup) {
-                    drinkController.showDrinkKeyboard(event.userId, event.eventIsFromGroup)
+                if (event.isFromGroup) {
+                    drinkController.showDrinkKeyboard(event.userId, event.isFromGroup)
                     .then(resolve);
                 }
                 else {
@@ -85,18 +87,18 @@ module.exports = function (event) {
 
                     var drinkValue = 12; // For now this is fixed for all drinks
 
-                    drinkController.addDrink(event.eventId, event.userId, event.userCallName, drinkType, drinkValue, event.eventIsFromGroup)
+                    drinkController.addDrink(event.eventId, event.userId, event.userCallName, drinkType, drinkValue, event.isFromGroup)
                     .then(resolve);
                 }
             break;
 
             case '/kaljoja':
-                drinkController.getDrinksAmount(event.userId, event.chatGroupId, event.chatGroupTitle, event.eventIsFromGroup, true)
+                drinkController.getDrinksAmount(event.userId, event.chatGroupId, event.chatGroupTitle, event.isFromGroup, true)
                 .then(resolve);
             break;
 
             case '/virvokkeita':
-                drinkController.getDrinksAmount(event.userId, event.chatGroupId, event.chatGroupTitle, event.eventIsFromGroup, false)
+                drinkController.getDrinksAmount(event.userId, event.chatGroupId, event.chatGroupTitle, event.isFromGroup, false)
                 .then(resolve);
             break;
 
@@ -128,7 +130,7 @@ module.exports = function (event) {
             // Takes one parameter, which changes the length of the graph
             case '/graafi':
             case '/histogrammi':
-                drinkController.drawGraph(event.userId, event.chatGroupId, event.eventIsFromGroup, event.userCommandParams)
+                drinkController.drawGraph(event.userId, event.chatGroupId, event.isFromGroup, event.userCommandParams)
                 .then(resolve);
             break;
 
@@ -137,7 +139,7 @@ module.exports = function (event) {
             case '/kerho':
             case '/cam':
             case '/webcam':
-                generic.webcam(event.userId, event.chatGroupId, event.eventIsFromGroup)
+                generic.webcam(event.userId, event.chatGroupId, event.isFromGroup)
                 .then(resolve);
             break;
 
@@ -147,7 +149,7 @@ module.exports = function (event) {
             case '/addme':
             case '/luotunnus':
             case '/start':
-                if (event.eventIsFromGroup) {
+                if (event.isFromGroup) {
                     botApi.sendMessage(event.chatGroupId, 'Jutellaan lisää privassa ' + emoji.get(':smirk:'));
                     botApi.sendMessage(event.userId, 'Luo käyttäjätunnus komennolla /luotunnus <paino> <sukupuoli>');
                     resolve();
@@ -177,7 +179,7 @@ module.exports = function (event) {
             case '/asetaryhmä':
             case '/moro':
             case '/ryhmä':
-                userController.setGroup(event.userId, event.chatGroupId, event.chatGroupTitle, event.eventIsFromGroup)
+                userController.setGroup(event.userId, event.chatGroupId, event.chatGroupTitle, event.isFromGroup)
                 .then(resolve);
             break;
 
@@ -188,7 +190,7 @@ module.exports = function (event) {
 
             case '/promillet':
             case '/promille':
-                if (event.eventIsFromGroup) {
+                if (event.isFromGroup) {
                     drinkController.getGroupAlcoholStatusReport(event.chatGroupId)
                     .then(function(event) {
                         botApi.sendMessage(event.chatGroupId, event);
@@ -253,7 +255,7 @@ module.exports = function (event) {
             case '/safka':
             case '/safkat':
             case '/menu':
-                restaurantController.getAllMenusForToday(event.eventIsFromGroup)
+                restaurantController.getAllMenusForToday(event.isFromGroup)
                 .then(function(msg) {
                     botApi.sendMessage(event.targetId, msg, 'Markdown', true);
                     resolve();
