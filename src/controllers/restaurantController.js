@@ -64,8 +64,7 @@ controller.getAllMenusForToday = function (isFromGroup) {
             return;
         }
         // Use shorter presentation if event is from group
-        var style = (!isFromGroup) ? _splitMealsToRows : 
-                                    function(x) {return x.join(', ');}
+        var style = (!isFromGroup) ? _splitMealsToRows : x => x.join(', ');
                                     
         // On saturday display right opening hours
         if (moment().weekday() === 6) {
@@ -105,9 +104,7 @@ controller.updateMenus = function () {
     return new Promise(function(resolve,reject) {
         
         // Delete old menus
-        _.forEach(diners, function(diner) {
-            diner.menu = [];
-        });
+        _.forEach(diners, diner => diner.menu = []);
         
         // Choose only relevant diners
         var validDiners = diners;
@@ -124,14 +121,12 @@ controller.updateMenus = function () {
         Promise.all(validParsers)
         .then(function(result) {
             var i = 0;
-            _.forEach(validDiners, function(diner) {
+            _.forEach(validDiners, diner => {
                 diner.menu = result[i];
                 i++;
             });
             resolve();
-        }).catch(function(e) {
-            reject(e);
-        });
+        }).catch(e => reject(e));
     });
 };
 
@@ -178,9 +173,7 @@ var _timeToCloseOrOpen = function(diner) {
 
 var _splitMealsToRows = function(meals) {
     var s = new String();
-    _.forEach(meals, function(meal) {
-        s += '\n  \u2022 ' + meal;
-    });
+    _.forEach(meals, meal => s += '\n  \u2022 ' + meal);
     return s;
 };
 
@@ -228,8 +221,8 @@ var _isDinerOpenToday = function(diner) {
 
 // Update menus when controller is initialized
 controller.updateMenus()
-.catch(function(e) {
-    logger.log('error', 'restaurantController: error when fetching menus first time - %s', e);
-});
+.catch(e =>
+    logger.log('error', 'restaurantController: error when fetching menus first time - %s', e)
+);
 
 module.exports = controller;

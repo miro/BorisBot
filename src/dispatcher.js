@@ -13,7 +13,7 @@ var talkbox     = require('./talkbox');
 
 
 module.exports = function parseTelegramEvent(msg) {
-    logger.log('debug', 'Webhook event from id: %s, message: %s', msg.from.id, msg.text);
+    logger.log('debug', 'Webhook event from id %s, message: %s', msg.from.id, msg.text);
 
     // # Parse the message into "event"-object which is passed forward to commander or talkbox
     var event = {};
@@ -53,8 +53,6 @@ module.exports = function parseTelegramEvent(msg) {
     event.userCommandParams = event.userInput.join(' ');
 
     event.targetId = (event.isFromGroup) ? event.chatGroupId : event.userId;
-
-    logger.log('info', 'Command %s from id %s', event.userCommand, event.userId);
 
     // # -> Dispatch the event based on its type
     // TODO: do we really want to handle replies in this way?

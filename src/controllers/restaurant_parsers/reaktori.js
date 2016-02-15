@@ -69,7 +69,7 @@ var _parseMenu = function (menu) {
     var meals = [];
     _.forEach(menu, function(category) {
         // Skip the unwanted categories
-        if (!(_.indexOf(categories, category.Name) < 0)) {
+        if (!(_.indexOf(categories, category.Name) < 0) && !_.isEmpty(category.Components)) {
             meals.push((category.Components[0]).split('(')[0].trim());
         }
     });
