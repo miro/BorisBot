@@ -159,11 +159,29 @@ db.getUsersByPrimaryGroupId = function(chatGroupId) {
 db.getUserById = function(userId) {
 
     return schema.collections.Users
-    .query(function(qb) {
-        qb.where({ telegramId: userId })
-    })
+    .query(qb => qb.where({ telegramId: userId }))
     .fetchOne();
 };
 
+// ## Expl related stuff
+//
+db.addExpl = function(userId, key, value) {
+
+    var expl = new schema.models.Expl({
+        creatorId: userId,
+        key: key,
+        value: value
+    })
+    .save()
+
+    return expl;
+};
+
+db.fetchExpl = function(key) {
+
+    return schema.collections.Expls
+    .query(qb => qb.where({ key: key}))
+    .fetchOne();
+}
 
 module.exports = db;

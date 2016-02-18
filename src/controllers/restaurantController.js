@@ -44,6 +44,9 @@ var diners = {
 controller.getAllMenusForToday = function (isFromGroup) {
     return new Promise(function(resolve,reject)  {
         
+        // Update menus
+        controller.updateMenus();
+
         // Process only three main diners if message is from group
         var validDiners = (isFromGroup && moment().isBefore(moment('15:00', 'HH:mm'))) ? {
             reaktori: diners.reaktori,

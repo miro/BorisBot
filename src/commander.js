@@ -24,7 +24,7 @@ var ethanolController       = require('./controllers/ethanolController');
 var memeController          = require('./controllers/memeController');
 var textController          = require('./controllers/textController');
 var restaurantController    = require('./controllers/restaurantController');
-
+var explController          = require('./controllers/explController');
 
 module.exports = function (event) {
     return new Promise(function (resolve, reject) {
@@ -34,6 +34,25 @@ module.exports = function (event) {
         // Dispatch command!
         switch (event.userCommand) {
 
+            // !-commands
+            //
+            case '!add':
+                explController.addExpl(event.userId, event.targetId, event.userCommandParams)
+                .then(resolve);
+            break;
+
+            case '!expl':
+                explController.getExpl(event.targetId, event.userCommandParams)
+                .then(resolve);
+            break;
+
+            case '!list':
+                explController.listExpls(event)
+                .then(resolve);
+            break;
+
+            // /-commands
+            //
             case '/kahvutti':
             case '/sumppi':
             case '/kahvi':

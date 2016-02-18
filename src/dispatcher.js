@@ -25,7 +25,7 @@ module.exports = function parseTelegramEvent(msg) {
 
     event.rawInput = msg.text;
     event.eventId = msg.message_id;
-    event.isCommand = (event.rawInput.charAt(0) !== '/' && !emojiRegex().test(event.rawInput.split(' ')[0]));
+    event.isCommand = (event.rawInput.charAt(0) !== '/' && !emojiRegex().test(event.rawInput.split(' ')[0]) && event.rawInput.charAt(0) !== '!');
 
     // Parse metadata from the message
     event.userId = msg.from.id;
