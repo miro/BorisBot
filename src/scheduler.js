@@ -54,7 +54,7 @@ scheduler.addJob({
         var daysLeft = startMoment.diff(moment(), 'days');
 
         if (daysLeft > 0) {
-            botApi.sendMessage(cfg.allowedGroups.mainChatId, 'HUOOOMENTA! Kesäpäiviin aikaa ' + daysLeft + ' päivää!!');
+            botApi.sendMessage({chat_id: cfg.allowedGroups.mainChatId, text: 'HUOOOMENTA! Kesäpäiviin aikaa ' + daysLeft + ' päivää!!'});
         }
     },
     timeZone: cfg.botTimezone

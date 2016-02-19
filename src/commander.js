@@ -126,8 +126,8 @@ module.exports = function (event) {
                 drinkController.getPersonalDrinkLog(event.userId)
                 .then(function() {
                     if (event.eventIsFromGroup) {
-                        botApi.sendMessage(event.userId, 'PS: anna "' +
-                            userCommand + '"-komento suoraan minulle, älä spämmää turhaan ryhmächättiä!');
+                        botApi.sendMessage({chat_id: event.userId, text: 'PS: anna "' +
+                            userCommand + '"-komento suoraan minulle, älä spämmää turhaan ryhmächättiä!'});
                     }
                     resolve();
                 });
@@ -169,8 +169,8 @@ module.exports = function (event) {
             case '/luotunnus':
             case '/start':
                 if (event.isFromGroup) {
-                    botApi.sendMessage(event.chatGroupId, 'Jutellaan lisää privassa ' + emoji.get(':smirk:'));
-                    botApi.sendMessage(event.userId, 'Luo käyttäjätunnus komennolla /luotunnus <paino> <sukupuoli>');
+                    botApi.sendMessage({chat_id: event.chatGroupId, text: 'Jutellaan lisää privassa ' + emoji.get(':smirk:')});
+                    botApi.sendMessage({chat_id: event.userId, text: 'Luo käyttäjätunnus komennolla /luotunnus <paino> <sukupuoli>'});
                     resolve();
                 }
                 else {
@@ -211,19 +211,19 @@ module.exports = function (event) {
             case '/promille':
                 if (event.isFromGroup) {
                     drinkController.getGroupAlcoholStatusReport(event.chatGroupId)
-                    .then(function(event) {
-                        botApi.sendMessage(event.chatGroupId, event);
+                    .then(function(msg) {
+                        botApi.sendMessage({chat_id: event.chatGroupId, text: msg});
                         resolve();
                     });
                 }
                 else {
                     ethanolController.getAlcoholLevel(event.userId)
-                    .then(function(event) {
-                        botApi.sendMessage(event.userId, event + ' \u2030');
+                    .then(function(msg) {
+                        botApi.sendMessage({chat_id: event.userId, text: msg + ' \u2030'});
                         resolve();
                     })
                     .catch(function(e) {
-                        botApi.sendMessage(event.userId, e);
+                        botApi.sendMessage({chat_id: event.userId, text: e});
                         resolve();
                     });
                 }
@@ -242,28 +242,28 @@ module.exports = function (event) {
             case '/pankkitili':
             case '/tilinumero':
             case '/tili':
-                botApi.sendMessage(event.targetId, 'FI78 1439 3500 0219 70');
+                botApi.sendMessage({chat_id: event.targetId, text: 'FI78 1439 3500 0219 70'});
                 resolve();
             break;
 
             case '/puhelin':
             case '/puh':
-                botApi.sendMessage(event.targetId, '041 369 2262');
+                botApi.sendMessage({chat_id: event.targetId, text: '041 369 2262'});
                 resolve();
             break;
 
             case '/iltaa':
-                botApi.sendMessage(event.targetId, 'iltaa');
+                botApi.sendMessage({chat_id: event.targetId, text: 'iltaa'});
                 resolve();
             break;
 
             case '/tiivista':
                 if (!event.eventIsFromGroup) {
-                    botApi.sendMessage(event.userId, 'Tämä komento toimii vain ryhmästä!');
+                    botApi.sendMessage({ chat_id: event.userId, text: 'Tämä komento toimii vain ryhmästä!'});
                     resolve();
                 } else {
                     var param = (_.isFinite(userCommand.split(' ')[0])) ? userCommand.split(' ')[0] : 1000;
-                    botApi.sendMessage(event.chatGroupId, textController.getSummary(event.chatGroupId, param));
+                    botApi.sendMessage({chat_id: event.chatGroupId, text: textController.getSummary(event.chatGroupId, param)});
                     resolve();
                 }
             break;
@@ -276,7 +276,7 @@ module.exports = function (event) {
             case '/menu':
                 restaurantController.getAllMenusForToday(event.isFromGroup)
                 .then(function(msg) {
-                    botApi.sendMessage(event.targetId, msg, 'Markdown', true);
+                    botApi.sendMessage({chat_id: event.targetId, text: msg, parse_mode: 'Markdown', disable_web_page_preview: true});
                     resolve();
                 })
                 .catch(resolve);

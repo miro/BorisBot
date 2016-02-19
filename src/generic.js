@@ -16,7 +16,7 @@ var generic = {};
 generic.webcam = function(userId, chatGroupId, eventIsFromGroup) {
     return new Promise(function(resolve,reject) {
         if (_.isUndefined(cfg.webcamURL)) {
-            botApi.sendMessage(userId, 'Botille ei ole määritetty webcamin osoitetta!');
+            botApi.sendMessage({chat_id: userId, text: 'Botille ei ole määritetty webcamin osoitetta!'});
             return resolve();
         }
 
@@ -24,7 +24,7 @@ generic.webcam = function(userId, chatGroupId, eventIsFromGroup) {
         .then(function(user) {
 
             if (_.isNull(user)) {
-                botApi.sendMessage(userId, 'Sinun täytyy /luotunnus ja käydä /moro ´ttamassa SpänniMobissa saadaksesi /webcam toimimaan!');
+                botApi.sendMessage({chat_id: userId, text: 'Sinun täytyy /luotunnus ja käydä /moro ´ttamassa SpänniMobissa saadaksesi /webcam toimimaan!'});
                 return resolve();
             }
 
@@ -40,7 +40,7 @@ generic.webcam = function(userId, chatGroupId, eventIsFromGroup) {
             }
 
             if (!msgFromAllowedId) {
-                botApi.sendMessage(targetId, 'Sinun täytyy käydä /moro ´ttamassa SpänniMobissa saadaksesi /webcam-komennon toimimaan priva-chatissa!');
+                botApi.sendMessage({chat_id: targetId, text: 'Sinun täytyy käydä /moro ´ttamassa SpänniMobissa saadaksesi /webcam-komennon toimimaan priva-chatissa!'});
                 resolve();
             }
             else {
@@ -98,7 +98,7 @@ generic.checkWebcamLightness = function() {
                     if (!generic.webcamLightsOn) {
                         logger.log('info', 'Webcam detected lights at clubroom, threshold: ' + threshold);
                         var bulb = emoji.get(':bulb:');
-                        botApi.sendMessage(cfg.allowedGroups.mainChatId, bulb+bulb+bulb);
+                        botApi.sendMessage({chat_id: cfg.allowedGroups.mainChatId, text: bulb+bulb+bulb});
                         generic.webcamLightsOn = true;
                     }
                     resolve();
@@ -121,7 +121,7 @@ generic.talkAsBotToMainGroup = function(userId, msg) {
     // TODO: convert this with a more generic one after we have info about groups
     // on the database
     if (_userHaveBotTalkRights(userId)) {
-        botApi.sendMessage(cfg.allowedGroups.mainChatId, msg);
+        botApi.sendMessage({chat_id: cfg.allowedGroups.mainChatId, text: msg});
     }
     else {
         logger.log('info', 'Non-allowed user tried to talk as Boris!');
@@ -137,7 +137,7 @@ generic.talkAsBotToUsersInMainGroup = function(userId, msg) {
 			db.getUsersByPrimaryGroupId(cfg.allowedGroups.mainChatId)
 			.then(function(collection) {
 				_.each(collection.models, function(user) {
-					botApi.sendMessage(user.get('telegramId'), msg);
+					botApi.sendMessage({chat_id: user.get('telegramId'), text: msg});
 				});
 				resolve();
 			});
@@ -147,7 +147,7 @@ generic.talkAsBotToUsersInMainGroup = function(userId, msg) {
 
 generic.commandCount = function(userId) {
     return new Promise(function(resolve, reject) {
-        botApi.sendMessage(userId, 'Viestejä hanskattu ' + msgs.getEventCount());
+        botApi.sendMessage({chat_id: userId, text: 'Viestejä hanskattu ' + msgs.getEventCount()});
         resolve();
     });
 };
@@ -211,13 +211,13 @@ generic.help = function(userId) {
     \n\
     \n/webcam - Lähetän tuoreen kuvan Spinnin kerhohuoneelta.\
     ';
-    botApi.sendMessage(userId, msg);
+    botApi.sendMessage({chat_id: userId, text: msg});
 };
 
 generic.whichOne = function(targetId, userParams) {
     var options = userParams.split(' ');
     if (options.length != 2) {
-        botApi.sendMessage(targetId, 'Anna kaksi parametria!');
+        botApi.sendMessage({chat_id: targetId, text: 'Anna kaksi parametria!'});
         return;
     } else {
         var text;
@@ -231,7 +231,7 @@ generic.whichOne = function(targetId, userParams) {
         } else {
             text = options[1];
         }
-        botApi.sendMessage(targetId, text);
+        botApi.sendMessage({chat_id: targetId, text: text});
         return;
     }
 };
@@ -241,7 +241,7 @@ generic.sendLog= function(targetId, userParams) {
         if (utils.userIsAdmin(targetId)) {
             fs.readFile(cfg.logLocation, function (err,data) {
                 if (err) {
-                    botApi.sendMessage(targetId, 'Lokia ei voitu avata! ' + err);
+                    botApi.sendMessage({chat_id: targetId, text: 'Lokia ei voitu avata! ' + err});
                     resolve();
                 } else {
                     var linesToRead = parseInt(userParams) || 50;
@@ -252,7 +252,7 @@ generic.sendLog= function(targetId, userParams) {
                         message += lines[i];
                         message += '\n';
                     }
-                    botApi.sendMessage(targetId, message);
+                    botApi.sendMessage({chat_id: targetId, text: message});
                     resolve();
                 }
             });
