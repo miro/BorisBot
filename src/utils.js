@@ -14,7 +14,13 @@ utils.downloadFile = function(uri, filename) {
                 logger.log('error','Error on file download!', err);
                 reject(err);
             }
-            request(uri).pipe(fs.createWriteStream(filename)).on('close', resolve);
+            request(uri)
+            .pipe(fs.createWriteStream(filename))
+            .on('error', e => {
+                logger.log('error', 'Error when downloading file: %s', e);
+                resolve()
+            })
+            .on('close', resolve);
         });
     });
 };

@@ -25,7 +25,10 @@ controller.addExpl = function(userId, targetId, params) {
                     resolve();
                 } else {
                     db.addExpl(userId, key, value)
-                    .then(resolve);
+                    .then( () => {
+                        botApi.sendMessage(targetId, 'Expl "' + key + '" added.');
+                        resolve();
+                    });
                 }
             } else {
                 botApi.sendMessage(targetId, '!add [avain] [selite]');
@@ -66,8 +69,16 @@ controller.getExpl = function(targetId, params) {
     });
 }
 
-controller.listExpls = function(event) {
-
+controller.listExpls = function(userId) {
+    return new Promise(function(resolve,reject) {
+        db.fetchAllExpl()
+        .then(entrys => {
+            var msg = "Expls: ";
+            msg += _.map(entrys, 'key').join(', ');
+            botApi.sendMessage(userId, msg)
+            resolve();
+        });
+    });
 }
 
 module.exports = controller;

@@ -184,4 +184,10 @@ db.fetchExpl = function(key) {
     .fetchOne();
 }
 
+db.fetchAllExpl = function() {
+    return schema.bookshelf
+    .knex('expls')
+    .orderBy('key', 'asc');
+}
+
 module.exports = db;
