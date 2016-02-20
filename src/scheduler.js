@@ -87,9 +87,9 @@ scheduler.addJob({
     timeZone: cfg.botTimeZone
 });
 
-// "Update restaurant menus"
+// "Update menus"
 scheduler.addJob({
-    cronTime: '00 00 3 * * *',
+    cronTime: '00 30 0,15 * * *',
     onTick: function updateMenus() {
         restaurantController.updateMenus();
     },
