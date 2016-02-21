@@ -279,7 +279,10 @@ module.exports = function (event) {
                     botApi.sendMessage({chat_id: event.targetId, text: msg, parse_mode: 'Markdown', disable_web_page_preview: true});
                     resolve();
                 })
-                .catch(resolve);
+                .catch( e => {
+                    logger.log('error', 'Error on getAllMenusForToday: %s', e);
+                    resolve();
+                });
             break;
 
 

@@ -39,7 +39,7 @@ controller.showDrinkKeyboard = function(userId, eventIsFromGroup) {
         botApi.sendMessage({
             chat_id: userId,
             text: msg,
-            reply_markup: JSON.stringfy({
+            reply_markup: JSON.stringify({
                 keyboard: keyboard,
                 resize_keyboard: true,
                 one_time_keyboard: true

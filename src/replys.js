@@ -10,7 +10,7 @@ replys.eventEmitter = new events.EventEmitter();
 // Creates event listener, which reacts to the user's reply
 replys.sendMessageAndListenForReply = function(targetId, msg) {
     return new Promise(function(resolve,reject) {
-        botApi.sendMessage({ chat_id: targetId, text: msg, reply_markup: JSON.stringfy({force_reply: true})})
+        botApi.sendMessage({ chat_id: targetId, text: msg, reply_markup: JSON.stringify({force_reply: true})})
         .then(function(response) {
             response = JSON.parse(response);
 
