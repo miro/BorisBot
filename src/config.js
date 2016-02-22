@@ -68,7 +68,7 @@ cfg.resourceDirectory = '../resources/';
 cfg.plotlyDirectory = cfg.resourceDirectory + 'plotly/';
 cfg.webcamDirectory = cfg.resourceDirectory + 'webcam/';
 cfg.memeDirectory = cfg.resourceDirectory + 'memes/';
-cfg.logDirectory = '../logs/';
+cfg.logDirectory = cfg.resourceDirectory + 'logs/';
 cfg.requiredDirectories = [cfg.resourceDirectory, cfg.plotlyDirectory, cfg.webcamDirectory, cfg.memeDirectory, cfg.logDirectory]; // these folders will be made with mkdir
 
 // URL where webcam image will be downloaded

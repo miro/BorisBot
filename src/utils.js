@@ -29,4 +29,8 @@ utils.userIsAdmin = function(userId) {
     return cfg.adminUsers.indexOf(parseInt(userId, 10)) >= 0;
 };
 
+utils.userHaveBotTalkRights = function(userId) {
+    return cfg.botTalkUsers.indexOf(parseInt(userId, 10)) >= 0;
+};
+
 module.exports = utils;

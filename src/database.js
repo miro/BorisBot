@@ -163,6 +163,12 @@ db.getUserById = function(userId) {
     .fetchOne();
 };
 
+db.getUserByName = function(userName) {
+    return schema.collections.Users
+    .query(qb => qb.where({ userName: userName }))
+    .fetchOne();
+}
+
 // ## Expl related stuff
 //
 db.addExpl = function(userId, key, value) {

@@ -92,7 +92,7 @@ controller.updateMenus = function () {
         // Choose only relevant diners
         var validDiners = diners;
         var validParsers = [];
-        _.forEach(diners, function(diner,name) {
+        _.forEach(validDiners, function(diner,name) {
             if (_isDinerOpenToday(diner)) {
                 validParsers.push(diner.parser());
             } else {

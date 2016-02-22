@@ -288,13 +288,23 @@ module.exports = function (event) {
 
             // # Admin commands
             //
-            case '/bottalk':
+            case '/adminhelp':
+                generic.adminhelp(event.userId);
+                resolve();
+            break;
+
+            case '/botgrouptalk':
                 generic.talkAsBotToMainGroup(event.userId, event.userCommandParams);
                 resolve();
             break;
 
-            case '/botprivatetalk':
+            case '/botgroupprivatetalk':
                 generic.talkAsBotToUsersInMainGroup(event.userId, event.userCommandParams)
+                .then(resolve);
+            break;
+
+            case '/botprivatetalk':
+                generic.talkAsBotToUser(event.userId, event.userCommandParams)
                 .then(resolve);
             break;
 
