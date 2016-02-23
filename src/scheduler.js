@@ -4,9 +4,11 @@ var moment          = require('moment-timezone');
 var _               = require('lodash');
 var CronJob         = require('cron').CronJob;
 
-var botApi                  = require('./botApi');
-var cfg                     = require('./config');
-var generic                 = require('./generic');
+var botApi  = require('./botApi');
+var cfg     = require('./config');
+var logger  = cfg.logger;
+var generic = require('./generic');
+
 var drinkController         = require('./controllers/drinkController');
 var textController          = require('./controllers/textController');
 var restaurantController    = require('./controllers/restaurantController');
