@@ -48,8 +48,25 @@ generic.webcam = function(userId, chatGroupId, eventIsFromGroup) {
                 botApi.sendAction(targetId, 'upload_photo');
                 utils.downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg')
                 .then(function() {
-                    botApi.sendPhoto(targetId, cfg.webcamDirectory + 'webcam.jpg');
-                    resolve();
+                    if (!eventIsFromGroup) {
+                        botApi.sendPhoto(targetId, cfg.webcamDirectory + 'webcam.jpg');
+                        resolve();
+                    } else {
+                        calculateWebcamLightness_()
+                        .then(threshold => {
+                            if (threshold < 40) {
+                                botApi.sendMessage({chat_id: targetId, text: '_"I only see a vast emptiness."_', parse_mode: 'Markdown'});
+                            } else {
+                                botApi.sendPhoto(targetId, cfg.webcamDirectory + 'webcam.jpg');
+                            }
+                            resolve();
+                        })
+                        .catch(err=> {
+                            logger.log('error', 'Error on threshold checking, sending photo anyway');
+                            botApi.sendPhoto(targetId, cfg.webcamDirectory + 'webcam.jpg');
+                            resolve();
+                        })
+                    }  
                 });
             }
         });
@@ -64,32 +81,8 @@ generic.checkWebcamLightness = function() {
         }
         utils.downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg')
         .then(function() {
-            getPixels(cfg.webcamDirectory + 'webcam.jpg', function(err,pixels) {
-                if (err) {
-                    logger.log('error', 'Error when getting webcam pixels: %s', err);
-                    resolve();
-                    return;
-                }
-                
-                // Notice only every n pixel
-                var n = 4;
-                
-                // Calculate sum of averages
-                var sum = 0;
-                var x = 0;
-                for(var i=0; i<pixels.shape[0]; i+=n) {
-                    for(var j=0; j<pixels.shape[1]; ++j) {
-                        var colorValue = 0;
-                        for(var k=0; k<3; ++k) {
-                            colorValue += parseInt(pixels.get(i,j,k));
-                        };
-                        sum += Math.round(colorValue / 3);
-                        ++x;
-                    };
-                };
-                
-                // Calculate whole average
-                var threshold = Math.round(sum / x);
+            calculateWebcamLightness_()
+            .then(threshold => {
                 logger.log('debug', 'Webcam lightness value: %d', threshold);
                 
                 if (threshold > 80) {   // TODO: Explore more specific thresholds
@@ -108,7 +101,8 @@ generic.checkWebcamLightness = function() {
                     generic.webcamLightsOn = false;
                     resolve();
                 }   
-            });
+            })
+            .catch(err => logger.log('error', 'Error when calculating webcam pixels: %s', err));
         });
     });
 }
@@ -308,5 +302,35 @@ generic.talkAsBotToUsersInMainGroup = function(userId, msg) {
         }
     });
 };
+
+var calculateWebcamLightness_ = function() {
+    return new Promise(function(resolve, reject) {
+        getPixels(cfg.webcamDirectory + 'webcam.jpg', function(err,pixels) {
+            if (err) {
+                return reject(err);
+            }
+            
+            // Notice only every n pixel
+            var n = 4;
+            
+            // Calculate sum of averages
+            var sum = 0;
+            var x = 0;
+            for(var i=0; i<pixels.shape[0]; i+=n) {
+                for(var j=0; j<pixels.shape[1]; ++j) {
+                    var colorValue = 0;
+                    for(var k=0; k<3; ++k) {
+                        colorValue += parseInt(pixels.get(i,j,k));
+                    };
+                    sum += Math.round(colorValue / 3);
+                    ++x;
+                };
+            };
+            
+            // Return whole average
+            return resolve(Math.round(sum / x));
+        });
+    });
+}
 
 module.exports = generic;
