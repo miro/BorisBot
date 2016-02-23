@@ -15,7 +15,7 @@ controller.addExpl = function(userId, targetId, params) {
         } else {
             var splitParams = params.split(' ');
             if (splitParams.length >= 2) {
-                const key = splitParams.shift();
+                const key = _.toLower(splitParams.shift());
                 const value = splitParams.join(' ');
                 if (key.length > 50) {
                     botApi.sendMessage({chat_id: targetId, text: 'Avain max. 50 merkkiä.'})
@@ -24,11 +24,19 @@ controller.addExpl = function(userId, targetId, params) {
                     botApi.sendMessage({chat_id: targetId, text: 'Selite max. 250 merkkiä.'})
                     resolve();
                 } else {
-                    db.addExpl(userId, key, value)
-                    .then( () => {
-                        botApi.sendMessage({ chat_id: targetId, text: 'Expl "' + key + '" added.'});
-                        resolve();
-                    });
+                    db.fetchExplMadeByUser(userId, key)
+                    .then(expl => {
+                        if (_.isNull(expl)) {
+                            db.addExpl(userId, key, value)
+                            .then( () => {
+                                botApi.sendMessage({ chat_id: targetId, text: 'Expl "' + key + '" lisätty.'});
+                                resolve();
+                            });
+                        } else {
+                            botApi.sendMessage({ chat_id: targetId, text: 'Olet jo tehnyt expl "' + key + '".'});
+                            resolve();
+                        }
+                    })
                 }
             } else {
                 botApi.sendMessage({chat_id: targetId, text: '!add [avain] [selite]'});
@@ -45,19 +53,21 @@ controller.getExpl = function(targetId, params) {
             resolve();
         } else {
             var splitParams = params.split(' ');
+            const key = _.toLower(splitParams[0]);
             if ( splitParams.length != 1 ) {
                 botApi.sendMessage({chat_id: targetId, text: '!expl [avain]'});
                 resolve();
-            } else if ( splitParams[0].length > 50 ) {
+            } else if ( key.length > 50 ) {
                 botApi.sendMessage({chat_id: targetId, text: 'Avaimet ovat alle 50 merkkisiä.'})
                 resolve();
             } else {
-                db.fetchExpl(splitParams[0])
-                .then(expl => {
-                    var msg = (_.isNull(expl)) ? 
-                    'Avaimella ' + splitParams[0] + ' ei löytynyt selitystä.' :
-                    expl.get('value');
-                    botApi.sendMessage({chat_id: targetId, text: msg});
+                db.fetchExpl(key)
+                .then(expls => {
+                    logger.debug(expls);
+                    var msg = (expls.length === 0) ? 
+                    'Expl ' + key + ' ei löytynyt.' :
+                    _.sample(_.map(expls.models, n => n.get('value')));
+                    botApi.sendMessage({chat_id: targetId, text: key + ': ' + msg});
                     resolve();
                 })
                 .catch(e => {
@@ -69,14 +79,41 @@ controller.getExpl = function(targetId, params) {
     });
 }
 
-controller.listExpls = function(userId) {
+controller.removeExpl = function(userId, targetId, params) {
+    return new Promise(function(resolve,reject) {
+        if (params === '') {
+            botApi.sendMessage({chat_id: targetId, text: '!rm [avain]'});
+            return resolve();
+        }
+        var splitParams = params.split(' ');
+        const key = _.toLower(splitParams[0]);
+        db.fetchExplMadeByUser(userId, key)
+        .then( expl => {
+            if (!_.isNull(expl)) {
+                db.deleteExpl(userId, key)
+                .then( () => {
+                    botApi.sendMessage({chat_id: targetId, text: 'Expl ' + key + ' poistettu.'});
+                    resolve();
+                });
+            } else {
+                botApi.sendMessage({chat_id: targetId, text: 'Expl ' + key + ' ei löytynyt tai se ei ole sinun tekemäsi.'});
+                resolve();
+            }
+        });
+    });
+}
+
+controller.listExpls = function(targetId) {
     return new Promise(function(resolve,reject) {
         db.fetchAllExpl()
         .then(entrys => {
-            var msg = "Expls: ";
-            msg += _.map(entrys, 'key').join(', ');
-            botApi.sendMessage({chat_id: userId, text: msg})
-            resolve();
+            var msg = _.map(entrys, 'key').join(', ');
+            if (msg !== '') {
+                botApi.sendMessage({chat_id: targetId, text: 'Expls: ' + msg})
+                resolve();
+            } else {
+                botApi.sendMessage( {chat_id: targetId, text: 'En löytänyt yhtään selitystä!'})
+            }
         });
     });
 }

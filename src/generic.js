@@ -83,7 +83,6 @@ generic.checkWebcamLightness = function() {
         .then(function() {
             calculateWebcamLightness_()
             .then(threshold => {
-                logger.log('debug', 'Webcam lightness value: %d', threshold);
                 
                 if (threshold > 80) {   // TODO: Explore more specific thresholds
                 
@@ -119,8 +118,6 @@ generic.commandCount = function(userId) {
 
 generic.help = function(userId) {
 
-    var msg = 
-
     botApi.sendMessage({
         chat_id: userId,
         text: 'Moro! Olen Spinnin oma Telegram-botti, näin kavereiden kesken BorisBot.\
@@ -144,7 +141,7 @@ generic.help = function(userId) {
         \n\
         \n/kaljoja - Näytän kaikki nautitut alkoholilliset juomat.\
         \n\
-        \n/kumpi `[vaihtoehto 1]` `[vaihtoehto 2]` - Päätän tärkeät valinnat puolestasi.\
+        \n/kumpi `<vaihtoehto 1>` `<vaihtoehto 2>` - Päätän tärkeät valinnat puolestasi.\
         \n\
         \n/luomeemi - Luon haluamasi meemin haluamillasi teksteillä.\
         Tuetut meemit saat tietoosi /meemit komennolla.\
@@ -177,7 +174,15 @@ generic.help = function(userId) {
         \n\
         \n/virvokkeita - Näytän kaikki nautitut alkoholittomat juomat.\
         \n\
-        \n/webcam - Lähetän tuoreen kuvan Spinnin kerhohuoneelta.',
+        \n/webcam - Lähetän tuoreen kuvan Spinnin kerhohuoneelta.\
+        \n\
+        \n!expl <avain> - Annan sanallesi selityksen, jos löydän sellaisen.\
+        \n\
+        \n!add `<avain>` `<selite>` - Annan sanalle uuden selityksen.\
+        \n\
+        \n!remove `<avain>` - Poistan selitteen, jos se on sinun hallussasi.\
+        \n\
+        \n!list - Listaan kaikki saatavilla olevat selitettävät sanat',
         parse_mode: 'Markdown'});
 };
 
@@ -328,7 +333,9 @@ var calculateWebcamLightness_ = function() {
             };
             
             // Return whole average
-            return resolve(Math.round(sum / x));
+            var threshold = Math.round(sum / x);
+            logger.log('debug', 'Webcam lightness value: %d', threshold);
+            return resolve(threshold);
         });
     });
 }

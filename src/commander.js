@@ -47,7 +47,12 @@ module.exports = function (event) {
             break;
 
             case '!list':
-                explController.listExpls(event.userId)
+                explController.listExpls(event.targetId)
+                .then(resolve);
+            break;
+
+            case '!rm':
+                explController.removeExpl(event.userId, event.targetId, event.userCommandParams)
                 .then(resolve);
             break;
 
@@ -138,6 +143,7 @@ module.exports = function (event) {
                 resolve();
             break;
 
+            case '/start':
             case '/help':
                 generic.help(event.userId);
                 resolve();
@@ -167,7 +173,6 @@ module.exports = function (event) {
             // Takes two parameters, weight of the person and gender
             case '/addme':
             case '/luotunnus':
-            case '/start':
                 if (event.isFromGroup) {
                     botApi.sendMessage({chat_id: event.chatGroupId, text: 'Jutellaan lisää privassa ' + emoji.get(':smirk:')});
                     botApi.sendMessage({chat_id: event.userId, text: 'Luo käyttäjätunnus komennolla /luotunnus <paino> <sukupuoli>'});

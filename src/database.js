@@ -184,16 +184,28 @@ db.addExpl = function(userId, key, value) {
 };
 
 db.fetchExpl = function(key) {
-
     return schema.collections.Expls
     .query(qb => qb.where({ key: key}))
-    .fetchOne();
+    .fetch();
 }
 
 db.fetchAllExpl = function() {
     return schema.bookshelf
     .knex('expls')
     .orderBy('key', 'asc');
+}
+
+db.fetchExplMadeByUser = function(userId, key) {
+    return schema.collections.Expls
+    .query(qb => qb.where({ creatorId: userId, key: key }))
+    .fetchOne();
+}
+
+db.deleteExpl = function(userId, key) {
+    return schema.bookshelf
+    .knex('expls')
+    .where({ creatorId: userId, key: key })
+    .del();
 }
 
 module.exports = db;
