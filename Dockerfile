@@ -4,7 +4,7 @@ FROM    debian:jessie
 RUN     rm /bin/sh && ln -s /bin/bash /bin/sh
 
 # Set debconf to run non-interactively
-RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+RUN     echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
 # Install dependencies
 RUN     apt-get update && apt-get install -y -q --no-install-recommends \
@@ -21,7 +21,7 @@ RUN     apt-get update && apt-get install -y -q --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 ENV     NVM_DIR /usr/local/nvm
-ENV     NODE_VERSION ${NODE_VERSION:"5.5.0"}
+ENV     NODE_VERSION 5.5.0
 
 # Install nvm with node and npm
 RUN     curl https://raw.githubusercontent.com/creationix/nvm/v0.30.2/install.sh | bash \
@@ -40,4 +40,4 @@ WORKDIR /app
 RUN     npm install
 
 EXPOSE  3000
-CMD     ["pm2", "start",  "src/server.js"]
+CMD     ["pm2", "start",  "src/server.js", "--no-daemon"]

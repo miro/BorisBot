@@ -14,13 +14,23 @@ utils.downloadFile = function(uri, filename) {
                 logger.log('error','Error on file download!', err);
                 reject(err);
             }
-            request(uri).pipe(fs.createWriteStream(filename)).on('close', resolve);
+            request(uri)
+            .pipe(fs.createWriteStream(filename))
+            .on('error', e => {
+                logger.log('error', 'Error when downloading file: %s', e);
+                resolve()
+            })
+            .on('close', resolve);
         });
     });
 };
 
 utils.userIsAdmin = function(userId) {
     return cfg.adminUsers.indexOf(parseInt(userId, 10)) >= 0;
+};
+
+utils.userHaveBotTalkRights = function(userId) {
+    return cfg.botTalkUsers.indexOf(parseInt(userId, 10)) >= 0;
 };
 
 module.exports = utils;

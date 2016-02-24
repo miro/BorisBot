@@ -36,18 +36,15 @@ controller.showDrinkKeyboard = function(userId, eventIsFromGroup) {
     msg += '(Tämä komento ei lisännyt vielä yhtään juomaa juoduksi.)';
 
     return new Promise(function (resolve, reject) {
-        botApi.sendMessage(
-            userId,
-            msg,
-            null, //parse_mode
-            null, //disable_web_page_preview
-            null, //reply_to_message_id
-            {
+        botApi.sendMessage({
+            chat_id: userId,
+            text: msg,
+            reply_markup: JSON.stringify({
                 keyboard: keyboard,
                 resize_keyboard: true,
                 one_time_keyboard: true
-            }
-        );
+            })
+        });
 
         resolve();
     });
@@ -108,7 +105,7 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
                                 if (drinksToday === 1) {
                                     // first drink for today!
                                     var groupMsg = userName + ' avasi pelin! ' + drinkType + '!';
-                                    botApi.sendMessage(primaryGroupId, groupMsg);
+                                    botApi.sendMessage({chat_id: primaryGroupId, text: groupMsg});
                                 }
                                 // Tell status report on 5, 10, 20, 30, ....
                                 if (drinksToday % 10 === 0 || drinksToday === 5) {
@@ -117,18 +114,18 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
                                         groupMsg += emoji.get(':top:') + 'Tilanne:\n';
                                         groupMsg += statusReport;
 
-                                        botApi.sendMessage(primaryGroupId, groupMsg);
+                                        botApi.sendMessage({chat_id: primaryGroupId, text: groupMsg});
                                     });
                                 }
                         }
 
                         // send the message
-                        botApi.sendMessage(userId, returnMessage);
+                        botApi.sendMessage({chat_id: userId, text: returnMessage});
 
                         // trigger also status report (to discourage users from spamming group chat)
                         if (!_.isNull(primaryGroupId)) {
                             controller.getGroupAlcoholStatusReport(primaryGroupId).then(function(statusReport) {
-                                botApi.sendMessage(userId, '\nRyhmäsi tilanne:\n' + statusReport);
+                                botApi.sendMessage({ chat_id: userId, text: '\nRyhmäsi tilanne:\n' + statusReport});
                             });
                         }
 
@@ -148,12 +145,12 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
                                 controller.getGroupHotBeveragelStatusReport(primaryGroupId)
                                 .then(function(statusReport) {
                                     msg += statusReport;
-                                    botApi.sendMessage(userId, msg);
+                                    botApi.sendMessage({chat_id: userId, text: msg});
                                     resolve(msg);
                                 });
                             } else {
                                 msg += 'Huom: Käy /moro ´ttamassa ryhmässä nähdäksesi koko ryhmäsi nauttimat kupposet!';
-                                botApi.sendMessage(userId, msg);
+                                botApi.sendMessage({chat_id: userId, text: msg});
                                 resolve(msg);
                             }
                         });
@@ -167,7 +164,7 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
             });
         })
         .catch(function(e) {
-            botApi.sendMessage(userId, 'Kippistely epäonnistui, yritä myöhemmin uudelleen');
+            botApi.sendMessage({chat_id: userId, text: 'Kippistely epäonnistui, yritä myöhemmin uudelleen'});
             resolve();
         });
     });
@@ -199,7 +196,7 @@ controller.getPersonalDrinkLog = function(userId) {
             message += '______________\n';
             message += 'Yhteensä ' + collection.models.length + ' kpl';
 
-            botApi.sendMessage(userId, message);
+            botApi.sendMessage({chat_id: userId, text: message});
             resolve();
         });
     });
@@ -270,14 +267,14 @@ controller.getDrinksAmount = function(userId, chatGroupId, chatGroupTitle, targe
                 var output = chatGroupTitle + ' on tuhonnut yhteensä ' + counts[0] + ' ' + drinkType + ', joista ';
                 output += counts[1] + ' viimeisen 24h aikana ja ' + counts[2] + ' viimeisen 48h aikana.';
 
-                botApi.sendMessage(chatGroupId, output);
+                botApi.sendMessage({chat_id: chatGroupId, text: output});
                 resolve();
             });
         }
         else {
             db.getCount('drinks', null, null, alcoholic)
             .then(function fetchOk(drinkCount) {
-                botApi.sendMessage(userId, 'Kaikenkaikkiaan juotu ' + drinkCount + ' ' + drinkType + '.' );
+                botApi.sendMessage({ chat_id: userId, text: 'Kaikenkaikkiaan juotu ' + drinkCount + ' ' + drinkType + '.' });
                 resolve();
             });
         }
@@ -429,7 +426,7 @@ controller.sendHotBeverageStatusReportForUser = function(userId) {
                     resolve();
                 });
             } else {
-                botApi.sendMessage(userId, 'Käy /moro´ttamassa ryhmässä saadaksesi kahvitilastot näkyviin!');
+                botApi.sendMessage({chat_id: userId, text: 'Käy /moro´ttamassa ryhmässä saadaksesi kahvitilastot näkyviin!'});
                 resolve();
             }
         });

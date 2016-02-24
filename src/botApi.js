@@ -13,31 +13,24 @@ var botApi = {};
 // ## Public functions
 //
 
-botApi.sendMessage = function(chatId, text, parseMode, disableWebPagePreview, replyToMessageId, replyMarkupObject) {
-    // TODO: use options-object for the parameters
-
+// Available options:
+//chat_id [int] REQUIRED
+//text [string] REQUIRED
+//parse_mode ["Markdown" or "HTML"] OPTIONAL
+//disable_web_page_preview [boolean] OPTIONAL
+//reply_to_message_id [int] OPTIONAL
+//reply_markup [ReplyKeyboardMarkup, ReplyKeyboardHide or ForeReply] OPTIONAL
+botApi.sendMessage = function(options) {
     return new Promise(function(resolve, reject) {
-        var data = {};
-        data.chat_id = chatId;
-        data.text = text;
-        data.parse_mode = parseMode || null;
-        data.disable_web_page_preview = disableWebPagePreview || null;
-        data.reply_to_message_id = replyToMessageId || null;
 
-        // Is there a reply markup set?
-        if (replyMarkupObject) {
-            data.reply_markup = JSON.stringify(replyMarkupObject);
-        }
-        else {
-            data.hide_keyboard = true;
-        }
+        options.hide_keyboard = (_.isUndefined(options.reply_markup)) ? true : false;
         // Send the message to Telegram API
         request.post(
             cfg.tgApiUrl + '/sendMessage',
-            { form: data },
+            { form: options },
             function(err, httpResponse, body) {
                 if (!err && JSON.parse(body).ok) {
-                    logger.log('info', 'botApi: sending message to %s: "%s..."', chatId, text.substring(0, parseInt(text.length*0.2)));
+                    logger.log('info', 'botApi: sending message to %s: "%s..."', options.chat_id, _.truncate(options.text));
                     resolve(body);
                 } else {
                     logger.log('error', 'botApi: error when sending message: ' + err);

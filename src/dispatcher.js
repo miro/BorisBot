@@ -10,6 +10,7 @@ var logger      = cfg.logger;
 
 var commander   = require('./commander');
 var talkbox     = require('./talkbox');
+var botApi      = require('./botApi');
 
 
 module.exports = function parseTelegramEvent(msg) {
@@ -25,7 +26,7 @@ module.exports = function parseTelegramEvent(msg) {
 
     event.rawInput = msg.text;
     event.eventId = msg.message_id;
-    event.isCommand = (event.rawInput.charAt(0) !== '/' && !emojiRegex().test(event.rawInput.split(' ')[0]));
+    event.isCommand = (event.rawInput.charAt(0) !== '/' && !emojiRegex().test(event.rawInput.split(' ')[0]) && event.rawInput.charAt(0) !== '!');
 
     // Parse metadata from the message
     event.userId = msg.from.id;
@@ -42,7 +43,8 @@ module.exports = function parseTelegramEvent(msg) {
     var userIsIgnored = cfg.ignoredUsers.indexOf(event.userId) >= 0;
     if (userIsIgnored) {
         // do nothing
-        logger.log('warn', 'Ignored user tried to use bot, username: %s', event.userCallName);
+        botApi.sendMessage({chat_id: event.userId, text: 'Sinut on toistaiseksi bannittu.'})
+        logger.log('info', 'Ignored user tried to use bot, username: %s', event.userCallName);
         return Promise.resolve();
     }
 

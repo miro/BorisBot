@@ -4,9 +4,11 @@ var moment          = require('moment-timezone');
 var _               = require('lodash');
 var CronJob         = require('cron').CronJob;
 
-var botApi                  = require('./botApi');
-var cfg                     = require('./config');
-var generic                 = require('./generic');
+var botApi  = require('./botApi');
+var cfg     = require('./config');
+var logger  = cfg.logger;
+var generic = require('./generic');
+
 var drinkController         = require('./controllers/drinkController');
 var textController          = require('./controllers/textController');
 var restaurantController    = require('./controllers/restaurantController');
@@ -54,7 +56,7 @@ scheduler.addJob({
         var daysLeft = startMoment.diff(moment(), 'days');
 
         if (daysLeft > 0) {
-            botApi.sendMessage(cfg.allowedGroups.mainChatId, 'HUOOOMENTA! Kesäpäiviin aikaa ' + daysLeft + ' päivää!!');
+            botApi.sendMessage({chat_id: cfg.allowedGroups.mainChatId, text: 'HUOOOMENTA! Kesäpäiviin aikaa ' + daysLeft + ' päivää!!'});
         }
     },
     timeZone: cfg.botTimezone
@@ -87,11 +89,12 @@ scheduler.addJob({
     timeZone: cfg.botTimeZone
 });
 
-// "Update restaurant menus"
+// "Update menus"
 scheduler.addJob({
-    cronTime: '00 00 3 * * *',
+    cronTime: '00 30 0,15 * * *',
     onTick: function updateMenus() {
-        restaurantController.updateMenus();
+        restaurantController.updateMenus()
+        .then(() => logger.log('debug', 'Menus updated'));
     },
     timeZone: cfg.botTimeZone
 })

@@ -24,7 +24,7 @@ var ethanolController       = require('./controllers/ethanolController');
 var memeController          = require('./controllers/memeController');
 var textController          = require('./controllers/textController');
 var restaurantController    = require('./controllers/restaurantController');
-
+var explController          = require('./controllers/explController');
 
 module.exports = function (event) {
     return new Promise(function (resolve, reject) {
@@ -34,6 +34,37 @@ module.exports = function (event) {
         // Dispatch command!
         switch (event.userCommand) {
 
+            // !-commands
+            //
+            case '!add':
+                explController.addExpl(event.userId, event.targetId, event.userCommandParams)
+                .then(resolve);
+            break;
+
+            case '!expl':
+                explController.getExpl(event.targetId, event.userCommandParams)
+                .then(resolve);
+            break;
+
+            case '!rexpl':
+                explController.getRandomExpl(event.targetId)
+                .then(resolve);
+            break;
+
+            case '!ls':
+            case '!list':
+                explController.listExpls(event.targetId)
+                .then(resolve);
+            break;
+
+            case '!rm':
+                explController.removeExpl(event.userId, event.targetId, event.userCommandParams)
+                .then(resolve);
+            break;
+
+
+            // /-commands
+            //
             case '/kahvutti':
             case '/sumppi':
             case '/kahvi':
@@ -106,9 +137,9 @@ module.exports = function (event) {
             case '/otinko':
                 drinkController.getPersonalDrinkLog(event.userId)
                 .then(function() {
-                    if (event.eventIsFromGroup) {
-                        botApi.sendMessage(event.userId, 'PS: anna "' +
-                            userCommand + '"-komento suoraan minulle, älä spämmää turhaan ryhmächättiä!');
+                    if (event.isFromGroup) {
+                        botApi.sendMessage({chat_id: event.userId, text: 'PS: anna "' +
+                            userCommand + '"-komento suoraan minulle, älä spämmää turhaan ryhmächättiä!'});
                     }
                     resolve();
                 });
@@ -119,6 +150,7 @@ module.exports = function (event) {
                 resolve();
             break;
 
+            case '/start':
             case '/help':
                 generic.help(event.userId);
                 resolve();
@@ -148,10 +180,9 @@ module.exports = function (event) {
             // Takes two parameters, weight of the person and gender
             case '/addme':
             case '/luotunnus':
-            case '/start':
                 if (event.isFromGroup) {
-                    botApi.sendMessage(event.chatGroupId, 'Jutellaan lisää privassa ' + emoji.get(':smirk:'));
-                    botApi.sendMessage(event.userId, 'Luo käyttäjätunnus komennolla /luotunnus <paino> <sukupuoli>');
+                    botApi.sendMessage({chat_id: event.chatGroupId, text: 'Jutellaan lisää privassa ' + emoji.get(':smirk:')});
+                    botApi.sendMessage({chat_id: event.userId, text: 'Luo käyttäjätunnus komennolla /luotunnus <paino> <sukupuoli>'});
                     resolve();
                 }
                 else {
@@ -169,7 +200,7 @@ module.exports = function (event) {
             // Removes existing user from the database
             case '/removeme':
             case '/poistatunnus':
-                userController.removeUser(event.userId, userName)
+                userController.removeUser(event.userId, event.userName)
                 .then(resolve);
             break;
 
@@ -192,19 +223,19 @@ module.exports = function (event) {
             case '/promille':
                 if (event.isFromGroup) {
                     drinkController.getGroupAlcoholStatusReport(event.chatGroupId)
-                    .then(function(event) {
-                        botApi.sendMessage(event.chatGroupId, event);
+                    .then(function(msg) {
+                        botApi.sendMessage({chat_id: event.chatGroupId, text: msg});
                         resolve();
                     });
                 }
                 else {
                     ethanolController.getAlcoholLevel(event.userId)
-                    .then(function(event) {
-                        botApi.sendMessage(event.userId, event + ' \u2030');
+                    .then(function(msg) {
+                        botApi.sendMessage({chat_id: event.userId, text: msg + ' \u2030'});
                         resolve();
                     })
                     .catch(function(e) {
-                        botApi.sendMessage(event.userId, e);
+                        botApi.sendMessage({chat_id: event.userId, text: e});
                         resolve();
                     });
                 }
@@ -223,28 +254,28 @@ module.exports = function (event) {
             case '/pankkitili':
             case '/tilinumero':
             case '/tili':
-                botApi.sendMessage(event.targetId, 'FI78 1439 3500 0219 70');
+                botApi.sendMessage({chat_id: event.targetId, text: 'FI78 1439 3500 0219 70'});
                 resolve();
             break;
 
             case '/puhelin':
             case '/puh':
-                botApi.sendMessage(event.targetId, '041 369 2262');
+                botApi.sendMessage({chat_id: event.targetId, text: '041 369 2262'});
                 resolve();
             break;
 
             case '/iltaa':
-                botApi.sendMessage(event.targetId, 'iltaa');
+                botApi.sendMessage({chat_id: event.targetId, text: 'iltaa'});
                 resolve();
             break;
 
             case '/tiivista':
-                if (!event.eventIsFromGroup) {
-                    botApi.sendMessage(event.userId, 'Tämä komento toimii vain ryhmästä!');
+                if (!event.isFromGroup) {
+                    botApi.sendMessage({ chat_id: event.userId, text: 'Tämä komento toimii vain ryhmästä!'});
                     resolve();
                 } else {
                     var param = (_.isFinite(userCommand.split(' ')[0])) ? userCommand.split(' ')[0] : 1000;
-                    botApi.sendMessage(event.chatGroupId, textController.getSummary(event.chatGroupId, param));
+                    botApi.sendMessage({chat_id: event.chatGroupId, text: textController.getSummary(event.chatGroupId, param)});
                     resolve();
                 }
             break;
@@ -257,27 +288,50 @@ module.exports = function (event) {
             case '/menu':
                 restaurantController.getAllMenusForToday(event.isFromGroup)
                 .then(function(msg) {
-                    botApi.sendMessage(event.targetId, msg, 'Markdown', true);
+                    botApi.sendMessage({chat_id: event.targetId, text: msg, parse_mode: 'Markdown', disable_web_page_preview: true});
                     resolve();
                 })
-                .catch(resolve);
+                .catch( e => {
+                    logger.log('error', 'Error on getAllMenusForToday: %s', e);
+                    resolve();
+                });
             break;
 
 
             // # Admin commands
             //
-            case '/bottalk':
+            case '/adminhelp':
+                generic.adminhelp(event.userId);
+                resolve();
+            break;
+
+            case '/botgrouptalk':
                 generic.talkAsBotToMainGroup(event.userId, event.userCommandParams);
                 resolve();
             break;
 
-            case '/botprivatetalk':
+            case '/botgroupprivatetalk':
                 generic.talkAsBotToUsersInMainGroup(event.userId, event.userCommandParams)
+                .then(resolve);
+            break;
+
+            case '/botprivatetalk':
+                generic.talkAsBotToUser(event.userId, event.userCommandParams)
                 .then(resolve);
             break;
 
             case '/logs':
                 generic.sendLog(event.userId, event.userCommandParams)
+                .then(resolve);
+            break;
+
+            case '/ban':
+                generic.banUser(event.userId, event.userCommandParams)
+                .then(resolve);
+            break;
+
+            case '/unban':
+                generic.unbanUser(event.userId, event.userCommandParams)
                 .then(resolve);
             break;
 

@@ -35,8 +35,8 @@ module.exports = function() {
                     });
                     resolve(meals);
                 }
-                catch (catchedError) {
-                    logger.log('error', 'Error when parsing reaktori: %s', catchedError);
+                catch (error) {
+                    logger.log('error', 'Error when parsing reaktori: %s', error);
                     resolve();
                 }
             } else {
@@ -62,7 +62,7 @@ var _parseMenu = function (menu) {
         'A´la carte',*/
     ];
     // offer only 'iltaruoka' if time is over 16 and its not saturday
-    if (moment().isAfter(moment(1600, 'HHmm')) && moment().weekday() !== 6) {
+    if (moment().isAfter(moment(1500, 'HHmm')) && moment().weekday() !== 6) {
         categories = ['Iltaruoka'];
     }
 

@@ -37,20 +37,21 @@ controller.dispatch = function(userId) {
                             botApi.sendPhoto(userId, filename);
                         });
                     }).catch(function(err) {
-                        botApi.sendMessage(userId, err);
+                        logger.log('error', 'Error when generating meme: %s', err)
+                        botApi.sendMessage({ chat_id: userId, text: 'Tapahtui virhe, pahoittelut.'});
                     });
                 });
             });
 
         } else {
-            botApi.sendMessage(userId, 'Meemiä ' + _.startCase(memeType) + ' ei löytynyt! Löydät tuetut meemit komennolla /meemit');
+            botApi.sendMessage({user_id: userId, text: 'Meemiä ' + _.startCase(memeType) + ' ei löytynyt! Löydät tuetut meemit komennolla /meemit'});
         }
     });
     
     // .sendMessageAndListenForReply -function may return reject
     // if user hasn't replied to the question.
-    Promise.onPossiblyUnhandledRejection(function(error){
-        logger.log('info', 'Unhandled rejection on memeController, possibly user didn´t response');
+    Promise.onPossiblyUnhandledRejection( err => {
+        logger.log('info', 'Unhandled rejection on memeController, possibly user didn´t response: %s', err);
     });
 };
 
@@ -60,7 +61,7 @@ controller.sendSupportedMemes = function(targetId) {
         msg += '\n';
         msg += meme.name;
     });
-    botApi.sendMessage(targetId, msg);
+    botApi.sendMessage({chat_id: targetId, text: msg});
 };
 
 // Get memes which ImgFlip.com supports

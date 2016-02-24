@@ -86,12 +86,11 @@ function punishFromOldLink(linkModel, event) {
     const timesPosted = linkModel.get('times_linked');
 
     // This could be funnier
-    botApi.sendMessage(
-        event.chatGroupId,
-        'W, postattu ' + timesPosted + ' kertaa',
-        null, null,
-        event.eventId
-    );
+    botApi.sendMessage({
+        chat_id: event.chatGroupId,
+        text: 'W, postattu ' + timesPosted + ' kertaa',
+        reply_to_message_id: event.eventId
+    });
 }
 
 
