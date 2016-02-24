@@ -46,6 +46,12 @@ module.exports = function (event) {
                 .then(resolve);
             break;
 
+            case '!rexpl':
+                explController.getRandomExpl(event.targetId)
+                .then(resolve);
+            break;
+
+            case '!ls':
             case '!list':
                 explController.listExpls(event.targetId)
                 .then(resolve);
@@ -55,6 +61,7 @@ module.exports = function (event) {
                 explController.removeExpl(event.userId, event.targetId, event.userCommandParams)
                 .then(resolve);
             break;
+
 
             // /-commands
             //
@@ -130,7 +137,7 @@ module.exports = function (event) {
             case '/otinko':
                 drinkController.getPersonalDrinkLog(event.userId)
                 .then(function() {
-                    if (event.eventIsFromGroup) {
+                    if (event.isFromGroup) {
                         botApi.sendMessage({chat_id: event.userId, text: 'PS: anna "' +
                             userCommand + '"-komento suoraan minulle, älä spämmää turhaan ryhmächättiä!'});
                     }
@@ -193,7 +200,7 @@ module.exports = function (event) {
             // Removes existing user from the database
             case '/removeme':
             case '/poistatunnus':
-                userController.removeUser(event.userId, userName)
+                userController.removeUser(event.userId, event.userName)
                 .then(resolve);
             break;
 
@@ -263,7 +270,7 @@ module.exports = function (event) {
             break;
 
             case '/tiivista':
-                if (!event.eventIsFromGroup) {
+                if (!event.isFromGroup) {
                     botApi.sendMessage({ chat_id: event.userId, text: 'Tämä komento toimii vain ryhmästä!'});
                     resolve();
                 } else {
@@ -315,6 +322,16 @@ module.exports = function (event) {
 
             case '/logs':
                 generic.sendLog(event.userId, event.userCommandParams)
+                .then(resolve);
+            break;
+
+            case '/ban':
+                generic.banUser(event.userId, event.userCommandParams)
+                .then(resolve);
+            break;
+
+            case '/unban':
+                generic.unbanUser(event.userId, event.userCommandParams)
                 .then(resolve);
             break;
 

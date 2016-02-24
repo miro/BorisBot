@@ -4,7 +4,7 @@ FROM    debian:jessie
 RUN     rm /bin/sh && ln -s /bin/bash /bin/sh
 
 # Set debconf to run non-interactively
-RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+RUN     echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
 # Install dependencies
 RUN     apt-get update && apt-get install -y -q --no-install-recommends \

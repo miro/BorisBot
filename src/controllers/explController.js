@@ -79,6 +79,20 @@ controller.getExpl = function(targetId, params) {
     });
 }
 
+controller.getRandomExpl = function(targetId) {
+    return new Promise(function(resolve,reject) {
+        db.fetchAllExpl()
+        .then(entrys => {
+            var key = _.sample(_.uniq(_.map(entrys, 'key')));
+            db.fetchExpl(key)
+            .then(expls => {
+                botApi.sendMessage({ chat_id: targetId, text: key + ': ' + _.sample(_.map(expls.models, n => n.get('value'))) });
+                resolve();
+            })
+        })
+    });
+}
+
 controller.removeExpl = function(userId, targetId, params) {
     return new Promise(function(resolve,reject) {
         if (params === '') {
@@ -107,7 +121,7 @@ controller.listExpls = function(targetId) {
     return new Promise(function(resolve,reject) {
         db.fetchAllExpl()
         .then(entrys => {
-            var msg = _.map(entrys, 'key').join(', ');
+            var msg = _.uniq(_.map(entrys, 'key')).join(', ');
             if (msg !== '') {
                 botApi.sendMessage({chat_id: targetId, text: 'Expls: ' + msg})
                 resolve();

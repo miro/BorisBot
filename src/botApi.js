@@ -30,7 +30,7 @@ botApi.sendMessage = function(options) {
             { form: options },
             function(err, httpResponse, body) {
                 if (!err && JSON.parse(body).ok) {
-                    logger.log('info', 'botApi: sending message to %s: "%s..."', options.chat_id, options.text.substring(0, parseInt(options.text.length*0.2)));
+                    logger.log('info', 'botApi: sending message to %s: "%s..."', options.chat_id, _.truncate(options.text));
                     resolve(body);
                 } else {
                     logger.log('error', 'botApi: error when sending message: ' + err);

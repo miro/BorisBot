@@ -120,69 +120,43 @@ generic.help = function(userId) {
 
     botApi.sendMessage({
         chat_id: userId,
-        text: 'Moro! Olen Spinnin oma Telegram-botti, näin kavereiden kesken BorisBot.\
-        Pääset alkuun kirjoittamalla minulle /luotunnus ja käy sen jälkeen /moro ´ttamassa\
-        Spinnin kanavalla!\
-        \n\
-        \nMinulta voit myös kysyä seuraavia toimintoja:\
-        \n\
-        \n/graafi - Tutkin alkoholinkäyttöäsi ja luon niistä kauniin kuvaajan.\
-        Jos annat komennon perään positiivisen numeron, rajaan kuvaajan\
-        leveyden olemaan kyseisen numeron verran päiviä.\
-        \n\
-        \n/kahvi - Kirjaan nauttimasi kupillisen tietokantaani.\
-        \n\
-        \n/kalja - Kirjaan nauttimasi ohrapirtelön tietokantaani.\
-        \n\
-        \n/kippis - Kirjaan kilistelemäsi juoman ylös ja käytän sitä\
-        myöhemmin erilaisiin toimintoihini.\
-        \n\
-        \n/kahvit - Printaan sinulle ryhmäsi tämänhetkisen kahvitilanteen.\
-        \n\
-        \n/kaljoja - Näytän kaikki nautitut alkoholilliset juomat.\
-        \n\
-        \n/kumpi `<vaihtoehto 1>` `<vaihtoehto 2>` - Päätän tärkeät valinnat puolestasi.\
-        \n\
-        \n/luomeemi - Luon haluamasi meemin haluamillasi teksteillä.\
-        Tuetut meemit saat tietoosi /meemit komennolla.\
-        \n\
-        \n/luotunnus - Kirjoitan tietosi muistiin, jotta voin käyttää niitä\
-        myöhemmin. Tarvitsen komennon perään myös painosi ja sukupuolesi\
-        (lupaan että tietoja ei käytetä kaupallisiin tarkoituksiin).\
-        \n\
-        \n/meemit - Listaan meemi-generaattorissa tuetut meemit.\
-        \n\
-        \n/moro - Yhdistän käyttäjäsi ryhmään, mistä tämä komento lähetettiin. \
-        Tämän avulla voin yhdistää tekemäsi kippikset ryhmän tilastoihin.\
-        \n\
-        \n/otinko - Muistutan sinua juomista, jotka olet ottanut viimeisen \
-        48 tunnin aikana.\
-        \n\
-        \n/poistatunnus - Unohdan tunnuksesi tietokannastani.\
-        \n\
-        \n/promille - Tulostan sinun henkilökohtaisen promilletasosi. \
-        HUOM: lasken promillesi korkeammassa ulottuvuudessa, joten älä \
-        luota tulosten olevan täysin realistisia.\
-        \n\
-        \n/promillet - Tulostan ryhmän tämänhetkiset promilletasot.\
-        \n\
-        \n/puhelin - Tulostan Spinnin puhelinnumeron.\
-        \n\
-        \n/tee - Kirjaan nauttimasi kupillisen tietokantaani.\
-        \n\
-        \n/tili - Lähetän sinulle Spinnin tilinumeron.\
-        \n\
-        \n/virvokkeita - Näytän kaikki nautitut alkoholittomat juomat.\
-        \n\
-        \n/webcam - Lähetän tuoreen kuvan Spinnin kerhohuoneelta.\
-        \n\
-        \n!expl <avain> - Annan sanallesi selityksen, jos löydän sellaisen.\
-        \n\
-        \n!add `<avain>` `<selite>` - Annan sanalle uuden selityksen.\
-        \n\
-        \n!remove `<avain>` - Poistan selitteen, jos se on sinun hallussasi.\
-        \n\
-        \n!list - Listaan kaikki saatavilla olevat selitettävät sanat',
+        text: 'Moro! Olen Spinnin oma Telegram-botti, näin kavereiden kesken BorisBot. ' +
+        'Pääset alkuun kirjoittamalla minulle /luotunnus ja käy sen jälkeen /moro ´ttamassa' +
+        'Spinnin kanavalla!\n' +
+        'Minulta voit myös kysyä seuraavia toimintoja:\n' +
+        '\n/graafi - Tutkin alkoholinkäyttöäsi ja luon niistä kauniin kuvaajan. ' +
+        'Jos annat komennon perään positiivisen numeron, rajaan kuvaajan ' +
+        'leveyden olemaan kyseisen numeron verran päiviä.\n' + 
+        '\n/kahvi - Kirjaan nauttimasi kupillisen tietokantaani.\n' +
+        '\n/kalja - Kirjaan nauttimasi ohrapirtelön tietokantaani.\n' +
+        '\n/kippis - Kirjaan kilistelemäsi juoman ylös ja käytän sitä myöhemmin erilaisiin toimintoihini.\n' +
+        '\n/kahvit - Printaan sinulle ryhmäsi tämänhetkisen kahvitilanteen.\n' +
+        '\n/kaljoja - Näytän kaikki nautitut alkoholilliset juomat.\n' + 
+        '\n/kumpi `<vaihtoehto 1>` `<vaihtoehto 2>` - Päätän tärkeät valinnat puolestasi.\n' +
+        '\n/luomeemi - Luon haluamasi meemin haluamillasi teksteillä. ' + 
+        'Tuetut meemit saat tietoosi /meemit komennolla.\n' +
+        '\n/luotunnus - Kirjoitan tietosi muistiin, jotta voin käyttää niitä\n' +
+        'myöhemmin. Tarvitsen komennon perään myös painosi ja sukupuolesi' +
+        'lupaan että tietoja ei käytetä kaupallisiin tarkoituksiin).\n' +
+        '\n/meemit - Listaan meemi-generaattorissa tuetut meemit.\n' +
+        '\n/moro - Yhdistän käyttäjäsi ryhmään, mistä tämä komento lähetettiin. ' +
+        'Tämän avulla voin yhdistää tekemäsi kippikset ryhmän tilastoihin.\n' +
+        '\n/otinko - Muistutan sinua juomista, jotka olet ottanut viimeisen 48 tunnin aikana.\n' +
+        '\n/poistatunnus - Unohdan tunnuksesi tietokannastani.\n' +
+        '\n/promille - Tulostan sinun henkilökohtaisen promilletasosi. \n' +
+        'HUOM: lasken promillesi korkeammassa ulottuvuudessa, joten älä ' +
+        'luota tulosten olevan täysin realistisia.\n' +
+        '\n/promillet - Tulostan ryhmän tämänhetkiset promilletasot.\n' +
+        '\n/puhelin - Tulostan Spinnin puhelinnumeron.\n' +
+        '\n/raflat - Tulostan kampuksen ravintoloiden ruokalistat.\n' +
+        '\n/tee - Kirjaan nauttimasi kupillisen tietokantaani.\n' +
+        '\n/tili - Lähetän sinulle Spinnin tilinumeron.\n' +
+        '\n/virvokkeita - Näytän kaikki nautitut alkoholittomat juomat.\n' +
+        '\n/webcam - Lähetän tuoreen kuvan Spinnin kerhohuoneelta.\n' +
+        '\n!expl <avain> - Annan sanallesi selityksen, jos löydän sellaisen.\n' +
+        '\n!add `<avain>` `<selite>` - Annan sanalle uuden selityksen.\n' +
+        '\n!remove `<avain>` - Poistan selitteen, jos se on sinun hallussasi.\n' +
+        '\n!list - Listaan kaikki saatavilla olevat selitettävät sanat',
         parse_mode: 'Markdown'});
 };
 
@@ -221,6 +195,8 @@ generic.adminhelp = function(userId) {
                     \n/logs - Print logs',
             parse_mode: 'Markdown'
         })
+    } else {
+        botApi.sendMessage({chat_id: userId, text: 'Käyttö evätty.'});
     }
 }
 
@@ -245,7 +221,7 @@ generic.sendLog= function(userId, userParams) {
                 }
             });
         } else {
-            botApi.sendMessage({chat_id: userId, text: 'Permission denied.'});
+            botApi.sendMessage({chat_id: userId, text: 'Käyttö evätty.'});
             resolve();
         }
     });
@@ -254,26 +230,20 @@ generic.sendLog= function(userId, userParams) {
 generic.talkAsBotToUser = function(userId, userParams) {
     return new Promise(function(resolve,reject) {
         if (utils.userIsAdmin(userId)) {
-            var splitParams = userParams.split(' ');
-            var targetUser = splitParams.shift();
-            var msg = splitParams.join(' ');
-            if (!_.isNaN(_.parseInt(targetUser))) {
-                botApi.sendMessage({chat_id: targetUser, text: msg});
-                resolve();
-            } else {
-                db.getUserByName(targetUser)
-                .then(model => {
-                    if (_.isNull(model)) {
-                        botApi.sendMessage({chat_id: userId, text: 'Henkilöä "' + splitParam[0] + '"" ei löytynyt.'});
-                        resolve();
-                    } else {
-                        botApi.sendMessage({chat_id: model.get('telegramId'), text: msg});
-                        resolve();
-                    }
-                });
-            }
+            var msg = _.drop(userParams.split(' ')).join(' ');
+            var targetUser = (userParams.split(' ')).shift();
+            parseId_(targetUser)
+            .then(id => {
+                if (_.isNull(id)) {
+                    botApi.sendMessage({chat_id: userId, text: 'Henkilöä ' + targetUser + ' ei löytynt'});
+                    resolve();
+                } else {
+                    botApi.sendMessage({chat_id: id, text: msg});
+                    resolve();
+                }
+            });
         } else {
-            botApi.sendMessage({chat_id: userId, text: 'Permission denied.'});
+            botApi.sendMessage({chat_id: userId, text: 'Käyttö evätty.'});
             resolve();
         }
     });
@@ -287,7 +257,7 @@ generic.talkAsBotToMainGroup = function(userId, msg) {
         botApi.sendMessage({chat_id: cfg.allowedGroups.mainChatId, text: msg});
     }
     else {
-        botApi.sendMessage({chat_id: userId, text: 'Permission denied.'});
+        botApi.sendMessage({chat_id: userId, text: 'Käyttö evätty.'});
     }
 };
 
@@ -302,11 +272,65 @@ generic.talkAsBotToUsersInMainGroup = function(userId, msg) {
                 resolve();
             });
         } else {
-            botApi.sendMessage({chat_id: userId, text: 'Permission denied.'});
+            botApi.sendMessage({chat_id: userId, text: 'Käyttö evätty.'});
             resolve();
         }
     });
 };
+
+generic.banUser = function(userId, userParams) {
+    return new Promise(function(resolve,reject) {
+        if (utils.userIsAdmin(userId)) {
+            var splitParams = userParams.split(' ');
+            parseId_(splitParams[0])
+            .then(id => {
+                if (_.isNull(id)) {
+                    botApi.sendMessage({chat_id: userId, text: 'Henkilöä "' + splitParams[0] + '" ei löytynyt.'});
+                    resolve();
+                } else {
+                    if (!_.includes(cfg.ignoredUsers, id)) {
+                        cfg.ignoredUsers.push(id);
+                        botApi.sendMessage({chat_id: userId, text: 'Banned id: ' + id})
+                        resolve();
+                    } else {
+                        botapi.sendMessage({chat_id: userId, text: 'Id ' + id + ' on jo bannittu.'});
+                        resolve();
+                    }
+                }
+            });
+        } else {
+            botApi.sendMessage({chat_id: userId, text: 'Käyttö evätty.'});
+            resolve();
+        }
+    });
+}
+
+generic.unbanUser = function(userId, userParams) {
+    return new Promise(function(resolve,reject) {
+        if (utils.userIsAdmin(userId)) {
+            var splitParams = userParams.split(' ');
+            parseId_(splitParams[0])
+            .then(id => {
+                if (_.isNull(id)) {
+                    botApi.sendMessage({chat_id: userId, text: 'Henkilöä "' + splitParams[0] + '"" ei löytynyt.'});
+                    resolve();
+                } else {
+                    if (_.includes(cfg.ignoredUsers, id)) {
+                        _.pull(cfg.ignoredUsers, id);
+                        botApi.sendMessage({chat_id: userId, text: 'Unbanned id: ' + id})
+                        resolve();
+                    } else {
+                        botapi.sendMessage({chat_id: userId, text: 'Henkilöä ' + id + ' ei ole bannittu.'});
+                        resolve();
+                    }
+                }
+            });
+        } else {
+            botApi.sendMessage({chat_id: userId, text: 'Käyttö evätty.'});
+            resolve();
+        }
+    });
+}
 
 var calculateWebcamLightness_ = function() {
     return new Promise(function(resolve, reject) {
@@ -337,6 +361,23 @@ var calculateWebcamLightness_ = function() {
             logger.log('debug', 'Webcam lightness value: %d', threshold);
             return resolve(threshold);
         });
+    });
+}
+
+var parseId_ = function(targetUser) {
+    return new Promise(function(resolve,reject) {
+        if (!_.isNaN(_.parseInt(targetUser))) {
+            resolve(targetUser);
+        } else {
+             db.getUserByName(targetUser)
+            .then(model => {
+                if (_.isNull(model)) {
+                    resolve(null);
+                } else {
+                    resolve(model.get('telegramId'));
+                }
+            });
+        }
     });
 }
 
