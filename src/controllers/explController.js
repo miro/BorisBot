@@ -29,11 +29,11 @@ controller.addExpl = function(userId, targetId, params) {
                         if (_.isNull(expl)) {
                             db.addExpl(userId, key, value)
                             .then( () => {
-                                botApi.sendMessage({ chat_id: targetId, text: 'Expl "' + key + '" lisätty.'});
+                                botApi.sendMessage({ chat_id: userId, text: 'Expl "' + key + '" lisätty.'});
                                 resolve();
                             });
                         } else {
-                            botApi.sendMessage({ chat_id: targetId, text: 'Olet jo tehnyt expl "' + key + '".'});
+                            botApi.sendMessage({ chat_id: userId, text: 'Olet jo tehnyt expl "' + key + '".'});
                             resolve();
                         }
                     })

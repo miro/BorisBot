@@ -189,10 +189,12 @@ generic.adminhelp = function(userId) {
     if (utils.userIsAdmin(userId)) {
         botApi.sendMessage({
             chat_id: userId,
-            text:   '/botgrouptalk `[text]` - Talk as bot to main chat \
-                    \n/botgroupprivatetalk `[text]` - Talk as bot in private to every registered user in main chat \
-                    \n/botprivatetalk `[id or username]` `[text]` - Talk as bot to user in private  \
-                    \n/logs - Print logs',
+            text:   '/botgrouptalk `[text]` - Puhu bottina päächattiin.\n' +
+                    '/botgroupprivatetalk `[text]` - Puhu bottina kaikille päächattiin rekisteröityneille käyttäjille privassa.\n' +
+                    '/botprivatetalk `[id or username]` `[text]` - Puhu bottina käyttäjälle privassa.\n' +
+                    '/logs - Printtaa lokit.\n' +
+                    '/ban `<id tai username>` - Banni käyttäjä.\n' +
+                    '/unban `<id tai username>` - Unbanni käyttäjä.',
             parse_mode: 'Markdown'
         })
     } else {
