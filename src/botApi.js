@@ -13,11 +13,26 @@ var botApi = {};
 // ## Public functions
 //
 
-// Available options:
+botApi.getMe = function() {
+    return new Promise(function(resolve,reject) {
+        request(cfg.tgApiUrl + '/getMe', function (err, res, body) {
+            if (!err && JSON.parse(body).ok) {
+                resolve(JSON.parse(body).result);
+            } else {
+                var errmsg = (err) ? ('Telegram API unreachable: ' + err) :
+                        ('botApi: error when getMe: ' + JSON.parse(body).description);
+                logger.log('error', errmsg);
+                reject(errmsg);
+            }
+        });
+    });
+}
+
 //chat_id [int] REQUIRED
 //text [string] REQUIRED
 //parse_mode ["Markdown" or "HTML"] OPTIONAL
 //disable_web_page_preview [boolean] OPTIONAL
+//disable_notification [boolean] OPTIONAL
 //reply_to_message_id [int] OPTIONAL
 //reply_markup [ReplyKeyboardMarkup, ReplyKeyboardHide or ForeReply] OPTIONAL
 botApi.sendMessage = function(options) {
@@ -28,67 +43,134 @@ botApi.sendMessage = function(options) {
         request.post(
             cfg.tgApiUrl + '/sendMessage',
             { form: options },
-            function(err, httpResponse, body) {
+            function(err, resp, body) {
                 if (!err && JSON.parse(body).ok) {
                     logger.log('info', 'botApi: sending message to %s: "%s..."', options.chat_id, _.truncate(options.text));
                     resolve(body);
                 } else {
-                    logger.log('error', 'botApi: error when sending message: ' + err);
-                    logger.debug(body);
-                    resolve(err);
+                    var errmsg = (err) ? ('Telegram API unreachable: ' + err) :
+                        ('botApi: error when sending message: ' + JSON.parse(body).description);
+                    logger.log('error', errmsg);
+                    resolve(errmsg);
                 }
             }
         );
     });
 };
 
-botApi.sendAction = function (chatId, action) {
-    request.post(cfg.tgApiUrl + '/sendChatAction', {
-        form: {
-            chat_id: chatId,
-            action: action
-        }
-    });
-};
-
-botApi.sendSticker = function (chatId, sticker, options) {
-    _sendFile('sticker', chatId, sticker, options);
-};
-
-botApi.sendVideo = function (chatId, video, options) {
-    _sendFile('video', chatId, video, options);
-};
-
-botApi.sendPhoto = function (chatId, photo, options) {
-    _sendFile('photo', chatId, photo, options);
-};
-
-botApi.setWebhook = function (webhookUrl, certificateFile) {
-
-    // Delete old webhook
-    request.post(cfg.tgApiUrl + '/setWebhook', { form: {url: ''}}, function (error, response, body) {
-        if (error) logger.log('error', 'Telegram API unreachable: ', error);
-        else {
-            logger.log('debug', 'botApi: previous webhook deleted, response: ' + body);
-            
-            // Subscribe new webhook
-            certificateFile = typeof certificateFile !== 'undefined' ? certificateFile : null;
-            var opts = { qs: { url: webhookUrl } };
-            if (certificateFile) {
-                opts.formData = _formatSendData('certificate', certificateFile).formData;
+//chat_id [int or string] REQUIRED
+//from_chat_id [int or string] REQUIRED
+//disable_notification [boolean] OPTIONAL
+//message_id [int] REQUIRED
+botApi.forwardMessage = function(options) {
+    return new Promise(function(resolve, reject) {
+        request.post(
+            cfg.tgApiUrl + '/forwardMessage',
+            { form: options },
+            function(err, resp, body) {
+                if (!err && JSON.parse(body).ok) {
+                    logger.log('info', 'botApi: forwarded message to %s', options.chat_id);
+                    resolve(body);
+                } else {
+                    var errmsg = (err) ? ('Telegram API unreachable: ' + err) :
+                        ('botApi: error when forwarding message: ' + JSON.parse(body).description);
+                    logger.log('error', errmsg);
+                    resolve(errmsg);
+                }
             }
-            request.post(cfg.tgApiUrl + '/setWebhook', opts, function (error, response, body) {
+        );
+    })
+}
+
+//chat_id [int or string] REQUIRED
+//action ['typing' or 'upload_photo' or 'record_video' or
+//        'upload_video' or 'record_video' or 'upload_audio' or
+//        'upload_document' or 'find_location'] REQUIRED
+botApi.sendAction = function (options) {
+    request.post(cfg.tgApiUrl + '/sendChatAction', { form: options });
+};
+
+//chat_id [int or string] REQUIRED
+//file [file_location or file_id] REQUIRED
+//disable_notification [boolean] OPTIONAL
+//reply_to_message_id [int] OPTIONAL
+//reply_markup [ReplyKeyboardMarkup or ReplyKeyboardHide or ForceReply] OPTIONAL
+botApi.sendSticker = function (options) {
+    return _sendFile('sticker', options);
+};
+
+//chat_id [int or string] REQUIRED
+//file [file_location or file_id] REQUIRED
+//duration [int] OPTIONAL
+//width [int] OPTIONAL
+//height [int] OPTIONAL
+//caption [string] OPTIONAL
+//disable_notification [boolean] OPTIONAL
+//reply_to_message_id [int] OPTIONAL
+//reply_markup [ReplyKeyboardMarkup or ReplyKeyboardHide or ForceReply] OPTIONAL
+botApi.sendVideo = function (options) {
+    return _sendFile('video', options);
+};
+
+//chat_id [int or string] REQUIRED
+//file [file_location or file_id] REQUIRED
+//caption [string] OPTIONAL
+//disable_notification [boolean] OPTIONAL
+//reply_to_message_id [int] OPTIONAL
+//reply_markup [ReplyKeyboardMarkup or ReplyKeyboardHide or ForceReply] OPTIONAL
+botApi.sendPhoto = function (options) {
+    return _sendFile('photo', options);
+};
+
+//url [string] REQUIRED
+//certificate [file_location] REQUIRED
+botApi.setWebhook = function (options) {
+    return new Promise(function(resolve,reject) {
+        // Delete old webhook
+        request.post(cfg.tgApiUrl + '/setWebhook', { form: {url: ''}}, function (error, response, body) {
+            if (error) {
+                logger.log('error', 'Telegram API unreachable: ', error);
+            } else {
+                logger.log('debug', 'botApi: previous webhook deleted, response: ' + body);
+                
+                // Subscribe new webhook
+                var fromData = '';
+                if (options.certificate) {
+                    formData = _formatSendData('certificate', options.certificate).formData;
+                }
+                request.post(cfg.tgApiUrl + '/setWebhook', {qs: options, formData: formData}, function (error, response, body) {
                     if (!error && JSON.parse(body).ok) {
                         logger.log('info', 'botApi: webhook updated successfully!')
                         logger.log('debug', 'botApi: webhook response' + body);
+                        resolve();
                     }
                     else {
-                        logger.log('error', 'Telegram API unreachable: ', error);
+                        var errmsg = (err) ? ('Telegram API unreachable: ' + err) :
+                            ('botApi: error when setting webhook: ' + JSON.parse(body).description);
+                        logger.log('error', errmsg);
+                        reject(errmsg);
                     }
-            });
-        }
+                });
+            }
+        });
     });
 };
+
+//file_id [string] REQUIRED
+botApi.getFile = function(options) {
+    return new Promise(function(resolve,reject) {
+        request.post(cfg.tgApiUrl + '/setWebhook', {qs: options}, function(error, response,body) {
+            if (!error && JSON.parse(body).ok) {
+                resolve(JSON.parse(body).result);
+            } else {
+                var errmsg = (err) ? ('Telegram API unreachable: ' + err) :
+                    ('botApi: error when setting webhook: ' + JSON.parse(body).description);
+                logger.log('error', errmsg);
+                reject(errmsg);
+            }
+        });        
+    });
+}
 
 // ## Internal functions
 //
@@ -125,25 +207,25 @@ var _formatSendData = function (type, data) {
         formData: formData,
         file: fileId
     };
-};
+}; 
 
-var _sendFile = function (type, chatId, file, options) {
-    var opts = {
-        qs: options || {}
-    };
-    var content = _formatSendData(type, file);
-    opts.formData = content.formData;
-    opts.qs[type] = content.file;
-    opts.qs.chat_id = chatId;
-    
-    request.post(cfg.tgApiUrl + '/send' + _.camelCase(type), opts, function(err, httpResponse, body) {
-        if (!err && JSON.parse(body).ok) {
-            logger.log('info', 'botApi: sent ' + type + ' to ' + chatId);
-        } else {
-            var errmsg = (err) ? ('Telegram API unreachable: ' + err) : ('botApi: error when sending' + type + ': ' + JSON.parse(body).description);
-            logger.log('error', errmsg);
-        }
-    });
+var _sendFile = function (type, options) {
+    return new Promise(function(resolve,reject) {
+        var content = _formatSendData(type, options.file);
+        options[type] = content.file;
+        
+        request.post(cfg.tgApiUrl + '/send' + _.camelCase(type), { qs: options, formData: content.formData }, function(err, httpResponse, body) {
+            if (!err && JSON.parse(body).ok) {
+                logger.log('info', 'botApi: sent ' + type + ' to ' + options.chat_id);
+                resolve()
+            } else {
+                var errmsg = (err) ? ('Telegram API unreachable: ' + err) :
+                    ('botApi: error when sending' + type + ': ' + JSON.parse(body).description);
+                logger.log('error', errmsg);
+                reject(errmsg)
+            }
+        });        
+    })
 };
 
 module.exports = botApi;

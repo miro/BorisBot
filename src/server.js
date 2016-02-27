@@ -67,6 +67,7 @@ app.use(function genericErrorHandler(err, req, res, next) { // 500
 // # Make required directories
 _.each(cfg.requiredDirectories, function(directory) {
     fs.lstat(directory, function(err, stats) {
+        logger.log(err);
         if (err && err['code'] === 'ENOENT') {
             var mkdir = 'mkdir -p ' + directory;
             var child = exec(mkdir, function(err,stdout,stderr) {
@@ -79,23 +80,13 @@ _.each(cfg.requiredDirectories, function(directory) {
 
 // # Start the server
 app.listen(cfg.serverPort, function() {
-    logger.log('info', 'BorisBot backend started at port', cfg.serverPort);
+    logger.log('info', 'BorisBot backend started at port ' + cfg.serverPort, {color: 'red'});
 });
 
 // Subscribe webhook
-botApi.setWebhook(cfg.webhookUrl, cfg.certificateFile);
-
+botApi.setWebhook({url: cfg.webhookUrl, certificate: cfg.certificateFile})
 // Run test sequence
-request(cfg.tgApiUrl + '/getMe', function (error, res, body) {
-    var response = JSON.parse(body);
-    var botName = response.result.first_name;
-    var botUserName = response.result.username;
-
-    logger.log('info', 'I Am', botName + ' / @' + botUserName);
-});
-
-// Download meme-object
-memeController.getMemes();
+.then(() => botApi.getMe()).then(r => logger.log('info', 'I am %s / @%s', r.first_name, r.username));
 
 // Start scheduler
 scheduler.startJobs();
