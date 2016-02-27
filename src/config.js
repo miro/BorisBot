@@ -64,7 +64,7 @@ cfg.imgFlipUserName = process.env.BORISBOT_IMGFLIP_USERNAME;
 cfg.imgFlipPassword = process.env.BORISBOT_IMGFLIP_PASSWORD;
 
 // Local directories for data storage
-cfg.resourceDirectory = process.env.BORISBOT_RESOURCES_LOCATION || '../resources/';
+cfg.resourceDirectory = process.env.BORISBOT_RESOURCES_LOCATION || __dirname + '/../resources/';
 cfg.plotlyDirectory = cfg.resourceDirectory + 'plotly/';
 cfg.webcamDirectory = cfg.resourceDirectory + 'webcam/';
 cfg.memeDirectory = cfg.resourceDirectory + 'memes/';

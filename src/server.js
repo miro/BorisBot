@@ -80,7 +80,7 @@ _.each(cfg.requiredDirectories, function(directory) {
 
 // # Start the server
 app.listen(cfg.serverPort, function() {
-    logger.log('info', 'BorisBot backend started at port ' + cfg.serverPort, {color: 'red'});
+    logger.log('info', 'BorisBot backend started at port ' + cfg.serverPort);
 });
 
 // Subscribe webhook
