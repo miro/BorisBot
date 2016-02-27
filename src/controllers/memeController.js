@@ -113,6 +113,7 @@ var _generateMeme = function(templateId, topText, bottomText) {
     });
 };
 
-controller.getMemes(); 
+// Download memes on startup
+controller.getMemes();
 
 module.exports = controller;
