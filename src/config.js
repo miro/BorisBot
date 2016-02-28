@@ -64,7 +64,7 @@ cfg.imgFlipUserName = process.env.BORISBOT_IMGFLIP_USERNAME;
 cfg.imgFlipPassword = process.env.BORISBOT_IMGFLIP_PASSWORD;
 
 // Local directories for data storage
-cfg.resourceDirectory = '../resources/';
+cfg.resourceDirectory = process.env.BORISBOT_RESOURCES_LOCATION || __dirname + '/../resources/';
 cfg.plotlyDirectory = cfg.resourceDirectory + 'plotly/';
 cfg.webcamDirectory = cfg.resourceDirectory + 'webcam/';
 cfg.memeDirectory = cfg.resourceDirectory + 'memes/';
@@ -78,10 +78,19 @@ cfg.webcamURL = process.env.BORISBOT_WEBCAM_URL;
 cfg.logLocation = process.env.BORISBOT_LOGFILE || cfg.logDirectory + 'output.log';
 
 var logOptions = {};
+logOptions.transports = [
+    new (winston.transports.Console)({
+        timestamp: function() {
+            return moment().format('YYYY-MM-DDTHH:mm:SS');
+        },
+        level: 'debug',
+        colorize: true
+    })
+];
 
 // Add logs also to file if env is production
 if (cfg.env === 'production') {
-    logOptions.transports = [
+    logOptions.transports.push(
         new (winston.transports.File)({
                 filename: cfg.logLocation,
                 level: 'info',
@@ -94,15 +103,7 @@ if (cfg.env === 'production') {
                 maxsize: 10000000,
                 json: false
         })
-    ];
-} else {
-    logOptions.transports = [
-    new (winston.transports.Console)({
-        timestamp: function() {
-            return moment().format('YYYY-MM-DDTHH:mm:SS');
-        },
-        level: 'debug'})
-    ];
+    );
 }
 
 cfg.logger = new (winston.Logger)(logOptions);

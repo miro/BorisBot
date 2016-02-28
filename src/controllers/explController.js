@@ -29,11 +29,11 @@ controller.addExpl = function(userId, targetId, params) {
                         if (_.isNull(expl)) {
                             db.addExpl(userId, key, value)
                             .then( () => {
-                                botApi.sendMessage({ chat_id: targetId, text: 'Expl "' + key + '" lisätty.'});
+                                botApi.sendMessage({ chat_id: userId, text: 'Expl "' + key + '" lisätty.'});
                                 resolve();
                             });
                         } else {
-                            botApi.sendMessage({ chat_id: targetId, text: 'Olet jo tehnyt expl "' + key + '".'});
+                            botApi.sendMessage({ chat_id: userId, text: 'Olet jo tehnyt expl "' + key + '".'});
                             resolve();
                         }
                     })
@@ -63,11 +63,10 @@ controller.getExpl = function(targetId, params) {
             } else {
                 db.fetchExpl(key)
                 .then(expls => {
-                    logger.debug(expls);
-                    var msg = (expls.length === 0) ? 
-                    'Expl ' + key + ' ei löytynyt.' :
-                    _.sample(_.map(expls.models, n => n.get('value')));
-                    botApi.sendMessage({chat_id: targetId, text: key + ': ' + msg});
+                    var msg = (expls.length === 0) ? 'Expl ' + key + ' ei löytynyt.' :
+                    key + ': ' + _.sample(_.map(expls.models, n => n.get('value')));
+
+                    botApi.sendMessage({chat_id: targetId, text: msg});
                     resolve();
                 })
                 .catch(e => {

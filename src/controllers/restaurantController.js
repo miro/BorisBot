@@ -49,7 +49,7 @@ controller.getAllMenusForToday = function (isFromGroup) {
             reaktori: diners.reaktori,
             newton: diners.newton,
             hertsi: diners.hertsi
-        } : diners;
+        } : _.clone(diners);
 
         // Remove diners which aren't open
         _.forEach(validDiners, function(diner, name) {
@@ -90,7 +90,7 @@ controller.updateMenus = function () {
         // Delete old menus
         _.forEach(diners, diner => diner.menu = []);
         // Choose only relevant diners
-        var validDiners = diners;
+        var validDiners = _.clone(diners);
         var validParsers = [];
         _.forEach(validDiners, function(diner,name) {
             if (_isDinerOpenToday(diner)) {
@@ -207,7 +207,7 @@ var _isDinerOpen = function(diner) {
 
 var _isDinerOpenToday = function(diner) {
     var weekday = moment().weekday();
-    
+
     if (!_.isUndefined(diner.info.open[weekday])) {
         return true;
     } else {

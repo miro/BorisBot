@@ -45,11 +45,11 @@ generic.webcam = function(userId, chatGroupId, eventIsFromGroup) {
             }
             else {
                 // -> If we get here, we are good to go!
-                botApi.sendAction(targetId, 'upload_photo');
+                botApi.sendAction({chat_id: targetId, action: 'upload_photo'});
                 utils.downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg')
                 .then(function() {
                     if (!eventIsFromGroup) {
-                        botApi.sendPhoto(targetId, cfg.webcamDirectory + 'webcam.jpg');
+                        botApi.sendPhoto({chat_id: targetId, file: cfg.webcamDirectory + 'webcam.jpg'});
                         resolve();
                     } else {
                         calculateWebcamLightness_()
@@ -57,7 +57,7 @@ generic.webcam = function(userId, chatGroupId, eventIsFromGroup) {
                             if (threshold < 40) {
                                 botApi.sendMessage({chat_id: targetId, text: '_"I only see a vast emptiness."_', parse_mode: 'Markdown'});
                             } else {
-                                botApi.sendPhoto(targetId, cfg.webcamDirectory + 'webcam.jpg');
+                                botApi.sendPhoto({chat_id: targetId, file: cfg.webcamDirectory + 'webcam.jpg'});
                             }
                             resolve();
                         })
@@ -121,7 +121,7 @@ generic.help = function(userId) {
     botApi.sendMessage({
         chat_id: userId,
         text: 'Moro! Olen Spinnin oma Telegram-botti, näin kavereiden kesken BorisBot. ' +
-        'Pääset alkuun kirjoittamalla minulle /luotunnus ja käy sen jälkeen /moro ´ttamassa' +
+        'Pääset alkuun kirjoittamalla minulle /luotunnus ja käy sen jälkeen /moro ´ttamassa ' +
         'Spinnin kanavalla!\n' +
         'Minulta voit myös kysyä seuraavia toimintoja:\n' +
         '\n/graafi - Tutkin alkoholinkäyttöäsi ja luon niistä kauniin kuvaajan. ' +
@@ -189,20 +189,23 @@ generic.adminhelp = function(userId) {
     if (utils.userIsAdmin(userId)) {
         botApi.sendMessage({
             chat_id: userId,
-            text:   '/botgrouptalk `[text]` - Talk as bot to main chat \
-                    \n/botgroupprivatetalk `[text]` - Talk as bot in private to every registered user in main chat \
-                    \n/botprivatetalk `[id or username]` `[text]` - Talk as bot to user in private  \
-                    \n/logs - Print logs',
+            text:   '/botgrouptalk `[text]` - Puhu bottina päächattiin.\n' +
+                    '/botgroupprivatetalk `[text]` - Puhu bottina kaikille päächattiin rekisteröityneille käyttäjille privassa.\n' +
+                    '/botprivatetalk `[id or username]` `[text]` - Puhu bottina käyttäjälle privassa.\n' +
+                    '/logs - Printtaa lokit.\n' +
+                    '/ban `<id tai username>` - Banni käyttäjä.\n' +
+                    '/unban `<id tai username>` - Unbanni käyttäjä.',
             parse_mode: 'Markdown'
         })
     } else {
         botApi.sendMessage({chat_id: userId, text: 'Käyttö evätty.'});
     }
-}
+};
 
 generic.sendLog= function(userId, userParams) {
     return new Promise(function(resolve, reject) {
         if (utils.userIsAdmin(userId)) {
+            botApi.sendAction({chat_id: userId, action: 'typing'});
             fs.readFile(cfg.logLocation, function (err,data) {
                 if (err) {
                     botApi.sendMessage({chat_id: userId, text: 'Lokia ei voitu avata! ' + err});

@@ -274,7 +274,7 @@ module.exports = function (event) {
                     botApi.sendMessage({ chat_id: event.userId, text: 'Tämä komento toimii vain ryhmästä!'});
                     resolve();
                 } else {
-                    var param = (_.isFinite(userCommand.split(' ')[0])) ? userCommand.split(' ')[0] : 1000;
+                    var param = (_.isFinite(event.userCommandParams.split(' ')[0])) ? event.userCommandParams.split(' ')[0] : 1000;
                     botApi.sendMessage({chat_id: event.chatGroupId, text: textController.getSummary(event.chatGroupId, param)});
                     resolve();
                 }

@@ -217,7 +217,7 @@ controller.drawGraph = function(userId, chatGroupId, msgIsFromGroup, userCommand
             targetId = userId;
         }
 
-        botApi.sendAction(targetId, 'upload_photo');
+        botApi.sendAction({chat_id: targetId, action: 'upload_photo'});
 
         db.getOldest('drinks', whereObject)
         .then(function(result) {

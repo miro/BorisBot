@@ -35,9 +35,12 @@ ENV     PATH      $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 
 RUN     npm install pm2 -g
 
+# Copy host directory into container and install required node_modules
 COPY    . /app/
 WORKDIR /app
 RUN     npm install
 
+# Open port 3000
 EXPOSE  3000
-CMD     ["pm2", "start",  "src/server.js", "--no-daemon"]
+
+CMD     ["pm2", "start",  "src/server.js", "--name=borisbot", "--no-daemon"]
