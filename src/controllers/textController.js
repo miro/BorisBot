@@ -34,8 +34,9 @@ controller.getSummary = function(chatId, n) {
     if (_.isUndefined(controller.history[chatId]) || _.isEmpty(controller.history[chatId])) {
         return 'Tiivistettävää ei löydy.';
     } else {
+        n = (n < controller.history[chatId].length) ? n : controller.history[chatId].length;
         // TODO: Create more complex algorithm
-        var dice = _.ceil(Math.random() * n);
+        var dice = _.floor(Math.random() * n);
         return controller.history[chatId][dice][1];
     }
 }
