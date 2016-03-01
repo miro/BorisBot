@@ -123,7 +123,7 @@ botApi.sendPhoto = function (options) {
 };
 
 //url [string] REQUIRED
-//certificate [file_location] REQUIRED
+//certificate [file_location] OPTIONAL
 botApi.setWebhook = function (options) {
     return new Promise(function(resolve,reject) {
         // Delete old webhook
@@ -134,8 +134,8 @@ botApi.setWebhook = function (options) {
                 logger.log('debug', 'botApi: previous webhook deleted, response: ' + body);
                 
                 // Subscribe new webhook
-                var fromData = '';
-                if (options.certificate) {
+                var formData = '';
+                if (!_.isEmpty(options.certificate)) {
                     formData = _formatSendData('certificate', options.certificate).formData;
                 }
                 request.post(cfg.tgApiUrl + '/setWebhook', {qs: options, formData: formData}, function (error, response, body) {
