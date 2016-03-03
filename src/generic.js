@@ -79,6 +79,9 @@ generic.checkWebcamLightness = function() {
             logger.log('warn', 'Unable to calculate clubroom lightness, webcamURL is undefined');
             return resolve();
         }
+        // Don't use this feature if environment is development
+        if (cfg.env === 'development') return resolve();
+
         utils.downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg')
         .then(function() {
             calculateWebcamLightness_()
