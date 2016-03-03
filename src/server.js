@@ -11,6 +11,8 @@ var cfg             = require('./config');
 var msgHistory      = require('./messageHistory');
 var scheduler       = require('./scheduler');
 var memeController  = require('./controllers/memeController');
+var routes          = require('./routes');
+
 var logger          = cfg.logger;
 
 var app         = express();
@@ -27,6 +29,8 @@ app.set('views', __dirname + '/views');
 
 // # Routes
 //
+
+// Telegram Webhook API
 app.post('/api/webhook', function(req, res) {
     var msg = req.body.message;
 
@@ -48,6 +52,9 @@ app.post('/api/webhook', function(req, res) {
         res.sendStatus(500);
     });
 });
+
+// HTML views
+routes(app);
 
 // Catch all 404 route (this needs to be last)
 app.get('*', function(req, res, next) {
