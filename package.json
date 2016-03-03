@@ -5,6 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node src/server.js",
+    "build": "gulp build",
+    "build:watch": "gulp",
     "test": "mocha 'test/**/*.js'",
     "test:watch": "npm run test -- --watch"
   },
@@ -50,6 +52,11 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
+    "del": "^2.2.0",
+    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^3.1.0",
+    "gulp-livereload": "^3.8.1",
+    "gulp-sass": "^2.2.0",
     "mocha": "^2.4.5"
   }
 }

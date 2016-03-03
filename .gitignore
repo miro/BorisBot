@@ -1,3 +1,6 @@
+# WWW build directory
+src/www/build/
+
 # Logs
 logs
 *.log
