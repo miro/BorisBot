@@ -25,7 +25,7 @@ app.use(bodyParser.json()); // parse json
 
 // Set Jade to be the template engine & specify where to look for template files
 app.set('view engine', 'jade');
-app.set('views', __dirname + '/views');
+app.set('views', __dirname + '/www/views');
 
 // # Routes
 //
