@@ -127,9 +127,9 @@ botApi.sendPhoto = function (options) {
 botApi.setWebhook = function (options) {
     return new Promise(function(resolve,reject) {
         // Delete old webhook
-        request.post(cfg.tgApiUrl + '/setWebhook', { form: {url: ''}}, function (error, response, body) {
-            if (error) {
-                logger.log('error', 'Telegram API unreachable: ', error);
+        request.post(cfg.tgApiUrl + '/setWebhook', { form: {url: ''}}, function (err, response, body) {
+            if (err) {
+                logger.log('error', 'Telegram API unreachable: ', err);
             } else {
                 logger.log('debug', 'botApi: previous webhook deleted, response: ' + body);
                 
@@ -138,8 +138,8 @@ botApi.setWebhook = function (options) {
                 if (!_.isEmpty(options.certificate)) {
                     formData = _formatSendData('certificate', options.certificate).formData;
                 }
-                request.post(cfg.tgApiUrl + '/setWebhook', {qs: options, formData: formData}, function (error, response, body) {
-                    if (!error && JSON.parse(body).ok) {
+                request.post(cfg.tgApiUrl + '/setWebhook', {qs: options, formData: formData}, function (err, response, body) {
+                    if (!err && JSON.parse(body).ok) {
                         logger.log('info', 'botApi: webhook updated successfully!')
                         logger.log('debug', 'botApi: webhook response' + body);
                         resolve();
