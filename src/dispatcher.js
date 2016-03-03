@@ -26,7 +26,7 @@ module.exports = function parseTelegramEvent(msg) {
 
     event.rawInput = msg.text;
     event.eventId = msg.message_id;
-    event.isCommand = (event.rawInput.charAt(0) !== '/' && !emojiRegex().test(event.rawInput.split(' ')[0]) && event.rawInput.charAt(0) !== '!');
+    event.isCommand = isEventCommand(event);
 
     // Parse metadata from the message
     event.userId = msg.from.id;
@@ -68,3 +68,20 @@ module.exports = function parseTelegramEvent(msg) {
         return commander(event);
     }
 };
+
+function isEventCommand(event) {
+    // Does the message start with some specific character?
+    switch (event.rawInput.charAt(0)) {
+        case '/':
+        case '!':
+            return true;
+    }
+
+    // Messages starting with emoji (yes, these are counted as command)
+    if (emojiRegex().test(event.rawInput.split(' ')[0])) {
+        return true;
+    }
+
+    // If we get here, this was not a command
+    return false;
+}
