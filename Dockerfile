@@ -40,6 +40,9 @@ COPY    . /app/
 WORKDIR /app
 RUN     npm install
 
+# Build website related stuff
+RUN     npm run build
+    
 # Open port 3000
 EXPOSE  3000
 
