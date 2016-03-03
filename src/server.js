@@ -58,6 +58,9 @@ routes(app);
 
 // Static content
 app.use('/build', express.static(__dirname + '/www/build'));
+app.use('/assets', express.static(__dirname + '/www/assets'));
+
+
 // Catch all 404 route (this needs to be last)
 app.get('*', function(req, res, next) {
     var err = new Error();
