@@ -13,7 +13,7 @@ This repository consists of NodeJS web server, which subscribes and understands 
 ## Integrations
 * Uses [Plot.ly](https://plot.ly/) for graph generating
 
-## Get started
+## Get development started
 **Create your Telegram Bot and run the backend for it locally**
 
 1. Clone this repository and run `npm install`
@@ -25,11 +25,19 @@ This repository consists of NodeJS web server, which subscribes and understands 
   * `BORISBOT_TELEGRAM_APIKEY`: this is the API-token you can retrieve via @BotFather
 6. Start the server by running `npm start`
 
+
 **If everything went well, you should see the following as an output:**
 
     BorisBot backend started at port 3000
     I Am <your bot name> / <@your_bot_username>
     Webhook updated successfully!
+
+This means your bot is hooked to the Telegram API. Olé!
+
+In order to get the WWW views to work, run this command to start the style build flow:
+
+`npm run build:watch`
+
 
 =======
 
