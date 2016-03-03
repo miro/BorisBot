@@ -21,6 +21,10 @@ controller.process = function processEvent(event) {
         // if you want to spam me via links as a private message, I don't mind
         return Promise.resolve();
     }
+    if (cfg.env === 'development') {
+        // if environment is development, dont use this feature
+        return Promise.resolve();
+    }
 
     const rawInput = event.rawInput.toLowerCase();
     const link = controller.findLink(rawInput);
