@@ -67,7 +67,13 @@ controller.sendSupportedMemes = function(targetId) {
 // Get memes which ImgFlip.com supports
 controller.getMemes = function() {
     request('https://api.imgflip.com/get_memes', function(error,res,body) {
-        var response = JSON.parse(body);
+        try {
+            var response = JSON.parse(body);
+        }
+        catch (error) {
+            logger.error('Something fishy coming from imgflip');
+        }
+
         if (response['success']) {
             controller.supportedMemes = _.sortBy(response['data']['memes'], function(meme) {
                 return meme.name;
