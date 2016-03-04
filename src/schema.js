@@ -34,7 +34,13 @@ bookshelf.knex.schema.hasTable('expls').then(function(exists) {
             t.integer('creatorId'); // later: reference to user-table?
 
             t.string('key', 50);
+
+            // expl can be a plain string
             t.string('value', 250);
+
+            // ...or a reference to a previous message
+            t.integer('messageId');
+            t.integer('chatId');
         });
     }
 });

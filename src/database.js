@@ -171,17 +171,6 @@ db.getUserByName = function(userName) {
 
 // ## Expl related stuff
 //
-db.addExpl = function(userId, key, value) {
-
-    var expl = new schema.models.Expl({
-        creatorId: userId,
-        key: key,
-        value: value
-    })
-    .save()
-
-    return expl;
-};
 
 db.fetchExpl = function(key) {
     return schema.collections.Expls

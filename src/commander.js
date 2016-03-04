@@ -37,13 +37,13 @@ module.exports = function (event) {
             // !-commands
             //
             case '!add':
-                explController.addExpl(event.userId, event.targetId, event.userCommandParams)
+                explController.addExpl(event)
                 .then(resolve);
             break;
 
             case '??':
             case '!expl':
-                explController.getExpl(event.targetId, event.userCommandParams)
+                explController.getExpl(event)
                 .then(resolve);
             break;
 
