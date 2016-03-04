@@ -57,15 +57,29 @@ module.exports = function parseTelegramEvent(msg) {
     event.targetId = (event.isFromGroup) ? event.chatGroupId : event.userId;
 
     // # -> Dispatch the event based on its type
-    // TODO: do we really want to handle replies in this way?
+
+    // TODO: in here we would probably want to check that is this msg reply to OUR message...
+    // With this logic we will miss events that are replies to no-matter-what, and there could be something
+    // interesting within them
     if (msg.reply_to_message) {
         logger.log('debug', 'Got reply to previous message, passing handling to replys-module');
         replys.eventEmitter.emit(msg.reply_to_message.message_id, event.rawInput);
+
+        // Solve immediately
         return Promise.resolve();
-    } else if (!event.isCommand) {
-        return talkbox(event);
-    } else {
-        return commander(event);
+    }
+    else {
+        var parsingPromises = [];
+
+        if (event.isCommand) {
+            // this is a command -> send to commander
+            parsingPromises.push(commander(event));
+        }
+
+        // Always send the events to talkbox
+        parsingPromises.push(talkbox(event));
+
+        return Promise.all(parsingPromises);
     }
 };
 
