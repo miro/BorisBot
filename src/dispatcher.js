@@ -34,6 +34,7 @@ module.exports = function parseTelegramEvent(msg) {
     event.userFirstName = msg.from.first_name;
     event.userLastName = msg.from.last_name;
     event.userCallName = _.isUndefined(event.userName) ? userFirstName : ('@' + event.userName); // this can be used on messages
+    event.replyToMessage = msg.reply_to_message;
 
     event.isFromGroup = !_.isUndefined(msg.chat.title);
     event.chatGroupId = event.isFromGroup ? msg.chat.id : null;
@@ -57,30 +58,25 @@ module.exports = function parseTelegramEvent(msg) {
     event.targetId = (event.isFromGroup) ? event.chatGroupId : event.userId;
 
     // # -> Dispatch the event based on its type
+    var parsingPromises = [];
 
-    // TODO: in here we would probably want to check that is this msg reply to OUR message...
-    // With this logic we will miss events that are replies to no-matter-what, and there could be something
-    // interesting within them
-    if (msg.reply_to_message) {
+    // Was this event a reply to something?
+    if (event.replyToMessage) {
         logger.log('debug', 'Got reply to previous message, passing handling to replys-module');
-        replys.eventEmitter.emit(msg.reply_to_message.message_id, event.rawInput);
-
-        // Solve immediately
-        return Promise.resolve();
+        replys.eventEmitter.emit(event.replyToMessage.message_id, event.rawInput);
     }
-    else {
-        var parsingPromises = [];
 
-        if (event.isCommand) {
-            // this is a command -> send to commander
-            parsingPromises.push(commander(event));
-        }
-
-        // Always send the events to talkbox
-        parsingPromises.push(talkbox(event));
-
-        return Promise.all(parsingPromises);
+    // Was this event a command-like event=?
+    if (event.isCommand) {
+        // this is a command -> send to commander
+        parsingPromises.push(commander(event));
     }
+
+    // Always send the events to talkbox
+    parsingPromises.push(talkbox(event));
+
+
+    return Promise.all(parsingPromises);
 };
 
 function isEventCommand(event) {
