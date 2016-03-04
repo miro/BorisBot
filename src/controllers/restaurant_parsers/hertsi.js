@@ -9,7 +9,7 @@ var logger      = cfg.logger;
 
 moment.tz.setDefault(cfg.botTimezone);
 
-module.exports = function() {
+module.exports = function fetchKitchenMenus() {
     return new Promise(function(resolve,reject) {
         // makes an array of hertsi's meals of current date
         var date = moment().format('YYYY/MM/DD');

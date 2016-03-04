@@ -50,7 +50,7 @@ var _fetchKitchenMenus = function(kitchen) {
                 }
                 catch(err) {
                     logger.log('error', 'Error when parsing Juvenes kitchen: %s', err);
-                    resolve()
+                    resolve();
                 }
                 
             } else {

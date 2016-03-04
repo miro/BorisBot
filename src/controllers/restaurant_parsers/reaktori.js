@@ -9,7 +9,7 @@ var logger      = cfg.logger;
 
 moment.tz.setDefault(cfg.botTimezone);
 
-module.exports = function() {
+module.exports = function fetchKitchenMenus() {
     return new Promise(function(resolve,reject) {
         var date = moment().format('YYYY-MM-DD');
         var opt = {
@@ -47,7 +47,7 @@ module.exports = function() {
     });
 }
 
-var _parseMenu = function (menu) {
+var _parseMenu = function(menu) {
 
     // we don't want to include all the meals
     var categories = [
