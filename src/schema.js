@@ -17,7 +17,12 @@ bookshelf.knex.schema.hasTable('drinks').then(function(exists) {
             t.timestamp('timestamp').defaultTo(knex.raw('now()'));
             t.integer('chatGroupId');
 
+            t.integer('drinker_id')
+                .references('id')
+                .inTable('users')
+                .onDelete('CASCADE');
             t.integer('drinker_telegram_id');
+
             t.integer('messageId');
 
             t.string('drinkType', 140);
@@ -112,14 +117,17 @@ var models = {};
 models.Group = bookshelf.Model.extend({
     tableName: 'groups'
 });
+models.User = bookshelf.Model.extend({
+    tableName: 'users'
+});
 models.Drink = bookshelf.Model.extend({
-    tableName: 'drinks'
+    tableName: 'drinks',
+    drinker: function() {
+        return this.belongsTo(models.User, 'drinker_id');
+    }
 });
 models.Expl = bookshelf.Model.extend({
     tableName: 'expls'
-});
-models.User = bookshelf.Model.extend({
-    tableName: 'users'
 });
 models.Link = bookshelf.Model.extend({
     tableName: 'links',
@@ -130,6 +138,7 @@ models.Link = bookshelf.Model.extend({
         return this.belongsTo(models.User, 'linker_id');
     }
 });
+
 
 
 var collections = {};
