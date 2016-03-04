@@ -88,6 +88,7 @@ function isEventCommand(event) {
     switch (event.rawInput.charAt(0)) {
         case '/':
         case '!':
+        case '?':
             return true;
     }
 
