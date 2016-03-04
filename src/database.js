@@ -23,7 +23,7 @@ db.registerDrink = function(messageId, chatGroupId, drinker, drinkType, drinkVal
     var drink = new schema.models.Drink({
         messageId: messageId,
         chatGroupId: chatGroupId,
-        creatorId: drinker,
+        drinker_telegram_id: drinker,
         drinkType: drinkType,
         drinkValue: drinkVal
     })
@@ -83,7 +83,7 @@ db.getOldest = function(tableName, whereObject) {
 db.getLastDrinkBeforeTimestamp = function(userId, timestampMoment) {
     return schema.collections.Drinks
     .query(function(qb) {
-        qb.where({ creatorId: userId })
+        qb.where({ drinker_telegram_id: userId })
         .andWhere('timestamp', '<', timestampMoment.toJSON());
     })
     .fetchOne();
@@ -92,7 +92,7 @@ db.getLastDrinkBeforeTimestamp = function(userId, timestampMoment) {
 db.getNextDrinkAfterTimestamp = function(userId, timestampMoment) {
     return schema.collections.Drinks
     .query(function(qb) {
-        qb.where({ creatorId: userId })
+        qb.where({ drinker_telegram_id: userId })
         .andWhere('timestamp', '>', timestampMoment.toJSON());
     })
     .fetchOne();
@@ -102,7 +102,7 @@ db.getNextDrinkAfterTimestamp = function(userId, timestampMoment) {
 db.getDrinksSinceTimestampSortedForUser = function(userId, timestampMoment) {
     return schema.bookshelf
     .knex('drinks')
-    .where( {creatorId: userId} )
+    .where( {drinker_telegram_id: userId} )
     .andWhere('timestamp','>', timestampMoment.toJSON())
     .orderBy('timestamp', 'asc');
 };
