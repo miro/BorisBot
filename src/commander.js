@@ -41,6 +41,7 @@ module.exports = function (event) {
                 .then(resolve);
             break;
 
+            case '??':
             case '!expl':
                 explController.getExpl(event.targetId, event.userCommandParams)
                 .then(resolve);
