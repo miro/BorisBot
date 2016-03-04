@@ -62,7 +62,7 @@ module.exports = function parseTelegramEvent(msg) {
         logger.log('debug', 'Got reply to previous message, passing handling to replys-module');
         replys.eventEmitter.emit(msg.reply_to_message.message_id, event.rawInput);
         return Promise.resolve();
-    } else if (event.isCommand) {
+    } else if (!event.isCommand) {
         return talkbox(event);
     } else {
         return commander(event);

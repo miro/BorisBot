@@ -6,7 +6,7 @@ var emoji   = require('node-emoji')
 var parserJuvenes   = require('./restaurant_parsers/juvenes');
 var parserHertsi    = require('./restaurant_parsers/hertsi');
 var parserReaktori  = require('./restaurant_parsers/reaktori');
-var resources       = require('../../resources/restaurants');
+var resources       = require('./restaurant_parsers/restaurants');
 var cfg             = require('../config');
 var logger          = cfg.logger;
 

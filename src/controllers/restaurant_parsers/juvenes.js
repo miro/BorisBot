@@ -2,7 +2,7 @@ var request     = require('request');
 var moment      = require('moment-timezone');
 var Promise     = require('bluebird');
 
-var juvenes  = require('../../../resources/restaurants').juvenes;
+var juvenes     = require('./restaurants').juvenes;
 var cfg         = require('../../config');
 var logger      = cfg.logger;
 

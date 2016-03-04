@@ -3,7 +3,7 @@ var moment      = require('moment-timezone');
 var _           = require('lodash');
 var Promise     = require('bluebird');
 
-var reaktori    = require('../../../resources/restaurants').reaktori;
+var reaktori    = require('./restaurants').reaktori;
 var cfg         = require('../../config');
 var logger      = cfg.logger;
 
