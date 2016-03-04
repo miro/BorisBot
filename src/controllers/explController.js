@@ -1,80 +1,95 @@
-var Promise = require('bluebird');
-var _       = require('lodash');
+var Promise                 = require('bluebird');
+var _                       = require('lodash');
 
-var botApi  = require('../botApi');
-var db      = require('../database');
-var logger  = require('../config').logger;
+var botApi                  = require('../botApi');
+var ExplModel               = require('../schema').models.Expl;
+var ExplCollection          = require('../schema').collections.Expl;
+var db                      = require('../database');
+var logger                  = require('../config').logger;
 
 var controller = {};
 
-controller.addExpl = function(userId, targetId, params) {
-    return new Promise(function(resolve,reject) {
-        if (_.isEmpty(params)) {
-            botApi.sendMessage({ chat_id: targetId, text: '!add [avain] [selite]'});
-            resolve();
+const EXPL_VALUE_MAX_LENGTH = 250;
+const EXPL_KEY_MAX_LENGTH = 50;
+
+
+controller.addExpl = function(event) {
+    const chat_id = event.targetId;
+
+    var paramParts = event.userCommandParams ? event.userCommandParams.split(' ') : [];
+    const eventCanBeNewExpl = event.replyToMessage || paramParts.length > 1;
+    if (!eventCanBeNewExpl) {
+        // -> advise the user and abort
+        botApi.sendMessage({ chat_id, text: '!add [avain] [selite]'});
+        return Promise.resolve();
+    }
+
+    const key = _.toLower(paramParts.shift());
+    if (key.length > 50) {
+        botApi.sendMessage({ chat_id, text: 'Avain max. 50 merkkiä.'} )
+        return Promise.resolve();
+    }
+
+    var explanation = {
+        creatorId: event.userId,
+        key
+    };
+
+    // -> Figure out the explanation value for this key
+    if (event.replyToMessage) {
+        explanation.messageId = event.replyToMessage.message_id;
+        explanation.chatId = event.replyToMessage.chat.id;
+    } else {
+        explanation.value = paramParts.join(' ');
+        if (explanation.value.length > EXPL_VALUE_MAX_LENGTH) {
+            botApi.sendMessage({chat_id, text: 'Selite max. ' + EXPL_VALUE_MAX_LENGTH + ' merkkiä.'})
+            return Promise.resolve();
+        }
+    }
+
+    return ExplModel.forge({ creatorId: event.userId, key })
+    .fetch()
+    .then(existingModel => {
+        if (existingModel) {
+            botApi.sendMessage({ chat_id: event.userId, text: 'Olet jo tehnyt "' + key + '"-explin.'});
+            return Promise.resolve();
         } else {
-            var splitParams = params.split(' ');
-            if (splitParams.length >= 2) {
-                const key = _.toLower(splitParams.shift());
-                const value = splitParams.join(' ');
-                if (key.length > 50) {
-                    botApi.sendMessage({chat_id: targetId, text: 'Avain max. 50 merkkiä.'})
-                    resolve();
-                } else if (value.length > 250) {
-                    botApi.sendMessage({chat_id: targetId, text: 'Selite max. 250 merkkiä.'})
-                    resolve();
-                } else {
-                    db.fetchExplMadeByUser(userId, key)
-                    .then(expl => {
-                        if (_.isNull(expl)) {
-                            db.addExpl(userId, key, value)
-                            .then( () => {
-                                botApi.sendMessage({ chat_id: userId, text: 'Expl "' + key + '" lisätty.'});
-                                resolve();
-                            });
-                        } else {
-                            botApi.sendMessage({ chat_id: userId, text: 'Olet jo tehnyt expl "' + key + '".'});
-                            resolve();
-                        }
-                    })
-                }
-            } else {
-                botApi.sendMessage({chat_id: targetId, text: '!add [avain] [selite]'});
-                resolve();
-            }
+            return new ExplModel(explanation)
+            .save()
+            .then(newModel => botApi.sendMessage({ chat_id: event.userId, text: 'Expl "' + newModel.get('key') + '" lisätty.'}));
         }
     });
 }
 
-controller.getExpl = function(targetId, params) {
-    return new Promise(function(resolve, reject) {
-        if (_.isEmpty(params)) {
-            botApi.sendMessage({chat_id: targetId, text: '!expl [avain]'});
-            resolve();
-        } else {
-            var splitParams = params.split(' ');
-            const key = _.toLower(splitParams[0]);
-            if ( splitParams.length != 1 ) {
-                botApi.sendMessage({chat_id: targetId, text: '!expl [avain]'});
-                resolve();
-            } else if ( key.length > 50 ) {
-                botApi.sendMessage({chat_id: targetId, text: 'Avaimet ovat alle 50 merkkisiä.'})
-                resolve();
-            } else {
-                db.fetchExpl(key)
-                .then(expls => {
-                    var msg = (expls.length === 0) ? 'Expl ' + key + ' ei löytynyt.' :
-                    key + ': ' + _.sample(_.map(expls.models, n => n.get('value')));
+controller.getExpl = function(event) {
+    // event.targetId, event.userCommandParams
+    const chat_id = event.targetId;
+    var paramParts = event.userCommandParams ? event.userCommandParams.split(' ') : [];
 
-                    botApi.sendMessage({chat_id: targetId, text: msg});
-                    resolve();
-                })
-                .catch(e => {
-                    logger.log('error', 'Error when fetching expl: ' + e)
-                    resolve();
-                }); 
-            }
+    if (paramParts.length === 0) {
+        botApi.sendMessage({ chat_id, text: '!expl [avain]' });
+        return Promise.resolve();
+    }
+
+    const key = _.toLower(paramParts[0]);
+
+    if (key.length > EXPL_KEY_MAX_LENGTH) {
+        botApi.sendMessage({ chat_id, text: 'Avaimet ovat alle 50 merkkisiä.' });
+        return Promise.resolve();
+    }
+
+    return db.fetchExpl(key)
+    .then(explanations => {
+        if (explanations.length === 0) {
+            return botApi.sendMessage({ chat_id, text: 'Expl ' + key + ' ei löytynyt.'});
+        } else {
+            var explModelToEcho = _.sample(explanations.models);
+            return echoExplanation(explModelToEcho, event);
         }
+    })
+    .catch(e => {
+        logger.log('error', 'Error when fetching expl: ' + e)
+        return Promise.resolve();
     });
 }
 
@@ -129,6 +144,25 @@ controller.listExpls = function(targetId) {
             }
         });
     });
+}
+
+function echoExplanation(explModel, requestingEvent) {
+    if (explModel.get('messageId')) {
+        // this expl is a reference to older message
+        botApi.forwardMessage({
+            chat_id: requestingEvent.targetId,
+            from_chat_id: explModel.get('chatId'),
+            message_id: explModel.get('messageId'),
+            disable_notification: true
+        });
+    } else {
+        botApi.sendMessage({
+            chat_id: requestingEvent.targetId,
+            text: explModel.get('key') + ': ' + explModel.get('value')
+        });
+    }
+
+    return Promise.resolve();
 }
 
 module.exports = controller;
