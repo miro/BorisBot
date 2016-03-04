@@ -1,7 +1,10 @@
+- var baseUrl = process.env.BORISBOT_BASE_URL || '/';
+
 doctype html
 html
     head
-        link(rel='stylesheet', href='/build/main.css')
+        base(href=baseUrl)
+        link(rel='stylesheet', href='build/main.css')
 
         meta(charset='utf-8')
         meta(name='viewport', content='width=device-width, initial-scale=1')
