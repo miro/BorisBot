@@ -159,12 +159,12 @@ botApi.setWebhook = function (options) {
 //file_id [string] REQUIRED
 botApi.getFile = function(options) {
     return new Promise(function(resolve,reject) {
-        request.post(cfg.tgApiUrl + '/setWebhook', {qs: options}, function(error, response,body) {
-            if (!error && JSON.parse(body).ok) {
+        request.post(cfg.tgApiUrl + '/getFile', {qs: options}, function(err, response, body) {
+            if (!err && JSON.parse(body).ok) {
                 resolve(JSON.parse(body).result);
             } else {
                 var errmsg = (err) ? ('Telegram API unreachable: ' + err) :
-                    ('botApi: error when setting webhook: ' + JSON.parse(body).description);
+                    ('botApi: error when getting file: ' + JSON.parse(body).description);
                 logger.log('error', errmsg);
                 reject(errmsg);
             }
