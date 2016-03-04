@@ -8,6 +8,16 @@ var logger      = cfg.logger;
 
 moment.tz.setDefault(cfg.botTimezone);
 
+// check http://www.juvenes.fi/DesktopModules/Talents.LunchMenu/LunchMenuServices.asmx
+// for API documentation ( ~ kitchen and menu IDs)
+
+module.exports = {
+    newton: function() {return _fetchKitchenMenus({id: 6, menu: 60})},
+    sååsbar: function() {return _fetchKitchenMenus({id: 6, menu: 77})},
+    fusion: function() {return _fetchKitchenMenus({id: 60038,menu: 3})},
+    konehuone: function() {return _fetchKitchenMenus({id: 60038, menu: 74})}
+};
+
 var _fetchKitchenMenus = function(kitchen) {
     return new Promise(function(resolve,reject) {
         // juvenes' API doesn't offer 100% valid json
@@ -15,13 +25,11 @@ var _fetchKitchenMenus = function(kitchen) {
         // play with it little and
         // then parse it as json
 
-        var date = moment().format('YYYY-MM-DD');
-
         var opt = {
             url: juvenes.url +
                 "?KitchenId=" + kitchen.id +
                 "&MenuTypeId=" + kitchen.menu + 
-                "&date='" + date +
+                "&date='" + moment().format('YYYY-MM-DD') +
                 "'&format=json&lang='fi'"
         };
 
@@ -52,15 +60,3 @@ var _fetchKitchenMenus = function(kitchen) {
         });
     });
 };
-
-var parser = {
-    newton: function() {return _fetchKitchenMenus({id: 6, menu: 60})},
-    sååsbar: function() {return _fetchKitchenMenus({id: 6, menu: 77})},
-    fusion: function() {return _fetchKitchenMenus({id: 60038,menu: 3})},
-    konehuone: function() {return _fetchKitchenMenus({id: 60038, menu: 74})}
-};
-
-// check http://www.juvenes.fi/DesktopModules/Talents.LunchMenu/LunchMenuServices.asmx
-// for API documentation ( ~ kitchen and menu IDs)
-
-module.exports = parser;

@@ -12,6 +12,7 @@ var generic = require('./generic');
 var drinkController         = require('./controllers/drinkController');
 var textController          = require('./controllers/textController');
 var restaurantController    = require('./controllers/restaurantController');
+var memeController          = require('./controllers/memeController');
 
 // set default timezone to bot timezone
 moment.tz.setDefault(cfg.botTimezone);
@@ -89,12 +90,20 @@ scheduler.addJob({
     timeZone: cfg.botTimeZone
 });
 
-// "Update menus"
+// "Update restaurant menus"
 scheduler.addJob({
     cronTime: '00 30 0,15 * * *',
     onTick: function updateMenus() {
-        restaurantController.updateMenus()
-        .then(() => logger.log('debug', 'Menus updated'));
+        restaurantController.updateMenus();
+    },
+    timeZone: cfg.botTimeZone
+})
+
+// "Update memes every week"
+scheduler.addJob({
+    cronTime: '* * * 1 * *',
+    onTick: function updateMemes() {
+        memeController.getMemes();
     },
     timeZone: cfg.botTimeZone
 })
