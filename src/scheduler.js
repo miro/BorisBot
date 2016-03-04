@@ -11,7 +11,7 @@ var generic = require('./generic');
 
 var drinkController         = require('./controllers/drinkController');
 var textController          = require('./controllers/textController');
-var restaurantController    = require('./controllers/restaurantController');
+var restaurantController    = require('./controllers/restaurant/restaurantController');
 var memeController          = require('./controllers/memeController');
 
 // set default timezone to bot timezone

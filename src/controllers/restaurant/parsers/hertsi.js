@@ -3,8 +3,8 @@ var moment      = require('moment-timezone');
 var Promise     = require('bluebird');
 var _           = require('lodash');
 
-var hertsi      = require('./restaurants').hertsi;
-var cfg         = require('../../config');
+var hertsi      = require('../restaurantsConfig').hertsi;
+var cfg         = require('../../../config');
 var logger      = cfg.logger;
 
 moment.tz.setDefault(cfg.botTimezone);

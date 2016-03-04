@@ -23,7 +23,7 @@ var drinkController         = require('./controllers/drinkController');
 var ethanolController       = require('./controllers/ethanolController');
 var memeController          = require('./controllers/memeController');
 var textController          = require('./controllers/textController');
-var restaurantController    = require('./controllers/restaurantController');
+var restaurantController    = require('./controllers/restaurant/restaurantController');
 var explController          = require('./controllers/explController');
 
 module.exports = function (event) {

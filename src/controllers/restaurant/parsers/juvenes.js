@@ -2,8 +2,8 @@ var request     = require('request');
 var moment      = require('moment-timezone');
 var Promise     = require('bluebird');
 
-var juvenes     = require('./restaurants').juvenes;
-var cfg         = require('../../config');
+var juvenes     = require('../restaurantsConfig').juvenes;
+var cfg         = require('../../../config');
 var logger      = cfg.logger;
 
 moment.tz.setDefault(cfg.botTimezone);
@@ -28,7 +28,7 @@ var _fetchKitchenMenus = function(kitchen) {
         var opt = {
             url: juvenes.url +
                 "?KitchenId=" + kitchen.id +
-                "&MenuTypeId=" + kitchen.menu + 
+                "&MenuTypeId=" + kitchen.menu +
                 "&date='" + moment().format('YYYY-MM-DD') +
                 "'&format=json&lang='fi'"
         };
@@ -45,14 +45,14 @@ var _fetchKitchenMenus = function(kitchen) {
                         var meal = json.MealOptions[i].MenuItems[0].Name;
                         meals.push(meal.trim());
                     }
-                    
+
                     resolve(meals);
                 }
                 catch(err) {
                     logger.log('error', 'Error when parsing Juvenes kitchen: %s', err);
                     resolve();
                 }
-                
+
             } else {
                 logger.log('error', 'Error when requesting Juvenes HTML: %s', error);
                 resolve();
