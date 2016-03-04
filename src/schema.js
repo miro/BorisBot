@@ -52,7 +52,7 @@ bookshelf.knex.schema.hasTable('users').then(function(exists) {
         return bookshelf.knex.schema.createTable('users', function(t) {
             t.increments('id').primary();
 
-            t.integer('telegramId');
+            t.integer('telegramId').unique();
             t.string('userName', 100).unique();
             t.string('firstName', 100);
             t.string('lastName', 100);
