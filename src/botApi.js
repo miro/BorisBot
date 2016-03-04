@@ -132,7 +132,7 @@ botApi.setWebhook = function (options) {
                 logger.log('error', 'Telegram API unreachable: ', err);
             } else {
                 logger.log('debug', 'botApi: previous webhook deleted, response: ' + body);
-                
+
                 // Subscribe new webhook
                 var formData = '';
                 if (!_.isEmpty(options.certificate)) {
@@ -168,7 +168,7 @@ botApi.getFile = function(options) {
                 logger.log('error', errmsg);
                 reject(errmsg);
             }
-        });        
+        });
     });
 }
 
@@ -207,13 +207,13 @@ var _formatSendData = function (type, data) {
         formData: formData,
         file: fileId
     };
-}; 
+};
 
 var _sendFile = function (type, options) {
     return new Promise(function(resolve,reject) {
         var content = _formatSendData(type, options.file);
         options[type] = content.file;
-        
+
         request.post(cfg.tgApiUrl + '/send' + _.camelCase(type), { qs: options, formData: content.formData }, function(err, httpResponse, body) {
             if (!err && JSON.parse(body).ok) {
                 logger.log('info', 'botApi: sent ' + type + ' to ' + options.chat_id);
@@ -224,7 +224,7 @@ var _sendFile = function (type, options) {
                 logger.log('error', errmsg);
                 reject(errmsg)
             }
-        });        
+        });
     })
 };
 
