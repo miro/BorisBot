@@ -147,6 +147,7 @@ module.exports = function (event) {
             break;
 
             case '/kumpi':
+            case '/valitse':
                 generic.whichOne(event.targetId, event.userCommandParams);
                 resolve();
             break;
