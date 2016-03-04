@@ -3,7 +3,6 @@ var _                       = require('lodash');
 
 var botApi                  = require('../botApi');
 var ExplModel               = require('../schema').models.Expl;
-var ExplCollection          = require('../schema').collections.Expl;
 var db                      = require('../database');
 var logger                  = require('../config').logger;
 
@@ -88,7 +87,7 @@ controller.getExpl = function(event) {
         }
     })
     .catch(e => {
-        logger.log('error', 'Error when fetching expl: ' + e)
+        logger.log('error', 'Error when fetching expl: ' + e);
         return Promise.resolve();
     });
 }
