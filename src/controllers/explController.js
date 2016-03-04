@@ -25,7 +25,7 @@ controller.addExpl = function(event) {
 
     const key = _.toLower(paramParts.shift());
     if (key.length > 50) {
-        botApi.sendMessage({ chat_id, text: 'Avain max. 50 merkkiä.'} )
+        botApi.sendMessage({ chat_id, text: 'Avain max. 50 merkkiä.'});
         return Promise.resolve();
     }
 
@@ -41,7 +41,7 @@ controller.addExpl = function(event) {
     } else {
         explanation.value = paramParts.join(' ');
         if (explanation.value.length > EXPL_VALUE_MAX_LENGTH) {
-            botApi.sendMessage({chat_id, text: 'Selite max. ' + EXPL_VALUE_MAX_LENGTH + ' merkkiä.'})
+            botApi.sendMessage({chat_id, text: 'Selite max. ' + EXPL_VALUE_MAX_LENGTH + ' merkkiä.'});
             return Promise.resolve();
         }
     }
@@ -55,7 +55,10 @@ controller.addExpl = function(event) {
         } else {
             return new ExplModel(explanation)
             .save()
-            .then(newModel => botApi.sendMessage({ chat_id: event.userId, text: 'Expl "' + newModel.get('key') + '" lisätty.'}));
+            .then(newModel => botApi.sendMessage({
+                chat_id: event.userId,
+                text: 'Expl "' + newModel.get('key') + '" lisätty.'
+            }));
         }
     });
 }
