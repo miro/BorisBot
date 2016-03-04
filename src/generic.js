@@ -164,25 +164,43 @@ generic.help = function(userId) {
 };
 
 generic.whichOne = function(targetId, userParams) {
-    var options = userParams.split(' ');
-    if (options.length != 2) {
-        botApi.sendMessage({chat_id: targetId, text: 'Anna kaksi parametria!'});
-        return;
+    const SEPARATION_KEYWORD = 'vai';
+
+    var paramParts = userParams.split(' ');
+
+    var alternatives = [];
+    if (paramParts.length === 2) {
+        // there were only two parts -> pick from them
+        alternatives = alternatives.concat(paramParts);
+    } else if (userParams.split(SEPARATION_KEYWORD).length > 1) {
+        alternatives = alternatives.concat(userParams.split(SEPARATION_KEYWORD));
     } else {
-        var text;
-        var dice = Math.floor(Math.random() * 100);
-        if (dice === 99) {
-            text = 'Molemmat!';
-        } else if (dice === 98) {
-            text = 'Ei kumpikaan!';
-        } else if (dice < 48) {
-            text = options[0];
-        } else {
-            text = options[1];
-        }
-        botApi.sendMessage({chat_id: targetId, text: text});
+        alternatives = alternatives.concat(userParams.split(' '));
+    }
+
+    // Did we get something to choose from?
+    if (alternatives.length <= 1) {
+        botApi.sendMessage({
+            chat_id: targetId,
+            text: 'Anna ainakin kaksi asiaa mistä arpoa!'
+        });
+
         return;
     }
+
+    // -> all good, pick a winner!
+
+    var outcome;
+    var dice = Math.floor(Math.random() * 100);
+    if (dice === 99) {
+        outcome = 'Molemmat!';
+    } else if (dice === 98) {
+        outcome = 'Ei kumpikaan!';
+    } else {
+        outcome = _.sample(alternatives);
+    }
+
+    botApi.sendMessage({ chat_id: targetId, text: outcome });
 };
 
 // Admin commands
