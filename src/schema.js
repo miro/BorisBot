@@ -15,9 +15,9 @@ bookshelf.knex.schema.hasTable('drinks').then(function(exists) {
         return bookshelf.knex.schema.createTable('drinks', function(t) {
             t.increments('id').primary();
             t.timestamp('timestamp').defaultTo(knex.raw('now()'));
-            t.integer('creatorId'); // later: reference to user-table?
             t.integer('chatGroupId');
 
+            t.integer('drinker_telegram_id');
             t.integer('messageId');
 
             t.string('drinkType', 140);
