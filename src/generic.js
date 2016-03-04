@@ -66,7 +66,7 @@ generic.webcam = function(userId, chatGroupId, eventIsFromGroup) {
                             botApi.sendPhoto(targetId, cfg.webcamDirectory + 'webcam.jpg');
                             resolve();
                         })
-                    }  
+                    }
                 });
             }
         });
@@ -86,9 +86,9 @@ generic.checkWebcamLightness = function() {
         .then(function() {
             calculateWebcamLightness_()
             .then(threshold => {
-                
+
                 if (threshold > 80) {   // TODO: Explore more specific thresholds
-                
+
                     // Lights on, check if they were already on
                     if (!generic.webcamLightsOn) {
                         logger.log('info', 'Webcam detected lights at clubroom, threshold: ' + threshold);
@@ -98,11 +98,11 @@ generic.checkWebcamLightness = function() {
                     }
                     resolve();
                 } else {
-                        
+
                     // Lights off, reset status
                     generic.webcamLightsOn = false;
                     resolve();
-                }   
+                }
             })
             .catch(err => logger.log('error', 'Error when calculating webcam pixels: %s', err));
         });
@@ -129,14 +129,14 @@ generic.help = function(userId) {
         'Minulta voit myös kysyä seuraavia toimintoja:\n' +
         '\n/graafi - Tutkin alkoholinkäyttöäsi ja luon niistä kauniin kuvaajan. ' +
         'Jos annat komennon perään positiivisen numeron, rajaan kuvaajan ' +
-        'leveyden olemaan kyseisen numeron verran päiviä.\n' + 
+        'leveyden olemaan kyseisen numeron verran päiviä.\n' +
         '\n/kahvi - Kirjaan nauttimasi kupillisen tietokantaani.\n' +
         '\n/kalja - Kirjaan nauttimasi ohrapirtelön tietokantaani.\n' +
         '\n/kippis - Kirjaan kilistelemäsi juoman ylös ja käytän sitä myöhemmin erilaisiin toimintoihini.\n' +
         '\n/kahvit - Printaan sinulle ryhmäsi tämänhetkisen kahvitilanteen.\n' +
-        '\n/kaljoja - Näytän kaikki nautitut alkoholilliset juomat.\n' + 
+        '\n/kaljoja - Näytän kaikki nautitut alkoholilliset juomat.\n' +
         '\n/kumpi `<vaihtoehto 1>` `<vaihtoehto 2>` - Päätän tärkeät valinnat puolestasi.\n' +
-        '\n/luomeemi - Luon haluamasi meemin haluamillasi teksteillä. ' + 
+        '\n/luomeemi - Luon haluamasi meemin haluamillasi teksteillä. ' +
         'Tuetut meemit saat tietoosi /meemit komennolla.\n' +
         '\n/luotunnus - Kirjoitan tietosi muistiin, jotta voin käyttää niitä\n' +
         'myöhemmin. Tarvitsen komennon perään myös painosi ja sukupuolesi' +
@@ -204,7 +204,7 @@ generic.whichOne = function(targetId, userParams) {
 };
 
 // Admin commands
-// 
+//
 
 generic.adminhelp = function(userId) {
     if (utils.userIsAdmin(userId)) {
@@ -362,10 +362,10 @@ var calculateWebcamLightness_ = function() {
             if (err) {
                 return reject(err);
             }
-            
+
             // Notice only every n pixel
             var n = 4;
-            
+
             // Calculate sum of averages
             var sum = 0;
             var x = 0;
@@ -379,7 +379,7 @@ var calculateWebcamLightness_ = function() {
                     ++x;
                 };
             };
-            
+
             // Return whole average
             var threshold = Math.round(sum / x);
             logger.log('debug', 'Webcam lightness value: %d', threshold);
