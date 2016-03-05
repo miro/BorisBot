@@ -63,7 +63,7 @@ generic.webcam = function(userId, chatGroupId, eventIsFromGroup) {
                         })
                         .catch(err=> {
                             logger.log('error', 'Error on threshold checking, sending photo anyway');
-                            botApi.sendPhoto(targetId, cfg.webcamDirectory + 'webcam.jpg');
+                            botApi.sendPhoto({chat_id: targetId, file: (cfg.webcamDirectory + 'webcam.jpg')});
                             resolve();
                         })
                     }

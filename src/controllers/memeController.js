@@ -37,7 +37,7 @@ controller.dispatch = function(userId) {
                         var filename = cfg.memeDirectory + userId + '_' + moment().format('x') + '.jpg'
                         utils.downloadFile(imageUrl, filename)
                         .then(function() {
-                            botApi.sendPhoto(userId, filename);
+                            botApi.sendPhoto({chat_id: userId, file: filename});
                         });
                     }).catch(function(err) {
                         logger.log('error', 'Error when generating meme: %s', err)

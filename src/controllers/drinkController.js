@@ -240,7 +240,7 @@ controller.drawGraph = function(userId, chatGroupId, msgIsFromGroup, userCommand
                     var destinationFilePath = cfg.plotlyDirectory + 'latestGraph.png';
                     utils.downloadFile(plotly.url + '.png', destinationFilePath)
                     .then(function() {
-                        botApi.sendPhoto(targetId, destinationFilePath);
+                        botApi.sendPhoto({chat_id: targetId, file: destinationFilePath});
                         resolve();
                     });
                 });
