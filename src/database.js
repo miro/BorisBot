@@ -169,6 +169,12 @@ db.getUserByName = function(userName) {
     .fetchOne();
 }
 
+db.getUserByLowercaseName = function(userName) {
+    return schema.collections.Users
+    .query(qb => qb.whereRaw('LOWER("userName")=?', userName))
+    .fetchOne();
+}
+
 // ## Expl related stuff
 //
 db.addExpl = function(userId, key, value) {
