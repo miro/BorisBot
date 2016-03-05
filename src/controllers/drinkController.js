@@ -2,7 +2,7 @@ var cfg                 = require('../config');
 var db                  = require('../database');
 var botApi              = require('../botApi');
 var utils               = require('../utils');
-var graph               = require('../graph');
+var graphController     = require('./graphController');
 var userController      = require('./userController');
 var ethanolController   = require('./ethanolController');
 var logger              = cfg.logger;
@@ -262,7 +262,7 @@ controller.drawGraph = function(userId, chatGroupId, msgIsFromGroup, userCommand
                     timestamps.push(moment(model.get('timestamp')));
                 });
 
-                graph.makeHistogram(timestamps, startRangeMoment)
+                graphController.makeHistogram(timestamps, startRangeMoment)
                 .then(function histogramCreatedHandler(plotly) {
                     var destinationFilePath = cfg.plotlyDirectory + 'latestGraph.png';
                     utils.downloadFile(plotly.url + '.png', destinationFilePath)
