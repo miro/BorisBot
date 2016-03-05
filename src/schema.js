@@ -20,7 +20,7 @@ bookshelf.knex.schema.hasTable('drinks').then(function(exists) {
             t.integer('drinker_id')
                 .references('id')
                 .inTable('users')
-                .onDelete('CASCADE');
+                .onDelete('SET NULL');
             t.integer('drinker_telegram_id');
 
             t.integer('messageId');

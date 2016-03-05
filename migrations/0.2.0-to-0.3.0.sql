@@ -1,5 +1,5 @@
 ALTER TABLE drinks ADD COLUMN drinker_id INTEGER;
-ALTER TABLE drinks ADD CONSTRAINT drinks_drinker_id_foreign FOREIGN KEY (drinker_id) REFERENCES users(id) ON DELETE CASCADE;
+ALTER TABLE drinks ADD CONSTRAINT drinks_drinker_id_foreign FOREIGN KEY (drinker_id) REFERENCES users(id) ON DELETE SET NULL;
 
 ALTER TABLE users ADD CONSTRAINT users_telegramId_unique UNIQUE ("telegramId");
 
