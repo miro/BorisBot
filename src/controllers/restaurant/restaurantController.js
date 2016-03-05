@@ -3,11 +3,12 @@ var _       = require('lodash');
 var moment  = require('moment-timezone');
 var emoji   = require('node-emoji')
 
-var parserJuvenes   = require('./restaurant_parsers/juvenes');
-var parserHertsi    = require('./restaurant_parsers/hertsi');
-var parserReaktori  = require('./restaurant_parsers/reaktori');
-var resources       = require('../../resources/restaurants');
-var cfg             = require('../config');
+var parserJuvenes   = require('./parsers/juvenes');
+var parserHertsi    = require('./parsers/hertsi');
+var parserReaktori  = require('./parsers/reaktori');
+var resources       = require('./restaurantsConfig');
+
+var cfg             = require('../../config');
 var logger          = cfg.logger;
 
 moment.tz.setDefault(cfg.botTimezone);
@@ -57,7 +58,7 @@ controller.getAllMenusForToday = function (isFromGroup) {
                 _.unset(validDiners, name);
             }
         });
-        
+
         // Check if every diner is closed
         if (_.isEmpty(validDiners)) {
             resolve('Ei ravintoloita auki.');
@@ -68,11 +69,11 @@ controller.getAllMenusForToday = function (isFromGroup) {
 
         var s = new String();
         _.forEach(validDiners, function(diner, name) {
-            
+
             // Print diner info
             s += '[' + diner.info.name + '](' + diner.info.homepage + ')';
             s +=  _timeToCloseOrOpen(diner) + ': ';
-            
+
             // Print menus if they exists
             if (!_.isEmpty(diner.menu)) {
                 s += style(diner.menu) + '\n';
@@ -86,7 +87,7 @@ controller.getAllMenusForToday = function (isFromGroup) {
 
 controller.updateMenus = function () {
     return new Promise(function(resolve,reject) {
-        
+
         // Delete old menus
         _.forEach(diners, diner => diner.menu = []);
         // Choose only relevant diners
@@ -99,7 +100,7 @@ controller.updateMenus = function () {
                 _.unset(validDiners, name);
             }
         });
-        
+
         // Fetch new ones
         Promise.all(validParsers)
         .then(function(result) {
@@ -145,7 +146,7 @@ var _timeToCloseOrOpen = function(diner) {
     var minutesToOpen = moment(from, 'HH:mm').diff(now, 'minutes');
 
     // Is diner open yet?
-    if (minutesToOpen > 0) { 
+    if (minutesToOpen > 0) {
         s += ' ' + '`(Aukeamiseen aikaa '
 
         // Is there only minutes
@@ -166,7 +167,7 @@ var _timeToCloseOrOpen = function(diner) {
             }
         }
         s += ')`';
-    
+
     } else {
         var minutesToClose = now.diff(moment(to, 'HH:mm'), 'mintues');
         if (minutesToClose > 0 && minutesToClose <= 60) {
@@ -185,13 +186,13 @@ var _splitMealsToRows = function(meals) {
 };
 
 var _isDinerOpen = function(diner) {
-    
+
     if (!_isDinerOpenToday(diner)) {return false;}
-    
+
     var now = moment();
     var info = diner.info.open[now.weekday()];
     var openTo = moment(info.to, 'HH:mm');
-    
+
     // Check if diner have a pause middle of the day
     if (_.isUndefined(info.pause)) {
         return now.isBefore(openTo);

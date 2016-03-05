@@ -12,13 +12,13 @@ var emojiRegex  = require('emoji-regex');
 
 var textController  = require('./controllers/textController');
 var linkController  = require('./controllers/linkController');
-var logger          = require('./config').logger;	
+var logger          = require('./config').logger;
 
 
 module.exports = function(event) {
     return new Promise(function (resolve, reject) {
 
-        logger.log('debug', 'Text "%s" event from user %s', event.rawInput, event.userCallName);
+        logger.log('debug', 'Talkbox "%s" event from user %s', event.rawInput, event.userCallName);
 
         // Add this message to our "history"
         textController.addMessage(event.chatGroupId, event.rawInput);
@@ -26,6 +26,7 @@ module.exports = function(event) {
         // Check for possible links
         linkController.process(event);
 
+        // Always resolve
         resolve();
     });
 }

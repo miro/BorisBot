@@ -3,13 +3,13 @@ var moment      = require('moment-timezone');
 var _           = require('lodash');
 var Promise     = require('bluebird');
 
-var reaktori    = require('../../../resources/restaurants').reaktori;
-var cfg         = require('../../config');
+var reaktori    = require('../restaurantsConfig').reaktori;
+var cfg         = require('../../../config');
 var logger      = cfg.logger;
 
 moment.tz.setDefault(cfg.botTimezone);
 
-module.exports = function() {
+module.exports = function fetchKitchenMenus() {
     return new Promise(function(resolve,reject) {
         var date = moment().format('YYYY-MM-DD');
         var opt = {
@@ -47,7 +47,7 @@ module.exports = function() {
     });
 }
 
-var _parseMenu = function (menu) {
+var _parseMenu = function(menu) {
 
     // we don't want to include all the meals
     var categories = [

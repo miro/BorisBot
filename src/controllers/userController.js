@@ -37,7 +37,7 @@ controller.newUserProcess = function(userId, userName, userFirstName, userLastNa
                 } else if (weight < 40) {
                     botApi.sendMessage({chat_id: userId, text: 'Laitathan oikean painosi, kiitos. ;)'});
                     resolve();
-                    
+
                 } else if (isMale !== 'mies' && isMale !== 'nainen' ) {
                     botApi.sendMessage({chat_id: userId, text: 'Parametri "' + isMale + '" ei ollut "mies" tai "nainen"!'});
                     resolve();
@@ -125,7 +125,11 @@ controller.setGroup = function(userId, chatGroupId, chatGroupTitle, messageIsFro
                 else {
                     db.updatePrimaryGroupIdToUser(userId, chatGroupId, chatGroupTitle)
                     .then(function updateOk() {
-                        botApi.sendMessage({chat_id: chatGroupId, text: '"Sielusi ratsastaa ikuisesti kera ' + chatGroupTitle + '-urhojen"'});
+                        botApi.sendMessage({
+                            chat_id: chatGroupId,
+                            text: '_Sielusi ratsastaa ikuisesti kera ' + chatGroupTitle + '-urhojen_',
+                            parse_mode: 'Markdown'
+                        });
                         resolve();
                     });
                 }

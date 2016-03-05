@@ -33,4 +33,6 @@ utils.userHaveBotTalkRights = function(userId) {
     return cfg.botTalkUsers.indexOf(parseInt(userId, 10)) >= 0;
 };
 
+// TODO: implement "getCommandAndParams" (see what is done multiple times in explController)
+
 module.exports = utils;

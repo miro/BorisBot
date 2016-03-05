@@ -1,6 +1,6 @@
 {
   "name": "borisbot",
-  "version": "5.5.0",
+  "version": "0.3.0",
   "description": "Telegram Bot for spinni.org",
   "main": "server.js",
   "scripts": {
@@ -18,6 +18,9 @@
     "telegram",
     "bot"
   ],
+  "engines": {
+    "node": "5.5.0"
+  },
   "author": "Miro Nieminen <miro.nieminen@gmail.com>",
   "contributors": [
     "Antti Kivimäki"

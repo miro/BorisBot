@@ -26,7 +26,7 @@ module.exports = function parseTelegramEvent(msg) {
 
     event.rawInput = msg.text;
     event.eventId = msg.message_id;
-    event.isCommand = (event.rawInput.charAt(0) !== '/' && !emojiRegex().test(event.rawInput.split(' ')[0]) && event.rawInput.charAt(0) !== '!');
+    event.isCommand = isEventCommand(event);
 
     // Parse metadata from the message
     event.userId = msg.from.id;
@@ -34,6 +34,7 @@ module.exports = function parseTelegramEvent(msg) {
     event.userFirstName = msg.from.first_name;
     event.userLastName = msg.from.last_name;
     event.userCallName = _.isUndefined(event.userName) ? userFirstName : ('@' + event.userName); // this can be used on messages
+    event.replyToMessage = msg.reply_to_message;
 
     event.isFromGroup = !_.isUndefined(msg.chat.title);
     event.chatGroupId = event.isFromGroup ? msg.chat.id : null;
@@ -57,14 +58,41 @@ module.exports = function parseTelegramEvent(msg) {
     event.targetId = (event.isFromGroup) ? event.chatGroupId : event.userId;
 
     // # -> Dispatch the event based on its type
-    // TODO: do we really want to handle replies in this way?
-    if (msg.reply_to_message) {
+    var parsingPromises = [];
+
+    // Was this event a reply to something?
+    if (event.replyToMessage) {
         logger.log('debug', 'Got reply to previous message, passing handling to replys-module');
-        replys.eventEmitter.emit(msg.reply_to_message.message_id, event.rawInput);
-        return Promise.resolve();
-    } else if (event.isCommand) {
-        return talkbox(event);
-    } else {
-        return commander(event);
+        replys.eventEmitter.emit(event.replyToMessage.message_id, event.rawInput);
     }
+
+    // Was this event a command-like event=?
+    if (event.isCommand) {
+        // this is a command -> send to commander
+        parsingPromises.push(commander(event));
+    }
+
+    // Always send the events to talkbox
+    parsingPromises.push(talkbox(event));
+
+
+    return Promise.all(parsingPromises);
 };
+
+function isEventCommand(event) {
+    // Does the message start with some specific character?
+    switch (event.rawInput.charAt(0)) {
+        case '/':
+        case '!':
+        case '?':
+            return true;
+    }
+
+    // Messages starting with emoji (yes, these are counted as command)
+    if (emojiRegex().test(event.rawInput.split(' ')[0])) {
+        return true;
+    }
+
+    // If we get here, this was not a command
+    return false;
+}

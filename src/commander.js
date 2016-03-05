@@ -23,7 +23,7 @@ var drinkController         = require('./controllers/drinkController');
 var ethanolController       = require('./controllers/ethanolController');
 var memeController          = require('./controllers/memeController');
 var textController          = require('./controllers/textController');
-var restaurantController    = require('./controllers/restaurantController');
+var restaurantController    = require('./controllers/restaurant/restaurantController');
 var explController          = require('./controllers/explController');
 
 module.exports = function (event) {
@@ -37,12 +37,13 @@ module.exports = function (event) {
             // !-commands
             //
             case '!add':
-                explController.addExpl(event.userId, event.targetId, event.userCommandParams)
+                explController.addExpl(event)
                 .then(resolve);
             break;
 
+            case '??':
             case '!expl':
-                explController.getExpl(event.targetId, event.userCommandParams)
+                explController.getExpl(event)
                 .then(resolve);
             break;
 
@@ -146,6 +147,7 @@ module.exports = function (event) {
             break;
 
             case '/kumpi':
+            case '/valitse':
                 generic.whichOne(event.targetId, event.userCommandParams);
                 resolve();
             break;

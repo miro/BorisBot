@@ -5,6 +5,9 @@ src/www/build/
 logs
 *.log
 
+# Ignore the resources-folder
+resources/
+
 # Runtime data
 pids
 *.pid

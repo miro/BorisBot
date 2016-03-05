@@ -2,7 +2,7 @@ var cfg                 = require('../config');
 var db                  = require('../database');
 var botApi              = require('../botApi');
 var utils               = require('../utils');
-var graph               = require('../graph');
+var graphController     = require('./graphController');
 var userController      = require('./userController');
 var ethanolController   = require('./ethanolController');
 var logger              = cfg.logger;
@@ -19,6 +19,7 @@ var controller = {};
 
 // TODO: announce when % 100 breaks in group
 
+const ALCOHOL_DAY_TRESHOLD_HOUR = 9;
 
 controller.showDrinkKeyboard = function(userId, eventIsFromGroup) {
     var keyboard = [[
@@ -61,22 +62,22 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
         db.getUserById(userId).then(function(user) {
             var primaryGroupId = (user && user.get('primaryGroupId')) ? user.get('primaryGroupId') : null;
 
-            db.registerDrink(messageId, primaryGroupId, userId, drinkType, drinkValue)
+            db.registerDrink(messageId, primaryGroupId, userId, drinkType, drinkValue, user)
             .then(function() {
-                db.getDrinksSinceTimestamp(_getTresholdMoment(9), { chatGroupId: primaryGroupId })
+                db.getDrinksSinceTimestamp(_getTresholdMoment(ALCOHOL_DAY_TRESHOLD_HOUR), { chatGroupId: primaryGroupId })
                 .then(function createReturnMessageFromCollection(drinksCollection) {
 
                     var returnMessage = '';
-                    
+
                     // Drink had alcohol
                     if (drinkValue > 0) {
-                
+
                         var alcoholDrinks = _.filter(drinksCollection.models, function(model) {
                             return model.get('drinkValue') > 0;
                         });
                         var drinksToday = alcoholDrinks.length;
                         var drinksTodayForThisUser = _.filter(alcoholDrinks, function(model) {
-                            return model.attributes.creatorId === userId;
+                            return model.attributes.drinker_telegram_id === userId;
                         }).length;
 
                         // # Form the message
@@ -94,7 +95,7 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
                                 returnMessage += ' promilletasostasi!)\n\n';
                             }
                         }
-                    
+
                         // Is there a group title?
                         if (_.isNull(primaryGroupId)) {
                             returnMessage += ' Se olikin jo ' + drinksTodayForThisUser + '. tälle päivälle.\n';
@@ -130,12 +131,16 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
                         }
 
                         resolve(returnMessage);
-                        
+
                     // Drink was coffee or tea
                     } else if (drinkType === 'coffee' || drinkType === 'tea') {
                         var drinkTypeMsg = (drinkType === 'coffee') ? 'kahvikupit' : 'teekupposet';
                         var msg = 'Tänään nauttimasi ' + drinkTypeMsg + ':\n';
-                        db.getCount('drinks', {creatorId: userId, drinkType: drinkType}, _getTresholdMoment(6))
+
+                        db.getCount('drinks', {
+                            drinker_telegram_id: userId,
+                            drinkType: drinkType
+                        }, _getTresholdMoment(6))
                         .then(function(count) {
                             _.times(count, function() {
                                 msg += emoji.get(':' + drinkType + ':');
@@ -154,7 +159,7 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
                                 resolve(msg);
                             }
                         });
-                          
+
                     // Drink was something non-alcohol and unspecified
                     } else {
                         logger.log('info', 'Unknown drinkType: ', drinkType);
@@ -174,7 +179,7 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
 controller.getPersonalDrinkLog = function(userId) {
     return new Promise(function (resolve, reject) {
 
-        db.getDrinksSinceTimestamp(moment().subtract(2, 'day'), { creatorId: userId })
+        db.getDrinksSinceTimestamp(moment().subtract(2, 'day'), { drinker_telegram_id: userId })
         .then(function(collection) {
             var message = 'Juomasi viimeisen 48h ajalta:\n';
 
@@ -202,6 +207,28 @@ controller.getPersonalDrinkLog = function(userId) {
     });
 };
 
+
+controller.getDailyAlcoholLogForEachGroup = function() {
+    // TODO: sort the list
+
+    // get not-the-previous-treshold but the treshold-before-that
+    var treshold = _getTresholdMoment(ALCOHOL_DAY_TRESHOLD_HOUR).subtract(1, 'day');
+
+    return db.getDrinksSinceTimestamp(treshold)
+    .then(collection => _.chain(collection.serialize())
+        .filter(item => item.drinkValue > 0)
+        .filter(item => _.get(item, 'drinker.id'))
+        .groupBy(item => item.chatGroupId)
+        .reduce((result, groupItems, key) => {
+            result[key] = _.countBy(groupItems, item => {
+                return item.drinker.userName ? item.drinker.userName : item.drinker.firstName;
+            });
+            return result;
+        }, {})
+        .value());
+};
+
+
 controller.drawGraph = function(userId, chatGroupId, msgIsFromGroup, userCommandParams) {
     return new Promise(function(resolve, reject) {
 
@@ -213,7 +240,7 @@ controller.drawGraph = function(userId, chatGroupId, msgIsFromGroup, userCommand
             targetId = chatGroupId;
         }
         else {
-            whereObject.creatorId = userId;
+            whereObject.drinker_telegram_id = userId;
             targetId = userId;
         }
 
@@ -235,12 +262,12 @@ controller.drawGraph = function(userId, chatGroupId, msgIsFromGroup, userCommand
                     timestamps.push(moment(model.get('timestamp')));
                 });
 
-                graph.makeHistogram(timestamps, startRangeMoment)
+                graphController.makeHistogram(timestamps, startRangeMoment)
                 .then(function histogramCreatedHandler(plotly) {
                     var destinationFilePath = cfg.plotlyDirectory + 'latestGraph.png';
                     utils.downloadFile(plotly.url + '.png', destinationFilePath)
                     .then(function() {
-                        botApi.sendPhoto(targetId, destinationFilePath);
+                        botApi.sendPhoto({chat_id: targetId, file: destinationFilePath});
                         resolve();
                     });
                 });
@@ -252,7 +279,7 @@ controller.drawGraph = function(userId, chatGroupId, msgIsFromGroup, userCommand
 
 controller.getDrinksAmount = function(userId, chatGroupId, chatGroupTitle, targetIsGroup, alcoholic) {
     return new Promise(function (resolve, reject) {
-        
+
         var drinkType = (alcoholic) ? 'alkoholillista juomaa' : 'alkoholitonta juomaa';
         if (targetIsGroup) {
 
@@ -290,13 +317,13 @@ controller.getGroupAlcoholStatusReport = function(chatGroupId) {
             if (drinkCollection.models.length === 0) {
                 resolve('Ei humaltuneita käyttäjiä.');
             }
-            
+
             var alcoholDrinks = _.filter(drinkCollection.models, function(model) {
                 return model.get('drinkValue') > 0;
             });
-            
+
             var drinksByUser = _.groupBy(alcoholDrinks, function(model) {
-                return model.get('creatorId');
+                return model.get('drinker_telegram_id');
             });
 
             // Create DB fetch for each of these users
@@ -385,14 +412,14 @@ controller.getGroupHotBeveragelStatusReport = function(chatGroupId) {
         var log = 'Ryhmäsi hörppimät kuumat kupposet:\n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n';
         db.getDrinksSinceTimestamp(_getTresholdMoment(6), {drinkValue: 0})
         .then(function fetchOk(collection) {
-            
+
             // Filter coffees and teas
             var beveragesByUser = _.filter(collection.models, function(model) {
                 return model.get('drinkType') === 'coffee' || model.get('drinkType') === 'tea';
             });
-            
+
             beveragesByUser = _.groupBy(collection.models, function(model) {
-                return model.get('creatorId');
+                return model.get('drinker_telegram_id');
             });
             var userAccountPromises = [];
             _.each(beveragesByUser, function(coffee, userId) {
