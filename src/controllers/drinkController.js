@@ -135,7 +135,11 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
                     } else if (drinkType === 'coffee' || drinkType === 'tea') {
                         var drinkTypeMsg = (drinkType === 'coffee') ? 'kahvikupit' : 'teekupposet';
                         var msg = 'Tänään nauttimasi ' + drinkTypeMsg + ':\n';
-                        db.getCount('drinks', {drinker_telegram_id: userId, drinkType: drinkType}, _getTresholdMoment(6))
+
+                        db.getCount('drinks', {
+                            drinker_telegram_id: userId,
+                            drinkType: drinkType
+                        }, _getTresholdMoment(6))
                         .then(function(count) {
                             _.times(count, function() {
                                 msg += emoji.get(':' + drinkType + ':');
