@@ -5,13 +5,15 @@ var _               = require('lodash');
 var CronJob         = require('cron').CronJob;
 
 var botApi  = require('./botApi');
+var brain  = require('./brain');
 var cfg     = require('./config');
 var logger  = cfg.logger;
 var generic = require('./generic');
 
 var drinkController         = require('./controllers/drinkController');
 var textController          = require('./controllers/textController');
-var restaurantController    = require('./controllers/restaurantController');
+var restaurantController    = require('./controllers/restaurant/restaurantController');
+var memeController          = require('./controllers/memeController');
 
 // set default timezone to bot timezone
 moment.tz.setDefault(cfg.botTimezone);
@@ -62,6 +64,16 @@ scheduler.addJob({
     timeZone: cfg.botTimezone
 });
 
+// "Good morning & drink log"
+scheduler.addJob({
+    cronTime: '03 09 * * *',
+    timeZone: cfg.botTimezone,
+    onTick: function() {
+        drinkController.getDailyAlcoholLogForEachGroup()
+        .then(logs => brain.announceDrinkLogsToGroups(logs));
+    }
+})
+
 // "Check clubroom's lightness value on weekdays"
 scheduler.addJob({
     cronTime: '00 */5 0-8,15-23 * * 1-5',
@@ -89,12 +101,20 @@ scheduler.addJob({
     timeZone: cfg.botTimeZone
 });
 
-// "Update menus"
+// "Update restaurant menus"
 scheduler.addJob({
     cronTime: '00 30 0,15 * * *',
     onTick: function updateMenus() {
-        restaurantController.updateMenus()
-        .then(() => logger.log('debug', 'Menus updated'));
+        restaurantController.updateMenus();
+    },
+    timeZone: cfg.botTimeZone
+})
+
+// "Update memes every week"
+scheduler.addJob({
+    cronTime: '* * * 1 * *',
+    onTick: function updateMemes() {
+        memeController.getMemes();
     },
     timeZone: cfg.botTimeZone
 })

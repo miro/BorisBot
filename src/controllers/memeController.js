@@ -1,4 +1,4 @@
-﻿var _       = require('lodash');
+var _       = require('lodash');
 var Promise = require('bluebird');
 var request = require('request');
 var moment  = require('moment-timezone');
@@ -9,23 +9,26 @@ var utils   = require('../utils');
 var botApi  = require('../botApi');
 var logger  = cfg.logger;
 
+// TODO: the need to reply-to-the-messages in private conversation is frustrating to users.
+// Make this work while "naturally" chatting with the bot
+
 // Set default timezone to bot timezone
 moment.tz.setDefault(cfg.botTimezone);
 
 var controller = {};
 
 controller.dispatch = function(userId) {
-    
+
     // Ask which meme user wants to use
     replys.sendMessageAndListenForReply(userId, 'Mitä meemiä haluat käyttää?')
     .then(function(memeType) {
         var memeObject = _getMemeObject(_.startCase(memeType));
         if (!_.isNull(memeObject)) {
-            
+
             // Ask content of the top text
             replys.sendMessageAndListenForReply(userId, 'Mitä laitetaan ylätekstiin?')
             .then(function(upperText) {
-                
+
                 // Ask content of the bottom text
                 replys.sendMessageAndListenForReply(userId, 'Entäs alas?')
                 .then(function(bottomText) {
@@ -34,7 +37,7 @@ controller.dispatch = function(userId) {
                         var filename = cfg.memeDirectory + userId + '_' + moment().format('x') + '.jpg'
                         utils.downloadFile(imageUrl, filename)
                         .then(function() {
-                            botApi.sendPhoto(userId, filename);
+                            botApi.sendPhoto({chat_id: userId, file: filename});
                         });
                     }).catch(function(err) {
                         logger.log('error', 'Error when generating meme: %s', err)
@@ -47,7 +50,7 @@ controller.dispatch = function(userId) {
             botApi.sendMessage({user_id: userId, text: 'Meemiä ' + _.startCase(memeType) + ' ei löytynyt! Löydät tuetut meemit komennolla /meemit'});
         }
     });
-    
+
     // .sendMessageAndListenForReply -function may return reject
     // if user hasn't replied to the question.
     Promise.onPossiblyUnhandledRejection( err => {
@@ -67,7 +70,13 @@ controller.sendSupportedMemes = function(targetId) {
 // Get memes which ImgFlip.com supports
 controller.getMemes = function() {
     request('https://api.imgflip.com/get_memes', function(error,res,body) {
-        var response = JSON.parse(body);
+        try {
+            var response = JSON.parse(body);
+        }
+        catch (error) {
+            logger.error('Something fishy coming from imgflip');
+        }
+
         if (response['success']) {
             controller.supportedMemes = _.sortBy(response['data']['memes'], function(meme) {
                 return meme.name;
@@ -97,7 +106,7 @@ var _generateMeme = function(templateId, topText, bottomText) {
         data.password = cfg.imgFlipPassword;
         data.text0 = topText;
         data.text1 = bottomText;
-        
+
         request.post('https://api.imgflip.com/caption_image', {form: data}, function(err, httpResponse, body) {
             if (err) {
                 reject(err);

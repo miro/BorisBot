@@ -123,23 +123,23 @@ botApi.sendPhoto = function (options) {
 };
 
 //url [string] REQUIRED
-//certificate [file_location] REQUIRED
+//certificate [file_location] OPTIONAL
 botApi.setWebhook = function (options) {
     return new Promise(function(resolve,reject) {
         // Delete old webhook
-        request.post(cfg.tgApiUrl + '/setWebhook', { form: {url: ''}}, function (error, response, body) {
-            if (error) {
-                logger.log('error', 'Telegram API unreachable: ', error);
+        request.post(cfg.tgApiUrl + '/setWebhook', { form: {url: ''}}, function (err, response, body) {
+            if (err) {
+                logger.log('error', 'Telegram API unreachable: ', err);
             } else {
                 logger.log('debug', 'botApi: previous webhook deleted, response: ' + body);
-                
+
                 // Subscribe new webhook
-                var fromData = '';
-                if (options.certificate) {
+                var formData = '';
+                if (!_.isEmpty(options.certificate)) {
                     formData = _formatSendData('certificate', options.certificate).formData;
                 }
-                request.post(cfg.tgApiUrl + '/setWebhook', {qs: options, formData: formData}, function (error, response, body) {
-                    if (!error && JSON.parse(body).ok) {
+                request.post(cfg.tgApiUrl + '/setWebhook', {qs: options, formData: formData}, function (err, response, body) {
+                    if (!err && JSON.parse(body).ok) {
                         logger.log('info', 'botApi: webhook updated successfully!')
                         logger.log('debug', 'botApi: webhook response' + body);
                         resolve();
@@ -159,16 +159,16 @@ botApi.setWebhook = function (options) {
 //file_id [string] REQUIRED
 botApi.getFile = function(options) {
     return new Promise(function(resolve,reject) {
-        request.post(cfg.tgApiUrl + '/setWebhook', {qs: options}, function(error, response,body) {
-            if (!error && JSON.parse(body).ok) {
+        request.post(cfg.tgApiUrl + '/getFile', {qs: options}, function(err, response, body) {
+            if (!err && JSON.parse(body).ok) {
                 resolve(JSON.parse(body).result);
             } else {
                 var errmsg = (err) ? ('Telegram API unreachable: ' + err) :
-                    ('botApi: error when setting webhook: ' + JSON.parse(body).description);
+                    ('botApi: error when getting file: ' + JSON.parse(body).description);
                 logger.log('error', errmsg);
                 reject(errmsg);
             }
-        });        
+        });
     });
 }
 
@@ -207,13 +207,13 @@ var _formatSendData = function (type, data) {
         formData: formData,
         file: fileId
     };
-}; 
+};
 
 var _sendFile = function (type, options) {
     return new Promise(function(resolve,reject) {
         var content = _formatSendData(type, options.file);
         options[type] = content.file;
-        
+
         request.post(cfg.tgApiUrl + '/send' + _.camelCase(type), { qs: options, formData: content.formData }, function(err, httpResponse, body) {
             if (!err && JSON.parse(body).ok) {
                 logger.log('info', 'botApi: sent ' + type + ' to ' + options.chat_id);
@@ -224,7 +224,7 @@ var _sendFile = function (type, options) {
                 logger.log('error', errmsg);
                 reject(errmsg)
             }
-        });        
+        });
     })
 };
 

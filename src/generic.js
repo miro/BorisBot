@@ -63,10 +63,10 @@ generic.webcam = function(userId, chatGroupId, eventIsFromGroup) {
                         })
                         .catch(err=> {
                             logger.log('error', 'Error on threshold checking, sending photo anyway');
-                            botApi.sendPhoto(targetId, cfg.webcamDirectory + 'webcam.jpg');
+                            botApi.sendPhoto({chat_id: targetId, file: (cfg.webcamDirectory + 'webcam.jpg')});
                             resolve();
                         })
-                    }  
+                    }
                 });
             }
         });
@@ -79,13 +79,16 @@ generic.checkWebcamLightness = function() {
             logger.log('warn', 'Unable to calculate clubroom lightness, webcamURL is undefined');
             return resolve();
         }
+        // Don't use this feature if environment is development
+        if (cfg.env === 'development') return resolve();
+
         utils.downloadFile(cfg.webcamURL, cfg.webcamDirectory + 'webcam.jpg')
         .then(function() {
             calculateWebcamLightness_()
             .then(threshold => {
-                
+
                 if (threshold > 80) {   // TODO: Explore more specific thresholds
-                
+
                     // Lights on, check if they were already on
                     if (!generic.webcamLightsOn) {
                         logger.log('info', 'Webcam detected lights at clubroom, threshold: ' + threshold);
@@ -95,11 +98,11 @@ generic.checkWebcamLightness = function() {
                     }
                     resolve();
                 } else {
-                        
+
                     // Lights off, reset status
                     generic.webcamLightsOn = false;
                     resolve();
-                }   
+                }
             })
             .catch(err => logger.log('error', 'Error when calculating webcam pixels: %s', err));
         });
@@ -126,14 +129,14 @@ generic.help = function(userId) {
         'Minulta voit myös kysyä seuraavia toimintoja:\n' +
         '\n/graafi - Tutkin alkoholinkäyttöäsi ja luon niistä kauniin kuvaajan. ' +
         'Jos annat komennon perään positiivisen numeron, rajaan kuvaajan ' +
-        'leveyden olemaan kyseisen numeron verran päiviä.\n' + 
+        'leveyden olemaan kyseisen numeron verran päiviä.\n' +
         '\n/kahvi - Kirjaan nauttimasi kupillisen tietokantaani.\n' +
         '\n/kalja - Kirjaan nauttimasi ohrapirtelön tietokantaani.\n' +
         '\n/kippis - Kirjaan kilistelemäsi juoman ylös ja käytän sitä myöhemmin erilaisiin toimintoihini.\n' +
         '\n/kahvit - Printaan sinulle ryhmäsi tämänhetkisen kahvitilanteen.\n' +
-        '\n/kaljoja - Näytän kaikki nautitut alkoholilliset juomat.\n' + 
+        '\n/kaljoja - Näytän kaikki nautitut alkoholilliset juomat.\n' +
         '\n/kumpi `<vaihtoehto 1>` `<vaihtoehto 2>` - Päätän tärkeät valinnat puolestasi.\n' +
-        '\n/luomeemi - Luon haluamasi meemin haluamillasi teksteillä. ' + 
+        '\n/luomeemi - Luon haluamasi meemin haluamillasi teksteillä. ' +
         'Tuetut meemit saat tietoosi /meemit komennolla.\n' +
         '\n/luotunnus - Kirjoitan tietosi muistiin, jotta voin käyttää niitä\n' +
         'myöhemmin. Tarvitsen komennon perään myös painosi ja sukupuolesi' +
@@ -161,29 +164,47 @@ generic.help = function(userId) {
 };
 
 generic.whichOne = function(targetId, userParams) {
-    var options = userParams.split(' ');
-    if (options.length != 2) {
-        botApi.sendMessage({chat_id: targetId, text: 'Anna kaksi parametria!'});
-        return;
+    const SEPARATION_KEYWORD = 'vai';
+
+    var paramParts = userParams.split(' ');
+
+    var alternatives = [];
+    if (paramParts.length === 2) {
+        // there were only two parts -> pick from them
+        alternatives = alternatives.concat(paramParts);
+    } else if (userParams.split(SEPARATION_KEYWORD).length > 1) {
+        alternatives = alternatives.concat(userParams.split(SEPARATION_KEYWORD));
     } else {
-        var text;
-        var dice = Math.floor(Math.random() * 100);
-        if (dice === 99) {
-            text = 'Molemmat!';
-        } else if (dice === 98) {
-            text = 'Ei kumpikaan!';
-        } else if (dice < 48) {
-            text = options[0];
-        } else {
-            text = options[1];
-        }
-        botApi.sendMessage({chat_id: targetId, text: text});
+        alternatives = alternatives.concat(userParams.split(' '));
+    }
+
+    // Did we get something to choose from?
+    if (alternatives.length <= 1) {
+        botApi.sendMessage({
+            chat_id: targetId,
+            text: 'Anna ainakin kaksi asiaa mistä arpoa!'
+        });
+
         return;
     }
+
+    // -> all good, pick a winner!
+
+    var outcome;
+    var dice = Math.floor(Math.random() * 100);
+    if (dice === 99) {
+        outcome = 'Molemmat!';
+    } else if (dice === 98) {
+        outcome = 'Ei kumpikaan!';
+    } else {
+        outcome = _.sample(alternatives);
+    }
+
+    botApi.sendMessage({ chat_id: targetId, text: outcome });
 };
 
 // Admin commands
-// 
+//
 
 generic.adminhelp = function(userId) {
     if (utils.userIsAdmin(userId)) {
@@ -341,10 +362,10 @@ var calculateWebcamLightness_ = function() {
             if (err) {
                 return reject(err);
             }
-            
+
             // Notice only every n pixel
             var n = 4;
-            
+
             // Calculate sum of averages
             var sum = 0;
             var x = 0;
@@ -358,7 +379,7 @@ var calculateWebcamLightness_ = function() {
                     ++x;
                 };
             };
-            
+
             // Return whole average
             var threshold = Math.round(sum / x);
             logger.log('debug', 'Webcam lightness value: %d', threshold);

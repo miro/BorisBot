@@ -1,14 +1,15 @@
-var config  = require('./config');
-var db      = require('./database');
+var config  = require('../config');
+var db      = require('../database');
 
 var Promise = require('bluebird');
 var plotly  = require('plotly')(config.plotlyUserName, config.plotlyApiKey);
 var _       = require('lodash');
 var moment  = require('moment-timezone');
+var logger  = config.logger;
 
-var graph = {};
+var controller = {};
 
-graph.makeHistogram = function(momentObjects, startTimestamp) {
+controller.makeHistogram = function(momentObjects, startTimestamp) {
     return new Promise(function(resolve, reject) {
         var dates = [];
         _.each(momentObjects, function(date) {
@@ -70,5 +71,8 @@ graph.makeHistogram = function(momentObjects, startTimestamp) {
     });
 };
 
+controller.makePieChart = function() {
 
-module.exports = graph;
+};
+
+module.exports = controller;

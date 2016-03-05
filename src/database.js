@@ -16,14 +16,16 @@ var db = {};
 //
 
 // Add new drink
-db.registerDrink = function(messageId, chatGroupId, drinker, drinkType, drinkValue) {
+db.registerDrink = function(messageId, chatGroupId, drinker, drinkType, drinkValue, userModel) {
 
     var drinkVal = (!_.isNull(drinkValue)) ? drinkValue : 10;
+    const userId = userModel ? userModel.get('id') : null;
 
     var drink = new schema.models.Drink({
         messageId: messageId,
         chatGroupId: chatGroupId,
-        creatorId: drinker,
+        drinker_telegram_id: drinker,
+        drinker_id: userId,
         drinkType: drinkType,
         drinkValue: drinkVal
     })
@@ -42,7 +44,7 @@ db.getDrinksSinceTimestamp = function(minTimestamp, whereObject) {
             qb.andWhere(whereObject);
         }
     })
-    .fetch();
+    .fetch({ withRelated: ['drinker'] });
 };
 
 
@@ -83,7 +85,7 @@ db.getOldest = function(tableName, whereObject) {
 db.getLastDrinkBeforeTimestamp = function(userId, timestampMoment) {
     return schema.collections.Drinks
     .query(function(qb) {
-        qb.where({ creatorId: userId })
+        qb.where({ drinker_telegram_id: userId })
         .andWhere('timestamp', '<', timestampMoment.toJSON());
     })
     .fetchOne();
@@ -92,7 +94,7 @@ db.getLastDrinkBeforeTimestamp = function(userId, timestampMoment) {
 db.getNextDrinkAfterTimestamp = function(userId, timestampMoment) {
     return schema.collections.Drinks
     .query(function(qb) {
-        qb.where({ creatorId: userId })
+        qb.where({ drinker_telegram_id: userId })
         .andWhere('timestamp', '>', timestampMoment.toJSON());
     })
     .fetchOne();
@@ -102,7 +104,7 @@ db.getNextDrinkAfterTimestamp = function(userId, timestampMoment) {
 db.getDrinksSinceTimestampSortedForUser = function(userId, timestampMoment) {
     return schema.bookshelf
     .knex('drinks')
-    .where( {creatorId: userId} )
+    .where( {drinker_telegram_id: userId} )
     .andWhere('timestamp','>', timestampMoment.toJSON())
     .orderBy('timestamp', 'asc');
 };
@@ -157,7 +159,6 @@ db.getUsersByPrimaryGroupId = function(chatGroupId) {
 };
 
 db.getUserById = function(userId) {
-
     return schema.collections.Users
     .query(qb => qb.where({ telegramId: userId }))
     .fetchOne();
@@ -171,17 +172,6 @@ db.getUserByName = function(userName) {
 
 // ## Expl related stuff
 //
-db.addExpl = function(userId, key, value) {
-
-    var expl = new schema.models.Expl({
-        creatorId: userId,
-        key: key,
-        value: value
-    })
-    .save()
-
-    return expl;
-};
 
 db.fetchExpl = function(key) {
     return schema.collections.Expls

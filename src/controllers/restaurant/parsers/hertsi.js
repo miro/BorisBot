@@ -3,13 +3,13 @@ var moment      = require('moment-timezone');
 var Promise     = require('bluebird');
 var _           = require('lodash');
 
-var hertsi      = require('../../../resources/restaurants').hertsi;
-var cfg         = require('../../config');
+var hertsi      = require('../restaurantsConfig').hertsi;
+var cfg         = require('../../../config');
 var logger      = cfg.logger;
 
 moment.tz.setDefault(cfg.botTimezone);
 
-module.exports = function() {
+module.exports = function fetchKitchenMenus() {
     return new Promise(function(resolve,reject) {
         // makes an array of hertsi's meals of current date
         var date = moment().format('YYYY/MM/DD');
