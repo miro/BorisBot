@@ -15,8 +15,13 @@ bookshelf.knex.schema.hasTable('drinks').then(function(exists) {
         return bookshelf.knex.schema.createTable('drinks', function(t) {
             t.increments('id').primary();
             t.timestamp('timestamp').defaultTo(knex.raw('now()'));
-            t.integer('creatorId'); // later: reference to user-table?
             t.integer('chatGroupId');
+
+            t.integer('drinker_id')
+                .references('id')
+                .inTable('users')
+                .onDelete('SET NULL');
+            t.integer('drinker_telegram_id');
 
             t.integer('messageId');
 
@@ -52,7 +57,7 @@ bookshelf.knex.schema.hasTable('users').then(function(exists) {
         return bookshelf.knex.schema.createTable('users', function(t) {
             t.increments('id').primary();
 
-            t.integer('telegramId');
+            t.integer('telegramId').unique();
             t.string('userName', 100).unique();
             t.string('firstName', 100);
             t.string('lastName', 100);
@@ -112,14 +117,17 @@ var models = {};
 models.Group = bookshelf.Model.extend({
     tableName: 'groups'
 });
+models.User = bookshelf.Model.extend({
+    tableName: 'users'
+});
 models.Drink = bookshelf.Model.extend({
-    tableName: 'drinks'
+    tableName: 'drinks',
+    drinker: function() {
+        return this.belongsTo(models.User, 'drinker_id');
+    }
 });
 models.Expl = bookshelf.Model.extend({
     tableName: 'expls'
-});
-models.User = bookshelf.Model.extend({
-    tableName: 'users'
 });
 models.Link = bookshelf.Model.extend({
     tableName: 'links',
@@ -130,6 +138,7 @@ models.Link = bookshelf.Model.extend({
         return this.belongsTo(models.User, 'linker_id');
     }
 });
+
 
 
 var collections = {};
