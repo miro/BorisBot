@@ -7,6 +7,7 @@ var del           = require('del');
 const STYLES_DIRECTORY = './src/www/styles/'
 const BUILD_DIRECTORY = './src/www/build';
 
+const LIVERELOAD_PORT = process.env.BORISBOT_GULP_LIVERELOAD_PORT || 35729;
 
 // # Tasks
 
@@ -26,7 +27,7 @@ gulp.task('buildCss', function() {
 
 // Keep watching styles
 gulp.task('watchStyles', ['buildCss'], function() {
-  livereload.listen();
+  livereload.listen({port: LIVERELOAD_PORT});
   gulp.watch(STYLES_DIRECTORY + '**/*.scss', ['buildCss']);
 });
 

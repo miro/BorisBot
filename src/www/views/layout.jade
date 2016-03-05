@@ -1,15 +1,17 @@
-- var baseUrl = process.env.BORISBOT_BASE_URL || '/';
+- var BASE_URL = process.env.BORISBOT_BASE_URL || '/';
+- var LIVERELOAD_PORT = process.env.BORISBOT_GULP_LIVERELOAD_PORT || 35729;
+- var LIVERELOAD_SCRIPT = 'http://localhost:' + LIVERELOAD_PORT + '/livereload.js?snipver=1';
 
 doctype html
 html
     head
-        base(href=baseUrl)
+        base(href=BASE_URL)
         link(rel='stylesheet', href='build/main.css')
 
         meta(charset='utf-8')
         meta(name='viewport', content='width=device-width, initial-scale=1')
 
-        script(src='http://localhost:35729/livereload.js?snipver=1')
+        script(src=LIVERELOAD_SCRIPT)
 
     block title
         title Borisbot
