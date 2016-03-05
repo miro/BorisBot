@@ -5,6 +5,7 @@ var _               = require('lodash');
 var CronJob         = require('cron').CronJob;
 
 var botApi  = require('./botApi');
+var brain  = require('./brain');
 var cfg     = require('./config');
 var logger  = cfg.logger;
 var generic = require('./generic');
@@ -62,6 +63,16 @@ scheduler.addJob({
     },
     timeZone: cfg.botTimezone
 });
+
+// "Good morning & drink log"
+scheduler.addJob({
+    cronTime: '03 09 * * *',
+    timeZone: cfg.botTimezone,
+    onTick: function() {
+        drinkController.getDailyAlcoholLogForEachGroup()
+        .then(logs => brain.announceDrinkLogsToGroups(logs));
+    }
+})
 
 // "Check clubroom's lightness value on weekdays"
 scheduler.addJob({
