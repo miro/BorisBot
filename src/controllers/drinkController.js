@@ -19,6 +19,7 @@ var controller = {};
 
 // TODO: announce when % 100 breaks in group
 
+const ALCOHOL_DAY_TRESHOLD_HOUR = 9;
 
 controller.showDrinkKeyboard = function(userId, eventIsFromGroup) {
     var keyboard = [[
@@ -63,7 +64,7 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
 
             db.registerDrink(messageId, primaryGroupId, userId, drinkType, drinkValue, user)
             .then(function() {
-                db.getDrinksSinceTimestamp(_getTresholdMoment(9), { chatGroupId: primaryGroupId })
+                db.getDrinksSinceTimestamp(_getTresholdMoment(ALCOHOL_DAY_TRESHOLD_HOUR), { chatGroupId: primaryGroupId })
                 .then(function createReturnMessageFromCollection(drinksCollection) {
 
                     var returnMessage = '';
@@ -205,6 +206,28 @@ controller.getPersonalDrinkLog = function(userId) {
         });
     });
 };
+
+
+controller.getDailyAlcoholLogForEachGroup = function() {
+    // TODO: sort the list
+
+    // get not-the-previous-treshold but the treshold-before-that
+    var treshold = _getTresholdMoment(ALCOHOL_DAY_TRESHOLD_HOUR).subtract(1, 'day');
+
+    return db.getDrinksSinceTimestamp(treshold)
+    .then(collection => _.chain(collection.serialize())
+        .filter(item => item.drinkValue > 0)
+        .filter(item => _.get(item, 'drinker.id'))
+        .groupBy(item => item.chatGroupId)
+        .reduce((result, groupItems, key) => {
+            result[key] = _.countBy(groupItems, item => {
+                return item.drinker.userName ? item.drinker.userName : item.drinker.firstName;
+            });
+            return result;
+        }, {})
+        .value());
+};
+
 
 controller.drawGraph = function(userId, chatGroupId, msgIsFromGroup, userCommandParams) {
     return new Promise(function(resolve, reject) {
