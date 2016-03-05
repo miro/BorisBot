@@ -61,7 +61,7 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
         db.getUserById(userId).then(function(user) {
             var primaryGroupId = (user && user.get('primaryGroupId')) ? user.get('primaryGroupId') : null;
 
-            db.registerDrink(messageId, primaryGroupId, userId, drinkType, drinkValue)
+            db.registerDrink(messageId, primaryGroupId, userId, drinkType, drinkValue, user)
             .then(function() {
                 db.getDrinksSinceTimestamp(_getTresholdMoment(9), { chatGroupId: primaryGroupId })
                 .then(function createReturnMessageFromCollection(drinksCollection) {
