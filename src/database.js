@@ -44,7 +44,7 @@ db.getDrinksSinceTimestamp = function(minTimestamp, whereObject) {
             qb.andWhere(whereObject);
         }
     })
-    .fetch();
+    .fetch({ withRelated: ['drinker'] });
 };
 
 
@@ -159,7 +159,6 @@ db.getUsersByPrimaryGroupId = function(chatGroupId) {
 };
 
 db.getUserById = function(userId) {
-
     return schema.collections.Users
     .query(qb => qb.where({ telegramId: userId }))
     .fetchOne();
