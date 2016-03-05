@@ -4,8 +4,9 @@ var autoprefixer  = require('gulp-autoprefixer');
 var livereload    = require('gulp-livereload');
 var del           = require('del');
 
-const STYLES_DIRECTORY = './src/www/styles/'
+const STYLES_DIRECTORY = './src/www/styles/';
 const BUILD_DIRECTORY = './src/www/build';
+const VIEW_DIRECTORY = './src/www/views/';
 
 const LIVERELOAD_PORT = process.env.BORISBOT_GULP_LIVERELOAD_PORT || 35729;
 
@@ -25,13 +26,19 @@ gulp.task('buildCss', function() {
         .pipe(livereload());
 });
 
-// Keep watching styles
-gulp.task('watchStyles', ['buildCss'], function() {
+// Reload page
+gulp.task('refresh', function() {
+    livereload.changed('*.jade');
+});
+
+// Keep watching styles and templates
+gulp.task('watch', ['buildCss'], function() {
   livereload.listen({port: LIVERELOAD_PORT});
   gulp.watch(STYLES_DIRECTORY + '**/*.scss', ['buildCss']);
+  gulp.watch(VIEW_DIRECTORY + '**/*.jade', ['refresh']);
 });
 
 
 gulp.task('build', ['cleanBuild', 'buildCss']);
 
-gulp.task('default', ['cleanBuild', 'watchStyles']);
+gulp.task('default', ['cleanBuild', 'watch']);
