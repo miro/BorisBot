@@ -95,15 +95,14 @@ controller.getExpl = function(event) {
     });
 }
 
-controller.getRandomExpl = function(targetId) {
+controller.getRandomExpl = function(event) {
     return new Promise(function(resolve,reject) {
         db.fetchAllExpl()
         .then(entrys => {
             var key = _.sample(_.uniq(_.map(entrys, 'key')));
             db.fetchExpl(key)
             .then(expls => {
-                botApi.sendMessage({ chat_id: targetId, text: key + ': ' + _.sample(_.map(expls.models, n => n.get('value'))) });
-                resolve();
+                return echoExplanation(_.sample(expls.models), event);
             })
         })
     });

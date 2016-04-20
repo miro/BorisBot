@@ -33,7 +33,7 @@ module.exports = function parseTelegramEvent(msg) {
     event.userName = msg.from.username;
     event.userFirstName = msg.from.first_name;
     event.userLastName = msg.from.last_name;
-    event.userCallName = _.isUndefined(event.userName) ? userFirstName : ('@' + event.userName); // this can be used on messages
+    event.userCallName = _.isUndefined(event.userName) ? event.userFirstName : ('@' + event.userName); // this can be used on messages
     event.replyToMessage = msg.reply_to_message;
 
     event.isFromGroup = !_.isUndefined(msg.chat.title);

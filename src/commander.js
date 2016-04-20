@@ -48,7 +48,7 @@ module.exports = function (event) {
             break;
 
             case '!rexpl':
-                explController.getRandomExpl(event.targetId)
+                explController.getRandomExpl(event)
                 .then(resolve);
             break;
 
