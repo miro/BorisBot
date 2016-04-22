@@ -132,16 +132,31 @@ controller.removeExpl = function(userId, targetId, params) {
     });
 }
 
-controller.listExpls = function(targetId) {
+controller.listExpls = function(event) {
     return new Promise(function(resolve,reject) {
-        db.fetchAllExpl()
+        var paramParts = event.userCommandParams ? event.userCommandParams.split(' ') : [];
+
+        if (paramParts.length === 0) {
+            botApi.sendMessage({ chat_id: event.targetId, text: '!ls <avaimen alku>' });
+            return Promise.resolve();
+        }
+
+        const keyLike = _.toLower(paramParts[0]);
+
+        db.fetchExplsLike(keyLike)
         .then(entrys => {
-            var msg = _.uniq(_.map(entrys, 'key')).join(', ');
-            if (msg !== '') {
-                botApi.sendMessage({chat_id: targetId, text: 'Expls: ' + msg})
+
+            var keys = [];
+            _.forEach(entrys.models, model => {
+                keys.push(model.get('key'));
+            })
+            keys = _.join(keys, ', ');
+
+            if (keys !== '') {
+                botApi.sendMessage({chat_id: event.targetId, text: keys})
                 resolve();
             } else {
-                botApi.sendMessage( {chat_id: targetId, text: 'En löytänyt yhtään selitystä!'})
+                botApi.sendMessage( {chat_id: event.targetId, text: 'En löytänyt yhtään selitystä!'})
             }
         });
     });

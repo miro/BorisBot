@@ -42,7 +42,7 @@ cfg.adminUsers = [24175254, 100100780];
 // List of users who can send messages through bot
 cfg.botTalkUsers = _.union(cfg.adminUsers, [73814886]);
 
-cfg.ignoredUsers = [50446519]; // users whom commands are ignored
+cfg.ignoredUsers = []; // users whom commands are ignored
 
 // Port which the Boris server will listen to
 cfg.serverPort = process.env.BORISBOT_PORT || 3000;

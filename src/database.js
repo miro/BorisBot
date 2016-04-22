@@ -185,6 +185,12 @@ db.fetchAllExpl = function() {
     .orderBy('key', 'asc');
 }
 
+db.fetchExplsLike = function(keyLike) {
+    return schema.collections.Expls
+    .query(qb => qb.where('key', 'LIKE', keyLike + '%'))
+    .fetch();
+}
+
 db.fetchExplMadeByUser = function(userId, key) {
     return schema.collections.Expls
     .query(qb => qb.where({ creatorId: userId, key: key }))

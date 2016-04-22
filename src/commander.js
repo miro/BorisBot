@@ -54,7 +54,7 @@ module.exports = function (event) {
 
             case '!ls':
             case '!list':
-                explController.listExpls(event.targetId)
+                explController.listExpls(event)
                 .then(resolve);
             break;
 
