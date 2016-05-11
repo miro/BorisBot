@@ -43,4 +43,4 @@ RUN     npm install
 # Open port 3000
 EXPOSE  3000
 
-CMD     ["pm2", "start",  "src/server.js", "--name=borisbot", "--no-daemon"]
+CMD     ["pm2", "start",  "ecosystem.json", "--env", "production", "--no-daemon"]

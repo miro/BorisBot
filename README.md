@@ -44,7 +44,9 @@ For production environments add also these:
 * `NODE_ENV` - if `production`, tries to connect to database via `$DATABASE_URL`. (This is required only on prod environment)
 * `DATABASE_URL` - connection string to database (when the `$NODE_ENV` is production)
 
+### Docker support
 
+If you are going to use Docker, insert your environment variables to ecosystem-example.json and rename it to ecosystem.json.
 
 ### Create development PostgreSQL database
 
