@@ -11,7 +11,7 @@ var cfg             = require('./config');
 var msgHistory      = require('./messageHistory');
 var scheduler       = require('./scheduler');
 var memeController  = require('./controllers/memeController');
-var logger          = cfg.logger;
+var logger          = require('./logger');
 
 var app         = express();
 

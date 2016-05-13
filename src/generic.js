@@ -3,7 +3,7 @@ var cfg         = require('./config');
 var botApi      = require('./botApi');
 var db          = require('./database');
 var msgs        = require('./messageHistory');
-var logger      = cfg.logger;
+var logger      = require('./logger');
 
 var Promise     = require('bluebird');
 var _           = require('lodash');

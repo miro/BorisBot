@@ -9,7 +9,7 @@ var parserReaktori  = require('./parsers/reaktori');
 var resources       = require('./restaurantsConfig');
 
 var cfg             = require('../../config');
-var logger          = cfg.logger;
+var logger          = require('../../logger');
 
 moment.tz.setDefault(cfg.botTimezone);
 

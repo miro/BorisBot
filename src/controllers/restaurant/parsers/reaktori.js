@@ -5,7 +5,7 @@ var Promise     = require('bluebird');
 
 var reaktori    = require('../restaurantsConfig').reaktori;
 var cfg         = require('../../../config');
-var logger      = cfg.logger;
+var logger      = require('../../../logger');
 
 moment.tz.setDefault(cfg.botTimezone);
 

@@ -5,7 +5,7 @@ var _           = require('lodash');
 
 var hertsi      = require('../restaurantsConfig').hertsi;
 var cfg         = require('../../../config');
-var logger      = cfg.logger;
+var logger      = require('../../../logger');
 
 moment.tz.setDefault(cfg.botTimezone);
 

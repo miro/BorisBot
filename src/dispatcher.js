@@ -6,7 +6,7 @@ var emojiRegex  = require('emoji-regex');
 
 var cfg         = require('./config');
 var replys      = require('./replys');
-var logger      = cfg.logger;
+var logger      = require('./logger');
 
 var commander   = require('./commander');
 var talkbox     = require('./talkbox');

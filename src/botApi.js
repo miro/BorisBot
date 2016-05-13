@@ -6,7 +6,7 @@ var mime    = require('mime');
 var path    = require('path');
 var Promise = require('bluebird');
 var _       = require('lodash');
-var logger  = cfg.logger;
+var logger  = require('./logger');
 
 var botApi = {};
 

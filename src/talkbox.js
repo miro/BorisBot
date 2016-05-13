@@ -12,7 +12,7 @@ var emojiRegex  = require('emoji-regex');
 
 var textController  = require('./controllers/textController');
 var linkController  = require('./controllers/linkController');
-var logger          = require('./config').logger;
+var logger          = require('./logger');
 
 
 module.exports = function(event) {

@@ -4,7 +4,7 @@ var _                       = require('lodash');
 var botApi                  = require('../botApi');
 var ExplModel               = require('../schema').models.Expl;
 var db                      = require('../database');
-var logger                  = require('../config').logger;
+var logger                  = require('../logger');
 
 var controller = {};
 

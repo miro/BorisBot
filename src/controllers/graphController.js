@@ -1,11 +1,11 @@
 var config  = require('../config');
 var db      = require('../database');
+var logger  = require('../logger');
 
 var Promise = require('bluebird');
 var plotly  = require('plotly')(config.plotlyUserName, config.plotlyApiKey);
 var _       = require('lodash');
 var moment  = require('moment-timezone');
-var logger  = config.logger;
 
 var controller = {};
 

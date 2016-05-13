@@ -16,7 +16,7 @@ var emojiRegex  = require('emoji-regex');
 var cfg         = require('./config');
 var botApi      = require('./botApi');
 var generic     = require('./generic');
-var logger      = cfg.logger;
+var logger      = require('./logger');
 
 var userController          = require('./controllers/userController');
 var drinkController         = require('./controllers/drinkController');

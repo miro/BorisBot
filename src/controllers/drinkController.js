@@ -5,7 +5,7 @@ var utils               = require('../utils');
 var graphController     = require('./graphController');
 var userController      = require('./userController');
 var ethanolController   = require('./ethanolController');
-var logger              = cfg.logger;
+var logger              = require('../logger');
 
 var Promise             = require('bluebird');
 var moment              = require('moment-timezone');
