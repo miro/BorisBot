@@ -150,14 +150,16 @@ controller.listExpls = function(event) {
             _.forEach(entrys.models, model => {
                 keys.push(model.get('key'));
             })
-            keys = _.join(keys, ', ');
+            keys = _.join(_.uniq(keys), ', ');
 
-            if (keys !== '') {
-                botApi.sendMessage({chat_id: event.targetId, text: keys})
-                resolve();
+            if (keys.length > 4096) { // Maximum message size
+                botApi.sendMessage({chat_id: event.targetId, text: 'Avaimia löytyi liikaa, rajaa hakua tarkemmin.'});
+            } else if (keys === '') {
+                botApi.sendMessage({chat_id: event.targetId, text: 'En löytänyt yhtään selitystä!'});
             } else {
-                botApi.sendMessage( {chat_id: event.targetId, text: 'En löytänyt yhtään selitystä!'})
+                botApi.sendMessage({chat_id: event.targetId, text: keys});
             }
+            resolve();
         });
     });
 }
