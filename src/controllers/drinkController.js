@@ -460,6 +460,24 @@ controller.sendHotBeverageStatusReportForUser = function(userId) {
     });
 };
 
+controller.addCustomValueDrink = function(event, drinkType) {
+    var params = event.userCommandParams.split(' ');
+    if (params.length < 2) {
+        botApi.sendMessage({chat_id: event.userId, text: '/'+ drinkType +' <senttilitrat> <alkoholi%>'});
+        return Promise.resolve();
+    }
+    var centLiter = +params[0];
+    var procent = +(params[1].replace(',', '.'));
+    if (centLiter > 0 && centLiter <= 50 && procent >= 1.0 && procent <= 90.0) {
+        // centiliters * 10 * procent / 100 * density of ethanol -> grams of ethanol
+        return controller.addDrink(event.eventId, event.userId, event.userCallName, drinkType, Math.round(centLiter * procent * 0.0789), event.isFromGroup);
+    } else {
+        botApi.sendMessage({chat_id: event.userId, text: 'Anna '+ drinkType +'n määrä senttilitroina (1-50) ja alkoholipitoisuus prosentteina (1-90)!'});
+        return Promise.resolve();
+    }
+}
+
+
 // ## Private functions
 //
 

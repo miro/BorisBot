@@ -154,6 +154,7 @@ generic.help = function(userId) {
         '\n/raflat - Tulostan kampuksen ravintoloiden ruokalistat.\n' +
         '\n/tee - Kirjaan nauttimasi kupillisen tietokantaani.\n' +
         '\n/tili - Lähetän sinulle Spinnin tilinumeron.\n' +
+        '\n/viina `<senttilitrat>` `<alkoholi%>` - Merkkaan nauttimasi viina-annoksen.\n' +
         '\n/virvokkeita - Näytän kaikki nautitut alkoholittomat juomat.\n' +
         '\n/webcam - Lähetän tuoreen kuvan Spinnin kerhohuoneelta.\n' +
         '\n!expl <avain> - Annan sanallesi selityksen, jos löydän sellaisen.\n' +

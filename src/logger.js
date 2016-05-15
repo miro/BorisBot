@@ -1,4 +1,5 @@
 const winston   = require('winston');
+const moment    = require('moment-timezone');
 const cfg       = require('./config');
 
 var logOptions = {};

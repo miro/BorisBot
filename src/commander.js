@@ -124,6 +124,11 @@ module.exports = function (event) {
                 }
             break;
 
+            case '/viina':
+                drinkController.addCustomValueDrink(event, 'viina')
+                .then(resolve);
+            break;
+
             case '/kaljoja':
                 drinkController.getDrinksAmount(event.userId, event.chatGroupId, event.chatGroupTitle, event.isFromGroup, true)
                 .then(resolve);
