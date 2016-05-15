@@ -16,7 +16,7 @@ var emojiRegex  = require('emoji-regex');
 var cfg         = require('./config');
 var botApi      = require('./botApi');
 var generic     = require('./generic');
-var logger      = cfg.logger;
+var logger      = require('./logger');
 
 var userController          = require('./controllers/userController');
 var drinkController         = require('./controllers/drinkController');
@@ -122,6 +122,11 @@ module.exports = function (event) {
                     drinkController.addDrink(event.eventId, event.userId, event.userCallName, drinkType, drinkValue, event.isFromGroup)
                     .then(resolve);
                 }
+            break;
+
+            case '/viina':
+                drinkController.addCustomValueDrink(event, 'viina')
+                .then(resolve);
             break;
 
             case '/kaljoja':

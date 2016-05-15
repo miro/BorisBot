@@ -5,9 +5,9 @@ var _               = require('lodash');
 var CronJob         = require('cron').CronJob;
 
 var botApi  = require('./botApi');
-var brain  = require('./brain');
+var brain   = require('./brain');
 var cfg     = require('./config');
-var logger  = cfg.logger;
+var logger  = require('./logger');
 var generic = require('./generic');
 
 var drinkController         = require('./controllers/drinkController');

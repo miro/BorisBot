@@ -3,7 +3,7 @@ var Promise             = require('bluebird');
 var _                   = require('lodash');
 
 var cfg                 = require('../config');
-var logger              = cfg.logger;
+var logger              = require('../logger');
 var LinkModel           = require('../schema').models.Link;
 var botApi              = require('../botApi');
 var groupController     = require('./groupController');

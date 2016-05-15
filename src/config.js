@@ -1,10 +1,7 @@
 var _           = require('lodash');
-var winston     = require('winston');
 var moment      = require('moment-timezone');
 
 var cfg = {}; // the cfg object which will be returned
-
-// TODO: remove the log stuff to independent module
 
 // The timezone in which the bot outputs all the datetimes
 cfg.botTimezone = 'Europe/Helsinki';
@@ -75,38 +72,6 @@ cfg.requiredDirectories = [cfg.resourceDirectory, cfg.plotlyDirectory, cfg.webca
 cfg.webcamURL = process.env.BORISBOT_WEBCAM_URL;
 
 // Logging config
-cfg.logLocation = process.env.BORISBOT_LOGFILE || cfg.logDirectory + 'output.log';
-
-var logOptions = {};
-logOptions.transports = [
-    new (winston.transports.Console)({
-        timestamp: function() {
-            return moment().format('YYYY-MM-DDTHH:mm:SS');
-        },
-        level: 'debug',
-        colorize: true
-    })
-];
-
-// Add logs also to file if env is production
-if (cfg.env === 'production') {
-    logOptions.transports.push(
-        new (winston.transports.File)({
-                filename: cfg.logLocation,
-                level: 'info',
-                timestamp: function() {
-                    return moment().format('YYYY-MM-DDTHH:mm:SS');
-                },
-                formatter: function(options) {
-                    return options.timestamp() +'--'+ options.level.toUpperCase() +'--'+ (undefined !== options.message ? options.message : '');
-                },
-                maxsize: 10000000,
-                json: false
-        })
-    );
-}
-
-cfg.logger = new (winston.Logger)(logOptions);
-
+cfg.logLocation = process.env.BORISBOT_LOGFILE_LOCATION || cfg.logDirectory + 'output.log';
 
 module.exports = cfg;

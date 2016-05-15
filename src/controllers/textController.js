@@ -1,9 +1,8 @@
 var cfg     = require('../config');
+var logger  = require('../logger');
 
 var _       = require('lodash');
 var moment  = require('moment-timezone');
-
-var logger  = cfg.logger;
 
 var controller = {};
 

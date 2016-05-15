@@ -2,7 +2,7 @@ var Promise     = require('bluebird');
 var request     = require('request');
 var fs          = require('fs');
 var cfg         = require('./config');
-var logger      = cfg.logger;
+var logger      = require('./logger');
 
 
 var utils = {};

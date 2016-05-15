@@ -7,7 +7,7 @@ var replys  = require('../replys');
 var cfg     = require('../config');
 var utils   = require('../utils');
 var botApi  = require('../botApi');
-var logger  = cfg.logger;
+var logger  = require('../logger');
 
 // TODO: the need to reply-to-the-messages in private conversation is frustrating to users.
 // Make this work while "naturally" chatting with the bot
