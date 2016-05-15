@@ -25,6 +25,7 @@ var memeController          = require('./controllers/memeController');
 var textController          = require('./controllers/textController');
 var restaurantController    = require('./controllers/restaurant/restaurantController');
 var explController          = require('./controllers/explController');
+var gameController          = require('./controllers/gameController');
 
 module.exports = function (event) {
     return new Promise(function (resolve, reject) {
@@ -302,6 +303,11 @@ module.exports = function (event) {
                     logger.log('error', 'Error on getAllMenusForToday: %s', e);
                     resolve();
                 });
+            break;
+
+            case '/pelit':
+            case '/games':
+                gameController.showGameKeyboard(event);
             break;
 
 

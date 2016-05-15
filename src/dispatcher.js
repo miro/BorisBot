@@ -35,6 +35,7 @@ module.exports = function parseTelegramEvent(msg) {
     event.userLastName = msg.from.last_name;
     event.userCallName = _.isUndefined(event.userName) ? event.userFirstName : ('@' + event.userName); // this can be used on messages
     event.replyToMessage = msg.reply_to_message;
+    event.type = msg.type;
 
     event.isFromGroup = !_.isUndefined(msg.chat.title);
     event.chatGroupId = event.isFromGroup ? msg.chat.id : null;
@@ -65,6 +66,9 @@ module.exports = function parseTelegramEvent(msg) {
         logger.log('debug', 'Got reply to previous message, passing handling to replys-module');
         replys.eventEmitter.emit(event.replyToMessage.message_id, event.rawInput);
     }
+
+    // Check if bot is waiting for answer (without reply)
+    replys.eventEmitter.emit(event.userId, event.rawInput);
 
     // Was this event a command-like event=?
     if (event.isCommand) {

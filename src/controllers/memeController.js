@@ -20,17 +20,17 @@ var controller = {};
 controller.dispatch = function(userId) {
 
     // Ask which meme user wants to use
-    replys.sendMessageAndListenForReply(userId, 'Mitä meemiä haluat käyttää?')
+    replys.sendMessageAndListenForReply({chat_id: userId, text: 'Mitä meemiä haluat käyttää?'})
     .then(function(memeType) {
         var memeObject = _getMemeObject(_.startCase(memeType));
         if (!_.isNull(memeObject)) {
 
             // Ask content of the top text
-            replys.sendMessageAndListenForReply(userId, 'Mitä laitetaan ylätekstiin?')
+            replys.sendMessageAndListenForReply({chat_id: userId, text: 'Mitä laitetaan ylätekstiin?'})
             .then(function(upperText) {
 
                 // Ask content of the bottom text
-                replys.sendMessageAndListenForReply(userId, 'Entäs alas?')
+                replys.sendMessageAndListenForReply({chat_id: userId, text: 'Entäs alas?'})
                 .then(function(bottomText) {
                     _generateMeme(memeObject.id, upperText, bottomText)
                     .then(function(imageUrl) {
