@@ -25,7 +25,14 @@ controller.showGameKeyboard = function(event) {
         })
     })
     .then(answer => {
-        GAMES[answer].start(event);
+        if (GAMES[answer]) {
+            GAMES[answer].start(event);
+        } else {
+            botApi.sendMessage({
+                chat_id: event.userId,
+                text: 'Peliä ' + answer + ' ei löytynyt!'
+            });
+        }
     })
     .catch(() => {
         logger.debug('User didn´t answer for game question');
