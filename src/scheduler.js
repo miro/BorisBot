@@ -54,7 +54,7 @@ scheduler.stopJobs = function() {
 scheduler.addJob({
     cronTime: '00 00 10 * * *',
     onTick: function sendTimeUntilKesaPaivatToSpinniMobi() {
-        var startMoment = moment('2015-07-24 18:00');
+        var startMoment = moment('2016-07-15 18:00');
         var daysLeft = startMoment.diff(moment(), 'days');
 
         if (daysLeft > 0) {
@@ -74,13 +74,24 @@ scheduler.addJob({
     }
 })
 
-// "Check clubroom's lightness value on weekdays"
+// TODO: Combine next three jobs together
+
+// "Check clubroom's lightness value on school period"
 scheduler.addJob({
-    cronTime: '00 */5 0-8,15-23 * * 1-5',
+    cronTime: '00 */5 0-8,15-23 * 1-4,9-12 1-5',
     onTick: function checkClubRoomStatus() {
         generic.checkWebcamLightness();
     },
     timeZone: cfg.botTimezone
+});
+
+// "Check clubroom's lightness value on summer period"
+scheduler.addJob({
+    cronTime: '00 */5 * * 5-8 *',
+    onTick: function checkClubRoomStatus() {
+        generic.checkWebcamLightness();
+    },
+    timeZone: cfg.botTimeZone
 });
 
 // "Check clubroom's lightness value on weekends"
