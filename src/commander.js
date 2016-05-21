@@ -17,6 +17,7 @@ var cfg         = require('./config');
 var botApi      = require('./botApi');
 var generic     = require('./generic');
 var logger      = require('./logger');
+var brain       = require('./brain');
 
 var userController          = require('./controllers/userController');
 var drinkController         = require('./controllers/drinkController');
@@ -272,7 +273,7 @@ module.exports = function (event) {
             break;
 
             case '/iltaa':
-                botApi.sendMessage({chat_id: event.targetId, text: 'iltaa'});
+                brain.answerIltaa(event);
                 resolve();
             break;
 

@@ -74,33 +74,28 @@ scheduler.addJob({
     }
 })
 
-// TODO: Combine next three jobs together
-
-// "Check clubroom's lightness value on school period"
+// "Check clubroom's lightness value"
 scheduler.addJob({
-    cronTime: '00 */5 0-8,15-23 * 1-4,9-12 1-5',
+    cronTime: '00 */5 * * * *',
     onTick: function checkClubRoomStatus() {
-        generic.checkWebcamLightness();
+        var now = moment();
+        var month = now.month();
+        var weekday = now.day();
+
+        // If it is summer period or weekend, check lightness every five minutes
+        if ((month >= 4 && month <= 7) || weekday === 0 || weekday === 6) {
+            generic.checkWebcamLightness();
+
+        // If it is school period, check lightness only before 8:00 and after 16:00
+        } else {
+            var hour = now.hour();
+            if (hour <= 8 || hour >= 16) {
+                generic.checkWebcamLightness();
+            }
+        }
+
     },
     timeZone: cfg.botTimezone
-});
-
-// "Check clubroom's lightness value on summer period"
-scheduler.addJob({
-    cronTime: '00 */5 * * 5-8 *',
-    onTick: function checkClubRoomStatus() {
-        generic.checkWebcamLightness();
-    },
-    timeZone: cfg.botTimeZone
-});
-
-// "Check clubroom's lightness value on weekends"
-scheduler.addJob({
-    cronTime: '00 */5 * * * 6-7',
-    onTick: function checkClubRoomStatus() {
-        generic.checkWebcamLightness();
-    },
-    timeZone: cfg.botTimeZone
 });
 
 // "Delete expired messages from textController
