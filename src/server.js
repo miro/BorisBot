@@ -25,9 +25,9 @@ app.use(bodyParser.json()); // parse json
 // # Routes
 //
 app.post('/api/webhook', function(req, res) {
-    var msg = req.body.message;
+    var updateId = req.body.update_id;
 
-    if (!msgHistory.startProcessingMsg(msg.message_id)) {
+    if (!msgHistory.startProcessingMsg(updateId)) {
         // this message is already parsed
         logger.log('info', 'Message ignored due to messageHistory state!');
         res.sendStatus(200);
@@ -35,13 +35,17 @@ app.post('/api/webhook', function(req, res) {
     }
 
     // Send message to the actual bot
+
+    // Check if body was message or edited_message
+    var msg = (req.body.message) ? req.body.message : req.body.edited_message;
+
     dispatcher(msg)
     .then(function() {
-        msgHistory.messageProcessed(msg.message_id);
+        msgHistory.messageProcessed(updateId);
         res.sendStatus(200);
     })
     .error(function() {
-        msgHistory.messageProcessingFailed(msg.message_id);
+        msgHistory.messageProcessingFailed(updateId);
         res.sendStatus(500);
     });
 });
