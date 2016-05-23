@@ -11,30 +11,30 @@ module.exports = {
 
     // marks the message to be "in progress", returns false if this message
     // is already in progress or has already been parsed
-    startProcessingMsg: function(messageId) {
-        if (this.history.indexOf(messageId) >= 0) {
+    startProcessingMsg: function(updateId) {
+        if (this.history.indexOf(updateId) >= 0) {
             // this message has already been parsed
             return false;
         }
-        else if (this.inProgress[messageId]) {
+        else if (this.inProgress[updateId]) {
             // message is already in progress, abort
             return false;
         }
         else {
-            this.inProgress[messageId] = true;
+            this.inProgress[updateId] = true;
             return true;
         }
     },
 
-    messageProcessingFailed: function(messageId) {
-        delete this.inProgress[messageId];
+    messageProcessingFailed: function(updateId) {
+        delete this.inProgress[updateId];
     },
 
-    messageProcessed: function(messageId) {
+    messageProcessed: function(updateId) {
 
-        delete this.inProgress[messageId];
+        delete this.inProgress[updateId];
 
-        this.history.push(messageId);
+        this.history.push(updateId);
         if (this.history.length > this.historySize) {
             this.history.shift();
         }

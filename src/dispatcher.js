@@ -40,6 +40,9 @@ module.exports = function parseTelegramEvent(msg) {
     event.chatGroupId = event.isFromGroup ? msg.chat.id : null;
     event.chatGroupTitle = event.isFromGroup ? msg.chat.title : null;
 
+    event.editDate = (msg.edit_date) ? msg.edit_date : null;
+    event.entities = (msg.entities) ? msg.entities : null;
+
     // Check if user is ignored
     var userIsIgnored = cfg.ignoredUsers.indexOf(event.userId) >= 0;
     if (userIsIgnored) {
