@@ -10,7 +10,17 @@ var controller = {};
 
 const EXPL_VALUE_MAX_LENGTH = 250;
 const EXPL_KEY_MAX_LENGTH = 50;
+const MAXIMUM_MESSAGE_SIZE = 4096;
 
+// When getting random expl, choose one key from this array
+var EXPL_KEYS = [];
+
+controller.updateRexplKeys = function() {
+    db.fetchAllExpl()
+    .then((entrys) => {
+        EXPL_KEYS = _.map(entrys, 'key');
+    });
+};
 
 controller.addExpl = function(event) {
     const chat_id = event.targetId;
@@ -55,10 +65,13 @@ controller.addExpl = function(event) {
         } else {
             return new ExplModel(explanation)
             .save()
-            .then(newModel => botApi.sendMessage({
-                chat_id: event.userId,
-                text: 'Expl "' + newModel.get('key') + '" lisätty.'
-            }));
+            .then(newModel => {
+                EXPL_KEYS.push(key);
+                botApi.sendMessage({
+                    chat_id: event.userId,
+                    text: 'Expl "' + newModel.get('key') + '" lisätty.'
+                });
+            });
         }
     });
 }
@@ -97,19 +110,21 @@ controller.getExpl = function(event) {
 
 controller.getRandomExpl = function(event) {
     return new Promise(function(resolve,reject) {
+
         db.fetchAllExpl()
         .then(entrys => {
-            var key = _.sample(_.uniq(_.map(entrys, 'key')));
-            db.fetchExpl(key)
+            db.fetchExpl(_.sample(_.uniq(EXPL_KEYS)))
             .then(expls => {
-                return echoExplanation(_.sample(expls.models), event);
-            })
-        })
+                echoExplanation(_.sample(expls.models), event)
+                .then(resolve);
+            });
+        });
     });
 }
 
 controller.removeExpl = function(userId, targetId, params) {
     return new Promise(function(resolve,reject) {
+
         if (params === '') {
             botApi.sendMessage({chat_id: targetId, text: '!rm [avain]'});
             return resolve();
@@ -121,6 +136,7 @@ controller.removeExpl = function(userId, targetId, params) {
             if (!_.isNull(expl)) {
                 db.deleteExpl(userId, key)
                 .then( () => {
+                    _.pullAt(EXPL_KEYS, _.indexOf(EXPL_KEYS, key));
                     botApi.sendMessage({chat_id: targetId, text: 'Expl ' + key + ' poistettu.'});
                     resolve();
                 });
@@ -134,6 +150,7 @@ controller.removeExpl = function(userId, targetId, params) {
 
 controller.listExpls = function(event) {
     return new Promise(function(resolve,reject) {
+
         var paramParts = event.userCommandParams ? event.userCommandParams.split(' ') : [];
 
         if (paramParts.length === 0) {
@@ -152,7 +169,7 @@ controller.listExpls = function(event) {
             })
             keys = _.join(_.uniq(keys), ', ');
 
-            if (keys.length > 4096) { // Maximum message size
+            if (keys.length > MAXIMUM_MESSAGE_SIZE) {
                 botApi.sendMessage({chat_id: event.targetId, text: 'Avaimia löytyi liikaa, rajaa hakua tarkemmin.'});
             } else if (keys === '') {
                 botApi.sendMessage({chat_id: event.targetId, text: 'En löytänyt yhtään selitystä!'});
@@ -166,6 +183,7 @@ controller.listExpls = function(event) {
 
 function echoExplanation(explModel, requestingEvent) {
     if (explModel.get('messageId')) {
+
         // this expl is a reference to older message
         botApi.forwardMessage({
             chat_id: requestingEvent.targetId,

@@ -11,6 +11,7 @@ var cfg             = require('./config');
 var msgHistory      = require('./messageHistory');
 var scheduler       = require('./scheduler');
 var memeController  = require('./controllers/memeController');
+var explController  = require('./controllers/explController');
 var logger          = require('./logger');
 
 var app         = express();
@@ -95,3 +96,5 @@ botApi.setWebhook({url: cfg.webhookUrl, certificate: cfg.certificateFile})
 // Start scheduler
 scheduler.startJobs();
 
+// Update expl keys for !rexpl
+explController.updateRexplKeys();
