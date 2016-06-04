@@ -26,6 +26,7 @@ var memeController          = require('./controllers/memeController');
 var textController          = require('./controllers/textController');
 var restaurantController    = require('./controllers/restaurant/restaurantController');
 var explController          = require('./controllers/explController');
+var imageController         = require('./controllers/imageController');
 
 module.exports = function (event) {
     return new Promise(function (resolve, reject) {
@@ -61,6 +62,11 @@ module.exports = function (event) {
 
             case '!rm':
                 explController.removeExpl(event.userId, event.targetId, event.userCommandParams)
+                .then(resolve);
+            break;
+
+            case '!g':
+                imageController.fetchImage(event)
                 .then(resolve);
             break;
 

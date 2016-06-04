@@ -60,6 +60,9 @@ cfg.plotlyApiKey = process.env.BORISBOT_PLOTLY_APIKEY;
 cfg.imgFlipUserName = process.env.BORISBOT_IMGFLIP_USERNAME;
 cfg.imgFlipPassword = process.env.BORISBOT_IMGFLIP_PASSWORD;
 
+// Bing Image Seach API config
+cfg.bingApiKey = process.env.BORISBOT_BING_APIKEY;
+
 // Local directories for data storage
 cfg.resourceDirectory = process.env.BORISBOT_RESOURCES_LOCATION || __dirname + '/../resources/';
 cfg.plotlyDirectory = cfg.resourceDirectory + 'plotly/';

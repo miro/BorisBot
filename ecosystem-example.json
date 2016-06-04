@@ -22,6 +22,8 @@
                 "BORISBOT_IMGFLIP_USERNAME": "",
                 "BORISBOT_IMGFLIP_PASSWORD": "",
 
+                "BORISBOT_BING_APIKEY": "",
+
                 "BORISBOT_WEBCAM_URL": "",
 
                 "BORISBOT_DATABASE_URL": "",
