@@ -160,7 +160,8 @@ generic.help = function(userId) {
         '\n!expl <avain> - Annan sanallesi selityksen, jos löydän sellaisen.\n' +
         '\n!add `<avain>` `<selite>` - Annan sanalle uuden selityksen.\n' +
         '\n!remove `<avain>` - Poistan selitteen, jos se on sinun hallussasi.\n' +
-        '\n!list - Listaan kaikki saatavilla olevat selitettävät sanat',
+        '\n!list - Listaan kaikki saatavilla olevat selitettävät sanat.\n' +
+        '\n!g <hakusanat> - Haen hakusanoja vastaavan kuvan internetin syövereistä.',
         parse_mode: 'Markdown'});
 };
 
