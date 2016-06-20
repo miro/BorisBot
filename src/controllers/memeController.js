@@ -75,6 +75,7 @@ controller.getMemes = function() {
         }
         catch (error) {
             logger.error('Something fishy coming from imgflip');
+            return;
         }
 
         if (response['success']) {
@@ -83,6 +84,7 @@ controller.getMemes = function() {
             });
         } else {
             logger.log('error', 'Error when using ImgFlip.com API');
+            return;
         }
     });
 };

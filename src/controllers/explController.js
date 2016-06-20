@@ -98,7 +98,10 @@ controller.getExpl = function(event) {
         if (explanations.length === 0) {
             return botApi.sendMessage({ chat_id, text: 'Expl ' + key + ' ei löytynyt.'});
         } else {
-            var explModelToEcho = _.sample(explanations.models);
+            var index = _.toInteger(paramParts[1]);
+            var explModelToEcho = (index > 0 && index <= explanations.models.length) ?
+                explanations.models[index-1] :
+                _.sample(explanations.models);
             return echoExplanation(explModelToEcho, event);
         }
     })
