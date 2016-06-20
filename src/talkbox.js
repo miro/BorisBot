@@ -30,7 +30,7 @@ module.exports = function(event) {
 
         // The mainchat conversation is stored because it will be used
         // as neural network teaching material for bot
-        if (event.chatGroupId === -126981306/*cfg.allowedGroups.mainChatId*/) {
+        if (event.chatGroupId === cfg.allowedGroups.mainChatId) {
             if (!fs.existsSync(cfg.mainChatLog)) {
                 fs.writeFileSync(cfg.mainChatLog,
                     'hashed_username;message;timestamp\n',
