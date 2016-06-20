@@ -76,5 +76,6 @@ cfg.webcamURL = process.env.BORISBOT_WEBCAM_URL;
 
 // Logging config
 cfg.logLocation = process.env.BORISBOT_LOGFILE_LOCATION || cfg.logDirectory + 'output.log';
+cfg.mainChatLog = process.env.BORISBOT_MAINCHAT_LOG_LOCATION || cfg.logDirectory + 'mainchat.log';
 
 module.exports = cfg;

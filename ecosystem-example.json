@@ -9,12 +9,11 @@
                 "NODE_ENV": "development",
                 "TZ": "Europe/Helsinki",
 
-                // INSERT YOUR ENVIRONMENT VARIABLES HERE
                 "BORISBOT_PORT": 3000,
 
-                "BORISBOT_PUBLIC_URL": "",         //REQUIRED
-                "BORISBOT_TELEGRAM_APIKEY": "",    //REQUIRED
-                "BORISBOT_PUBLIC_CERTIFICATE": "", //REQUIRED
+                "BORISBOT_PUBLIC_URL": "",
+                "BORISBOT_TELEGRAM_APIKEY": "",
+                "BORISBOT_PUBLIC_CERTIFICATE": "",
 
                 "BORISBOT_PLOTLY_USERNAME": "",
                 "BORISBOT_PLOTLY_APIKEY": "",
@@ -30,7 +29,8 @@
                 "BORISBOT_DATABASE_PASSWORD": "",
 
                 "BORISBOT_RESOURCES_LOCATION": "",
-                "BORISBOT_LOGFILE_LOCATION": ""
+                "BORISBOT_LOGFILE_LOCATION": "",
+                "BORISBOT_MAINCHAT_LOG_LOCATION": ""
 
             },
             "env_production" : {
