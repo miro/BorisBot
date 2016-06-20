@@ -163,18 +163,26 @@ controller.listExpls = function(event) {
         db.fetchExplsLike(keyLike)
         .then(entrys => {
 
-            var keys = [];
-            _.forEach(entrys.models, model => {
-                keys.push(model.get('key'));
-            })
-            keys = _.join(_.uniq(keys), ', ');
+            // Count how many keys with same name found
+            var keys = _.countBy(_.map(entrys.models, (model) => {
+                return model.get('key');
+            }));
+
+            // If there is more than one of the same key, show it on the message
+            keys = _.map(keys, (value, key) => {
+                return (value > 1) ?
+                    key + ' <code>[' + value + ']</code>' :
+                    key;
+            });
+
+            keys = _.join(keys, ', ');
 
             if (keys.length > MAXIMUM_MESSAGE_SIZE) {
                 botApi.sendMessage({chat_id: event.targetId, text: 'Avaimia löytyi liikaa, rajaa hakua tarkemmin.'});
             } else if (keys === '') {
                 botApi.sendMessage({chat_id: event.targetId, text: 'En löytänyt yhtään selitystä!'});
             } else {
-                botApi.sendMessage({chat_id: event.targetId, text: keys});
+                botApi.sendMessage({chat_id: event.targetId, text: keys, parse_mode: 'HTML'});
             }
             resolve();
         });
