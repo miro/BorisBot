@@ -1,28 +1,18 @@
+var _   = require('lodash');
 var cfg = require('./src/config');
 
-module.exports = {
+var knexCfg = {};
 
-  development: {
-    client: 'postgresql',
-    connection: {
-      database: 'borisbot',
-      user:     'borisbot',
-      password: 'borisbot'
-    },
-    pool: {
-      min: 2,
-      max: 10
-    },
-    migrations: {
-      tableName: 'knex_migrations'
-    }
-  },
-
-  // TODO: test config?
-
-  production: Object.assign({}, cfg.db, {
-    migrations: {
-      tableName: 'knex_migrations'
-    }
-  })
+knexCfg.development = _.cloneDeep(cfg.db);
+knexCfg.development.migrations = {
+    tableName: 'knex_migrations'
 };
+
+// TODO: test config?
+
+knexCfg.production = _.cloneDeep(cfg.db);
+knexCfg.production.migrations = {
+    tableName: 'knex_migrations'
+};
+
+module.exports = knexCfg;
