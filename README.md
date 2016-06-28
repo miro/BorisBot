@@ -16,6 +16,7 @@ This repository consists of NodeJS web server, which subscribes and understands 
 ## Get started
 **Create your Telegram Bot and run the backend for it locally**
 
+0. Ensure that you have all the required software installed [(see list)](start-from-scratch.md)
 1. Clone this repository and run `npm install`
 2. Create local database (see instructions below) 
 3. Create your own bot via Telegram's [@BotFather](https://telegram.me/botfather)
