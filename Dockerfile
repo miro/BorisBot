@@ -41,6 +41,9 @@ COPY    . /app/
 WORKDIR /app
 RUN     npm install
 
+# Trigger migration script
+RUN     ./tools/run-migrations.sh
+
 # Open port 3000
 EXPOSE  3000
 
