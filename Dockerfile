@@ -20,6 +20,7 @@ RUN     apt-get update && apt-get install -y -q --no-install-recommends \
         wget \
     && rm -rf /var/lib/apt/lists/*
 
+ENV     NODE_ENV production
 ENV     NVM_DIR /usr/local/nvm
 ENV     NODE_VERSION 5.5.0
 
