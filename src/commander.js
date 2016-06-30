@@ -335,6 +335,10 @@ module.exports = function(event) {
                 });
                 break;
 
+            case '/juurinyt':
+                generic.justNow(event);
+                resolve();
+            break;
 
             // # Admin commands
             //

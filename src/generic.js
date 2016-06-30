@@ -10,6 +10,9 @@ var _           = require('lodash');
 var getPixels   = require('get-pixels');
 var fs          = require('fs');
 var emoji       = require('node-emoji');
+var request     = require('request');
+var iconv       = require('iconv-lite');
+var cheerio     = require('cheerio');
 
 var generic = {};
 
@@ -204,6 +207,76 @@ generic.whichOne = function(targetId, userParams) {
 
     botApi.sendMessage({ chat_id: targetId, text: outcome });
 };
+
+generic.justNow = function(event) {
+
+    request({uri: 'http://www.iltalehti.fi/', encoding: null}, function(error, response, html) {
+        if(!error){
+
+            var output = [];
+            var selectors = [
+                '.juurinyt > p > a',
+                '#iltab_luetuimmat-kaikki1 > p > a > span:nth-child(2)'
+            ];
+            html = iconv.decode(new Buffer(html), "ISO-8859-1");
+            var $ = cheerio.load(html);
+
+            $(selectors.join(", ")).each( function() {
+                output.push($( this ).text());
+            });
+
+            var pre = (Math.random()*100 < 60) ?
+                ['Voiko tämä olla tottakaan! ', 'Mites tuota, ',
+                'Mitä vittua! ', 'Tästä Perttekin olisi ylpeä: ',
+                '..uskomatonta! ', 'Timo Soini: ', 'Kai se on pakko uskoa! ',
+                'Mitähän nyt taas, ', 'Marsaklan päiväkäsky: ', 'Näin vaikuttaa Brexit: ',
+                'Lama näkyy jo ihmisten kasvoilla: ', 'Enkelihoidot suosiossa: ',
+                'Uskomaton käänne puljujärven draftissa: ', 'Sote-uudistuksen laajat vaikutukset: ',
+                'Tätä et uskonut lukevasi ikinä koskaan: ', 'Arvaatko mitä? ', 'Miksi / Miksi ei ',
+                'Asiantuntijan raju analyysi: ', 'Mentula jyrähtää: ', 'Osti euroja, sai markkoja; Nyt marko tilittää: ',
+                'Bull Mentulan treenaamiseen liittyvä vihje: ', 'Lama-Eerikin oppivuodet: ', 'Heikki Lampelakin sen tiesi: ',
+                'Poliisihallituksessa kuhisee: ', 'Tarja Halosella epämiellyttävä epäily: ', 'Yllättävä fakta pieruista: ',
+                'Kyrpä kovettuu kun tämän ymmärtää: ', 'Tätä et voinut aavistaa vaikka olisitkin voinut: ',
+                'Lampela avaa eronsa / paluunsa taustoja: ', 'Sipilän viimeinen kikka: ', 'Nobel-voittajissa yllättävä yllätys - perustelu ontuu: ',
+                'Sote-uudistuksessa käänne: ', 'Timo Soini: en mielestäni ole Hitler, koska ', 'Helleraja taas rikki: ',
+                'Lähestyykö Suomea matala/korkeapaine? Pekka Pouta ennustaa: ', 'Jatkuvat vaikeudet ajoivat yrittäjän ahdinkoon: ',
+                'Säätilassa kernainen muutos, johon liittyy, että ', 'Miehet ja naiset kertovat: ', 'No johan pomppas! ',
+                '"Vittu" kertoi Mauri Kunnas - Syyt taustaan ovat ', 'Uniikki tiedottaa: ', 'Tämä on fantastinen juttu: ',
+                'Mi-tä?! ', 'Nainen lihotti lähes 60 kiloa yllättävän metodin avulla: ', 'Mies masturboi koirallaan - lisäksi: ',
+                'Tätä et tiennyt enkelihoidoista: ', 'Oikeestikko?! ', 'Syöpää vedestä - asian tuntiat älähtävät: ',
+                'Ehkä elämällä ei olekaan niin suurta merkitystä: ', 'Koru-Arvin tarinassa uusi käänne: ',
+                'Tietotekniikka nurin: ', 'Tietojohtajan muistutus: ', 'Tämäkin on Jannen koodikoulusta tuttua: ',
+                'Ylikomisarion viimeinen toive: ', 'Oispa tosiaan näin, että ', 'Vanha kansa ennusti tämän: ',
+                'Yleinen loruhan sen jo tiesi: ', 'Jos mennään näillä: ', 'Eiku sano vaan: '] : [''];
+
+            var post = (Math.random()*100 < 60) ?
+                [' - humalassa', ' - pajareissa',
+                ' saatana', ' - reaktio oli uskomaton!', ' iltaa',
+                ' - luona armopöydän', ' - eipä siinä', ' - mutta missä oli Puljujärvi?!',
+                ' - eipä siinä', ' - viimeistään huomenna', '- mieluiten nyt', ' - Töölössä',
+                ' - tää herättää kysymyksiä', ' - loogista? Ei välttämättä.', ' - leprassa',
+                ' - kera huorien', ' - kaupankäynti saattaa vaikeutua', ' - ihmisiä saattaa kuolla',
+                ' - Brexit syyllinen?', ' - myös Trump on tätä mieltä.', ' - paikalliset hankkivat tilalle uuden',
+                ' - suunnittelijana oma äiti', ' - oikeasti', ' - tulikin perseestä vene', ' - siinä lauantain perinteet!',
+                ' - kas sepä oiva kikka!', ' - selvinpäin', ' - vahingossa', ' - tee testi!', ' - luultavasti tarkoituksella',
+                ' - voisiko tämä olla mahdollista myös Suomessa?', ' - taustalla varsin outo syy', ' - raiskasi saatana',
+                ' - oikeustoimiakin väläytelty', ' - rakastaja uunissa?', ' - paljastui huijaukseksi'] : [''];
+
+            var message = '<b>JUURI NYT </b>' + _.sample(pre) + _.sample(output) + _.sample(post);
+            botApi.sendMessage({
+                chat_id: event.targetId,
+                text: message,
+                parse_mode: 'HTML'
+            });
+
+
+
+
+        } else {
+            logger.error('Error when fetching "Iltalehti": ' + error);
+        }
+    });
+}
 
 // Admin commands
 //
