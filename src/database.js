@@ -178,6 +178,14 @@ db.fetchAllExpl = function() {
     .orderBy('key', 'asc');
 };
 
+db.increaseExplEchoCount = function(id) {
+    return schema.knex
+    .raw(
+        'UPDATE expls SET "echoCount" = "echoCount" + 1 WHERE ID = ?',
+        [id]
+    );
+};
+
 db.fetchExplsLike = function(keyLike) {
     return schema.collections.Expls
     .query(qb => qb.where('key', 'LIKE', keyLike + '%'))
