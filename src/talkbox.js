@@ -10,6 +10,7 @@ var fs          = require('fs');
 
 var textController  = require('./controllers/textController');
 var linkController  = require('./controllers/linkController');
+var brain           = require('./brain');
 var logger          = require('./logger');
 var cfg             = require('./config');
 
@@ -51,6 +52,16 @@ module.exports = function(event) {
                     }
                 }
             );
+        }
+
+        // Did someone say ILTAA?
+        //
+        // TODO: it might be useful if we would create a "declarative"
+        // system in which you can input key words which then trigger
+        // event calls to the brain.js
+        if (event.rawInput.toLowerCase().indexOf('iltaa') >= 0) {
+            console.log('lol');
+            brain.answerIltaa(event);
         }
 
         // Always resolve
