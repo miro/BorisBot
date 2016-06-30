@@ -10,16 +10,16 @@ const botApi    = require('../botApi');
 var controller = {};
 
 controller.fetchImage = function(event) {
-    return new Promise(function(resolve,reject) {
+    return new Promise(function(resolve, reject) {
         if (!cfg.bingApiKey) {
-            botApi.sendMessage({chat_id: event.targetId, text: 'Ei tällähetkellä käytössä.'});
+            botApi.sendMessage({ chat_id: event.targetId, text: 'Ei tällähetkellä käytössä.' });
             return resolve();
         }
 
         var query = event.userCommandParams;
 
         if (!query) {
-            botApi.sendMessage({chat_id: event.targetId, text: '!g <hakusanat>'});
+            botApi.sendMessage({ chat_id: event.targetId, text: '!g <hakusanat>' });
             return resolve();
         }
 
@@ -31,7 +31,7 @@ controller.fetchImage = function(event) {
             qs: {
                 q: query,
                 count: 10,
-                offset: Math.round(Math.random()*30),
+                offset: Math.round(Math.random() * 30),
                 mkt: 'fi-FI',
                 safeSearch: 'Off'
             }
@@ -40,11 +40,11 @@ controller.fetchImage = function(event) {
             if (!err) {
                 var info = JSON.parse(body);
                 if (_.isEmpty(info.value)) {
-                    botApi.sendMessage({chat_id: event.targetId, text: 'En löytänyt yhtään kuvaa ' + emoji.get(':frowning:')});
+                    botApi.sendMessage({ chat_id: event.targetId, text: 'En löytänyt yhtään kuvaa ' + emoji.get(':frowning:') });
                     resolve();
                 } else {
                     var img = _.sample(info.value);
-                    botApi.sendMessage({chat_id: event.targetId, text: '<b>' + img.name + '</b>\n\n' + img.contentUrl, parse_mode: 'HTML'});
+                    botApi.sendMessage({ chat_id: event.targetId, text: '<b>' + img.name + '</b>\n\n' + img.contentUrl, parse_mode: 'HTML' });
                     resolve();
                 }
             } else {
@@ -52,7 +52,7 @@ controller.fetchImage = function(event) {
                 reject(err);
             }
         });
-    })
-}
+    });
+};
 
 module.exports = controller;

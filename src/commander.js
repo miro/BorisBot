@@ -8,7 +8,6 @@
 
 var Promise     = require('bluebird');
 var request     = require('request');
-
 var _           = require('lodash');
 var emoji       = require('node-emoji');
 var emojiRegex  = require('emoji-regex');
@@ -28,8 +27,8 @@ var restaurantController    = require('./controllers/restaurant/restaurantContro
 var explController          = require('./controllers/explController');
 var imageController         = require('./controllers/imageController');
 
-module.exports = function (event) {
-    return new Promise(function (resolve, reject) {
+module.exports = function(event) {
+    return new Promise(function(resolve, reject) {
 
         logger.log('debug', 'Command %s from user %s', event.userCommand, event.userCallName);
 

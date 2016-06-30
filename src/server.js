@@ -1,6 +1,5 @@
 var express         = require('express');
 var bodyParser      = require('body-parser');
-var request         = require('request');
 var _               = require('lodash');
 var fs              = require('fs');
 var exec            = require('child_process').exec;
@@ -10,13 +9,10 @@ var botApi          = require('./botApi');
 var cfg             = require('./config');
 var msgHistory      = require('./messageHistory');
 var scheduler       = require('./scheduler');
-var memeController  = require('./controllers/memeController');
 var explController  = require('./controllers/explController');
 var logger          = require('./logger');
 
 var app         = express();
-
-
 
 // # Express middleware
 app.use(bodyParser.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
