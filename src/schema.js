@@ -1,6 +1,5 @@
 var config      = require('./config');
 
-var Promise     = require('bluebird');
 var knex        = require('knex')(config.db);
 var bookshelf   = require('bookshelf')(knex);
 
@@ -33,7 +32,6 @@ models.Link = bookshelf.Model.extend({
 });
 
 
-
 var collections = {};
 collections.Drinks = bookshelf.Collection.extend({
     model: models.Drink
@@ -47,7 +45,7 @@ collections.Users = bookshelf.Collection.extend({
 
 
 module.exports = {
-    bookshelf: bookshelf,
-    models: models,
-    collections: collections
+    bookshelf,
+    models,
+    collections
 };
