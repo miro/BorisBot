@@ -2,10 +2,11 @@
   "name": "borisbot",
   "version": "0.3.0",
   "description": "Telegram Bot for spinni.org",
-  "main": "server.js",
+  "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
     "test": "mocha 'test/**/*.js'",
+    "lint": "eslint src/**/*.js",
     "test:watch": "npm run test -- --watch"
   },
   "repository": {
@@ -52,6 +53,10 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
+    "eslint": "^2.13.1",
+    "eslint-config-airbnb-base": "^3.0.1",
+    "eslint-plugin-import": "^1.10.0",
+    "eslint-plugin-mocha": "^3.0.0",
     "mocha": "^2.4.5"
   }
 }
