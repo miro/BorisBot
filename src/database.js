@@ -178,12 +178,17 @@ db.fetchAllExpl = function() {
     .orderBy('key', 'asc');
 };
 
-db.increaseExplEchoCount = function(id) {
+db.markExplAsEchoed = function(id) {
     return schema.knex
     .raw(
-        'UPDATE expls SET "echoCount" = "echoCount" + 1 WHERE ID = ?',
+        `UPDATE expls
+        SET
+            "echoCount" = "echoCount" + 1,
+            "lastEcho" = NOW()
+        WHERE
+            id = ?`,
         [id]
-    );
+    ).then(); // then must be called, otherwise query won't get executed
 };
 
 db.fetchExplsLike = function(keyLike) {

@@ -210,8 +210,8 @@ controller.listExpls = function(event) {
 };
 
 function echoExplanation(explModel, requestingEvent) {
-    // this expl is echoed - increase the "fetch count"
-    db.increaseExplEchoCount(explModel.get('id'));
+    // update the echo to DB
+    db.markExplAsEchoed(explModel.get('id'));
 
     if (explModel.get('messageId')) {
 
