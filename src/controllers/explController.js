@@ -51,7 +51,10 @@ controller.addExpl = function(event) {
     } else {
         explanation.value = paramParts.join(' ');
         if (explanation.value.length > EXPL_VALUE_MAX_LENGTH) {
-            botApi.sendMessage({ chat_id, text: 'Selite max. ' + EXPL_VALUE_MAX_LENGTH + ' merkkiä.' });
+            botApi.sendMessage({
+                chat_id,
+                text: 'Selite max. ' + EXPL_VALUE_MAX_LENGTH + ' merkkiä.'
+            });
             return Promise.resolve();
         }
     }
@@ -60,7 +63,10 @@ controller.addExpl = function(event) {
     .fetch()
     .then(existingModel => {
         if (existingModel) {
-            botApi.sendMessage({ chat_id: event.userId, text: 'Olet jo tehnyt "' + key + '"-explin.' });
+            botApi.sendMessage({
+                chat_id: event.userId,
+                text: 'Olet jo tehnyt "' + key + '"-explin.'
+            });
             return Promise.resolve();
         } else {
             return new ExplModel(explanation)
@@ -112,10 +118,10 @@ controller.getExpl = function(event) {
 };
 
 controller.getRandomExpl = function(event) {
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve) => {
 
-        db.fetchAllExpl()
-        .then(entrys => {
+        db.fetchAllExpl() // TODO this is completely useless call(??)
+        .then(() => {
             db.fetchExpl(_.sample(_.uniq(EXPL_KEYS)))
             .then(expls => {
                 echoExplanation(_.sample(expls.models), event)
@@ -126,7 +132,7 @@ controller.getRandomExpl = function(event) {
 };
 
 controller.removeExpl = function(userId, targetId, params) {
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve) => {
 
         if (params === '') {
             botApi.sendMessage({ chat_id: targetId, text: '!rm [avain]' });
@@ -137,22 +143,24 @@ controller.removeExpl = function(userId, targetId, params) {
         db.fetchExplMadeByUser(userId, key)
         .then(expl => {
             if (!_.isNull(expl)) {
-                db.deleteExpl(userId, key)
-                .then(() => {
+                return db.deleteExpl(userId, key).then(() => {
                     _.pullAt(EXPL_KEYS, _.indexOf(EXPL_KEYS, key));
                     botApi.sendMessage({ chat_id: targetId, text: 'Expl ' + key + ' poistettu.' });
-                    resolve();
+                    return resolve();
                 });
             } else {
-                botApi.sendMessage({ chat_id: targetId, text: 'Expl ' + key + ' ei löytynyt tai se ei ole sinun tekemäsi.' });
-                resolve();
+                botApi.sendMessage({
+                    chat_id: targetId,
+                    text: 'Expl ' + key + ' ei löytynyt tai se ei ole sinun tekemäsi.'
+                });
+                return resolve();
             }
         });
     });
 };
 
 controller.listExpls = function(event) {
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve) => {
 
         var paramParts = event.userCommandParams ? event.userCommandParams.split(' ') : [];
 
@@ -163,29 +171,38 @@ controller.listExpls = function(event) {
 
         const keyLike = _.toLower(paramParts[0]);
 
-        db.fetchExplsLike(keyLike)
-        .then(entrys => {
+        return db.fetchExplsLike(keyLike).then(entrys => {
 
             // Count how many keys with same name found
-            var keys = _.countBy(_.map(entrys.models, (model) => {
-                return model.get('key');
-            }));
+            var keys = _.countBy(_.map(entrys.models, (model) => model.get('key')));
 
             // If there is more than one of the same key, show it on the message
             keys = _.map(keys, (value, key) => {
-                return (value > 1) ?
-                    key + ' <code>[' + value + ']</code>' :
-                    key;
+                if (value > 1) {
+                    return key + ' <code>[' + value + ']</code>';
+                } else {
+                    return key;
+                }
             });
 
             keys = _.join(keys, ', ');
 
             if (keys.length > MAXIMUM_MESSAGE_SIZE) {
-                botApi.sendMessage({ chat_id: event.targetId, text: 'Avaimia löytyi liikaa, rajaa hakua tarkemmin.' });
+                botApi.sendMessage({
+                    chat_id: event.targetId,
+                    text: 'Avaimia löytyi liikaa, rajaa hakua tarkemmin.'
+                });
             } else if (keys === '') {
-                botApi.sendMessage({ chat_id: event.targetId, text: 'En löytänyt yhtään selitystä!' });
+                botApi.sendMessage({
+                    chat_id: event.targetId,
+                    text: 'En löytänyt yhtään selitystä!'
+                });
             } else {
-                botApi.sendMessage({ chat_id: event.targetId, text: keys, parse_mode: 'HTML' });
+                botApi.sendMessage({
+                    chat_id: event.targetId,
+                    text: keys,
+                    parse_mode: 'HTML'
+                });
             }
             resolve();
         });
