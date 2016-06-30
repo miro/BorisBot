@@ -210,6 +210,9 @@ controller.listExpls = function(event) {
 };
 
 function echoExplanation(explModel, requestingEvent) {
+    // this expl is echoed - increase the "fetch count"
+    db.increaseExplEchoCount(explModel.get('id'));
+
     if (explModel.get('messageId')) {
 
         // this expl is a reference to older message
