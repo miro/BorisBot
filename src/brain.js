@@ -21,7 +21,7 @@ var brain = {};
 brain.announceDrinkLogsToGroups = function announceDrinkLogsToGroups(groupLogs) {
     _.each(groupLogs, (log, groupId) => {
         var msgParts = [
-            '*HUOMENTA, ja vielä kerran HUOO MEN TA! Uusi päivä!*',
+            '*ILTAA, ja vielä kerran ILTUAILTUA ILTUA LT! Uusi päivä!*',
             'Eilisen tykittelijät:',
             ''
         ];
