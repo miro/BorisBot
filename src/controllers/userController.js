@@ -17,29 +17,29 @@ controller.newUserProcess = function(userId, userName, userFirstName, userLastNa
         db.getUserById(userId)
         .then(function(exists) {
             if (exists) {
-                botApi.sendMessage({chat_id: userId, text: 'Käyttäjä ' + userName + ' on jo rekisteröity!\n' +
-                    'Jos haluat päivittää tietojasi, poista vanha käyttäjä komennolla\n/poistatunnus ja komenna /luotunnus uudelleen.'});
+                botApi.sendMessage({ chat_id: userId, text: 'Käyttäjä ' + userName + ' on jo rekisteröity!\n' +
+                    'Jos haluat päivittää tietojasi, poista vanha käyttäjä komennolla\n/poistatunnus ja komenna /luotunnus uudelleen.' });
                 resolve();
             }
             else {
 
-                var weight = parseInt(userCommandParams.split(' ')[0],10);
+                var weight = parseInt(userCommandParams.split(' ')[0], 10);
                 var isMale = userCommandParams.split(' ')[1];
 
                 if (userCommandParams.split(' ').length !== 2) {
-                    botApi.sendMessage({chat_id: userId, text: 'Rekisteröi käyttäjä komennolla /luotunnus <paino> <sukupuoli>'});
+                    botApi.sendMessage({ chat_id: userId, text: 'Rekisteröi käyttäjä komennolla /luotunnus <paino> <sukupuoli>' });
                     resolve();
 
                 } else if (_.isNaN(weight) || weight <= 0) {
-                    botApi.sendMessage({chat_id: userId, text: 'Paino ei ollut positiivinen kokonaisluku!'});
+                    botApi.sendMessage({ chat_id: userId, text: 'Paino ei ollut positiivinen kokonaisluku!' });
                     resolve();
 
                 } else if (weight < 40) {
-                    botApi.sendMessage({chat_id: userId, text: 'Laitathan oikean painosi, kiitos. ;)'});
+                    botApi.sendMessage({ chat_id: userId, text: 'Laitathan oikean painosi, kiitos. ;)' });
                     resolve();
 
-                } else if (isMale !== 'mies' && isMale !== 'nainen' ) {
-                    botApi.sendMessage({chat_id: userId, text: 'Parametri "' + isMale + '" ei ollut "mies" tai "nainen"!'});
+                } else if (isMale !== 'mies' && isMale !== 'nainen') {
+                    botApi.sendMessage({ chat_id: userId, text: 'Parametri "' + isMale + '" ei ollut "mies" tai "nainen"!' });
                     resolve();
                 }
                 else {
@@ -54,11 +54,11 @@ controller.newUserProcess = function(userId, userName, userFirstName, userLastNa
                         msg += 'HUOM: ilmoittamasi painon perusteella lasketut promilleluvut ovat täysiä arvioita, ';
                         msg += 'eikä niiden pohjalta voi tehdä mitään päätelmiä minkään suhteen. Stay safe!';
 
-                        botApi.sendMessage({chat_id: userId, text: msg});
+                        botApi.sendMessage({ chat_id: userId, text: msg });
                         resolve();
                     });
-                };
-            };
+                }
+            }
         });
     });
 };
@@ -70,7 +70,7 @@ controller.getCurrentSettings = function(userId) {
                 var msg = 'Sinulla ei ole vielä käyttäjätunnusta minulle!\n';
                 msg += 'Tee sellainen käyttämällä /luotunnus -komentoa.';
 
-                botApi.sendMessage({chat_id: userId, text: msg});
+                botApi.sendMessage({ chat_id: userId, text: msg });
                 return resolve();
             }
             else {
@@ -82,7 +82,7 @@ controller.getCurrentSettings = function(userId) {
                 msg += 'Paino: ' + user.get('weight') + 'kg\n';
                 msg += 'Sukupuoli: ' + (user.get('isMale') ? 'mies' : 'nainen');
 
-                botApi.sendMessage({chat_id: userId, text: msg});
+                botApi.sendMessage({ chat_id: userId, text: msg });
                 return resolve();
             }
         });
@@ -94,32 +94,32 @@ controller.removeUser = function(userId, userName) {
         db.getUserById(userId)
         .then(function(exists) {
             if (!exists) {
-                botApi.sendMessage({chat_id: userId, text: 'Käyttäjää ' + userName + ' ei löytynyt tietokannasta!'});
+                botApi.sendMessage({ chat_id: userId, text: 'Käyttäjää ' + userName + ' ei löytynyt tietokannasta!' });
                 resolve();
             }
             else {
                 db.removeUser(userId)
                 .then(function deleteOk() {
-                    botApi.sendMessage({chat_id: userId, text: 'Käyttäjän ' + userName + ' poistaminen onnistui!'});
+                    botApi.sendMessage({ chat_id: userId, text: 'Käyttäjän ' + userName + ' poistaminen onnistui!' });
                     resolve();
                 });
-            };
+            }
         });
     });
 };
 
 
 controller.setGroup = function(userId, chatGroupId, chatGroupTitle, messageIsFromGroup) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
         if (!messageIsFromGroup) {
-            botApi.sendMessage({chat_id: userId, text: 'Sinun täytyy lähettää tämä komento jostain ryhmästä määrittääksesi ensisijaisen ryhmäsi!'});
+            botApi.sendMessage({ chat_id: userId, text: 'Sinun täytyy lähettää tämä komento jostain ryhmästä määrittääksesi ensisijaisen ryhmäsi!' });
             resolve();
         }
         else {
             db.getUserById(userId)
             .then(function(exists) {
                 if (!exists) {
-                    botApi.sendMessage({chat_id: chatGroupId, text: 'Käyttäjääsi ei ole vielä luotu botille!\nLuo sellainen huutamalla minulle privassa /luotunnus'});
+                    botApi.sendMessage({ chat_id: chatGroupId, text: 'Käyttäjääsi ei ole vielä luotu botille!\nLuo sellainen huutamalla minulle privassa /luotunnus' });
                     resolve();
                 }
                 else {

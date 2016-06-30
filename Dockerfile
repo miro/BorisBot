@@ -34,11 +34,15 @@ ENV     NODE_PATH $NVM_DIR/versions/node/v$NODE_VERSION/lib/node_modules
 ENV     PATH      $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 
 RUN     npm install pm2 -g
+RUN     npm install knex -g
 
 # Copy host directory into container and install required node_modules
 COPY    . /app/
 WORKDIR /app
 RUN     npm install
+
+# Trigger migration script
+RUN     ./tools/run-migrations.sh
 
 # Open port 3000
 EXPOSE  3000

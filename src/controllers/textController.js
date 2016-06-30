@@ -21,13 +21,13 @@ controller.addMessage = function(chatId, msg) {
         }
         var maxSize = 2000; // Max size of message list
         if (controller.history[chatId].length >= maxSize) {
-            logger.log('warn', 'textController: maximum list size (%d) reached on chatId %s', maxSize, chatId)
+            logger.log('warn', 'textController: maximum list size (%d) reached on chatId %s', maxSize, chatId);
             controller.history[chatId].pop();
         }
         controller.history[chatId].unshift([moment().unix(), msg]);
         return true;
     }
-}
+};
 
 controller.getSummary = function(chatId, n) {
     if (_.isUndefined(controller.history[chatId]) || _.isEmpty(controller.history[chatId])) {
@@ -38,15 +38,15 @@ controller.getSummary = function(chatId, n) {
         var dice = _.floor(Math.random() * n);
         return controller.history[chatId][dice][1];
     }
-}
+};
 
 controller.deleteExpired = function() {
     if (_.isEmpty(controller.history)) {
         return;
     } else {
-        var expired = moment().unix() - (controller.hoursToExpire*3600);
+        var expired = moment().unix() - (controller.hoursToExpire * 3600);
         _.forEach(controller.history, function(groupMsgs) {
-            for (var i = groupMsgs.length-1; i >= 0; i--) {
+            for (var i = groupMsgs.length - 1; i >= 0; i--) {
                 if (groupMsgs[i][0] < expired) {
                     groupMsgs.pop();
                 } else {
@@ -56,6 +56,6 @@ controller.deleteExpired = function() {
         });
         return;
     }
-}
+};
 
 module.exports = controller;

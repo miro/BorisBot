@@ -36,12 +36,12 @@ controller.showDrinkKeyboard = function(userId, eventIsFromGroup) {
     msg += 'Käytä allaolevaa näppäimistöä merkataksesi juoman, tai anna /kippis <juoman nimi>\n';
     msg += '(Tämä komento ei lisännyt vielä yhtään juomaa juoduksi.)';
 
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
         botApi.sendMessage({
             chat_id: userId,
             text: msg,
             reply_markup: JSON.stringify({
-                keyboard: keyboard,
+                keyboard,
                 resize_keyboard: true,
                 one_time_keyboard: true
             })
@@ -103,30 +103,30 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
                             returnMessage += ' Se olikin jo ryhmäsi ' + drinksToday +
                             '. tälle päivälle, ja Sinulle päivän ' + drinksTodayForThisUser + '.\n';
                                 // # Notify the group?
-                                if (drinksToday === 1) {
+                            if (drinksToday === 1) {
                                     // first drink for today!
-                                    var groupMsg = userName + ' avasi pelin! ' + drinkType + '!';
-                                    botApi.sendMessage({chat_id: primaryGroupId, text: groupMsg});
-                                }
+                                var groupMsg = userName + ' avasi pelin! ' + drinkType + '!';
+                                botApi.sendMessage({ chat_id: primaryGroupId, text: groupMsg });
+                            }
                                 // Tell status report on 5, 10, 20, 30, ....
-                                if (drinksToday % 10 === 0 || drinksToday === 5) {
-                                    controller.getGroupAlcoholStatusReport(primaryGroupId).then(function (statusReport) {
-                                        var groupMsg = userName + ' kellotti ryhmän ' + drinksToday + '. juoman tälle päivälle!\n\n';
-                                        groupMsg += emoji.get(':top:') + 'Tilanne:\n';
-                                        groupMsg += statusReport;
+                            if (drinksToday % 10 === 0 || drinksToday === 5) {
+                                controller.getGroupAlcoholStatusReport(primaryGroupId).then(function(statusReport) {
+                                    var groupMsg = userName + ' kellotti ryhmän ' + drinksToday + '. juoman tälle päivälle!\n\n';
+                                    groupMsg += emoji.get(':top:') + 'Tilanne:\n';
+                                    groupMsg += statusReport;
 
-                                        botApi.sendMessage({chat_id: primaryGroupId, text: groupMsg});
-                                    });
-                                }
+                                    botApi.sendMessage({ chat_id: primaryGroupId, text: groupMsg });
+                                });
+                            }
                         }
 
                         // send the message
-                        botApi.sendMessage({chat_id: userId, text: returnMessage});
+                        botApi.sendMessage({ chat_id: userId, text: returnMessage });
 
                         // trigger also status report (to discourage users from spamming group chat)
                         if (!_.isNull(primaryGroupId)) {
                             controller.getGroupAlcoholStatusReport(primaryGroupId).then(function(statusReport) {
-                                botApi.sendMessage({ chat_id: userId, text: '\nRyhmäsi tilanne:\n' + statusReport});
+                                botApi.sendMessage({ chat_id: userId, text: '\nRyhmäsi tilanne:\n' + statusReport });
                             });
                         }
 
@@ -139,7 +139,7 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
 
                         db.getCount('drinks', {
                             drinker_telegram_id: userId,
-                            drinkType: drinkType
+                            drinkType
                         }, _getTresholdMoment(6))
                         .then(function(count) {
                             _.times(count, function() {
@@ -150,12 +150,12 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
                                 controller.getGroupHotBeveragelStatusReport(primaryGroupId)
                                 .then(function(statusReport) {
                                     msg += statusReport;
-                                    botApi.sendMessage({chat_id: userId, text: msg});
+                                    botApi.sendMessage({ chat_id: userId, text: msg });
                                     resolve(msg);
                                 });
                             } else {
                                 msg += 'Huom: Käy /moro ´ttamassa ryhmässä nähdäksesi koko ryhmäsi nauttimat kupposet!';
-                                botApi.sendMessage({chat_id: userId, text: msg});
+                                botApi.sendMessage({ chat_id: userId, text: msg });
                                 resolve(msg);
                             }
                         });
@@ -169,7 +169,7 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
             });
         })
         .catch(function(e) {
-            botApi.sendMessage({chat_id: userId, text: 'Kippistely epäonnistui, yritä myöhemmin uudelleen'});
+            botApi.sendMessage({ chat_id: userId, text: 'Kippistely epäonnistui, yritä myöhemmin uudelleen' });
             resolve();
         });
     });
@@ -177,7 +177,7 @@ controller.addDrink = function(messageId, userId, userName, drinkType, drinkValu
 
 
 controller.getPersonalDrinkLog = function(userId) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
 
         db.getDrinksSinceTimestamp(moment().subtract(2, 'day'), { drinker_telegram_id: userId })
         .then(function(collection) {
@@ -201,7 +201,7 @@ controller.getPersonalDrinkLog = function(userId) {
             message += '______________\n';
             message += 'Yhteensä ' + collection.models.length + ' kpl';
 
-            botApi.sendMessage({chat_id: userId, text: message});
+            botApi.sendMessage({ chat_id: userId, text: message });
             resolve();
         });
     });
@@ -244,7 +244,7 @@ controller.drawGraph = function(userId, chatGroupId, msgIsFromGroup, userCommand
             targetId = userId;
         }
 
-        botApi.sendAction({chat_id: targetId, action: 'upload_photo'});
+        botApi.sendAction({ chat_id: targetId, action: 'upload_photo' });
 
         db.getOldest('drinks', whereObject)
         .then(function(result) {
@@ -252,7 +252,7 @@ controller.drawGraph = function(userId, chatGroupId, msgIsFromGroup, userCommand
             var dateRangeParameter = parseInt(userCommandParams.split(' ')[0], 10);
 
             if (!_.isNaN(dateRangeParameter) && dateRangeParameter > 0 && dateRangeParameter < moment().diff(startRangeMoment, 'days')) {
-                startRangeMoment = moment().subtract(dateRangeParameter,'days')
+                startRangeMoment = moment().subtract(dateRangeParameter, 'days');
             }
 
             db.getDrinksSinceTimestamp(startRangeMoment, whereObject)
@@ -267,7 +267,7 @@ controller.drawGraph = function(userId, chatGroupId, msgIsFromGroup, userCommand
                     var destinationFilePath = cfg.plotlyDirectory + 'latestGraph.png';
                     utils.downloadFile(plotly.url + '.png', destinationFilePath)
                     .then(function() {
-                        botApi.sendPhoto({chat_id: targetId, file: destinationFilePath});
+                        botApi.sendPhoto({ chat_id: targetId, file: destinationFilePath });
                         resolve();
                     });
                 });
@@ -278,7 +278,7 @@ controller.drawGraph = function(userId, chatGroupId, msgIsFromGroup, userCommand
 
 
 controller.getDrinksAmount = function(userId, chatGroupId, chatGroupTitle, targetIsGroup, alcoholic) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
 
         var drinkType = (alcoholic) ? 'alkoholillista juomaa' : 'alkoholitonta juomaa';
         if (targetIsGroup) {
@@ -286,15 +286,15 @@ controller.getDrinksAmount = function(userId, chatGroupId, chatGroupTitle, targe
             var dbFetches = [];
 
             // all-time drinks for group
-            dbFetches.push(db.getCount('drinks', { chatGroupId: chatGroupId }, null, alcoholic));
-            dbFetches.push(db.getCount('drinks', { chatGroupId: chatGroupId,}, moment().subtract(1, 'days').toJSON(), alcoholic));
-            dbFetches.push(db.getCount('drinks', { chatGroupId: chatGroupId }, moment().subtract(2, 'days').toJSON(), alcoholic));
+            dbFetches.push(db.getCount('drinks', { chatGroupId }, null, alcoholic));
+            dbFetches.push(db.getCount('drinks', { chatGroupId }, moment().subtract(1, 'days').toJSON(), alcoholic));
+            dbFetches.push(db.getCount('drinks', { chatGroupId }, moment().subtract(2, 'days').toJSON(), alcoholic));
 
             Promise.all(dbFetches).then(function fetchOk(counts) {
                 var output = chatGroupTitle + ' on tuhonnut yhteensä ' + counts[0] + ' ' + drinkType + ', joista ';
                 output += counts[1] + ' viimeisen 24h aikana ja ' + counts[2] + ' viimeisen 48h aikana.';
 
-                botApi.sendMessage({chat_id: chatGroupId, text: output});
+                botApi.sendMessage({ chat_id: chatGroupId, text: output });
                 resolve();
             });
         }
@@ -306,12 +306,12 @@ controller.getDrinksAmount = function(userId, chatGroupId, chatGroupTitle, targe
             });
         }
     });
-}
+};
 
 controller.getGroupAlcoholStatusReport = function(chatGroupId) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
 
-        db.getDrinksSinceTimestamp(moment().subtract(2,'days'), { chatGroupId: chatGroupId })
+        db.getDrinksSinceTimestamp(moment().subtract(2, 'days'), { chatGroupId })
         .then(function fetchOk(drinkCollection) {
 
             if (drinkCollection.models.length === 0) {
@@ -341,7 +341,7 @@ controller.getGroupAlcoholStatusReport = function(chatGroupId) {
                 // Calculate alcohol level for each user
                 var alcoLevelPromises = [];
                 _.each(users, function(user) {
-                     alcoLevelPromises.push(ethanolController.getAlcoholLevel(user.get('telegramId')));
+                    alcoLevelPromises.push(ethanolController.getAlcoholLevel(user.get('telegramId')));
                 });
                 Promise.all(alcoLevelPromises)
                 .then(function(alcoLevelArr) {
@@ -364,7 +364,7 @@ controller.getGroupAlcoholStatusReport = function(chatGroupId) {
                             userName: userCallName,
                             alcoLevel: alcoLevelArr[i],
                             drinkCount48h: drinksByUser[userIdAsStr].length,
-                            drinkCount24h: drinkCount24h
+                            drinkCount24h
                         });
                     }
 
@@ -389,7 +389,7 @@ controller.getGroupAlcoholStatusReport = function(chatGroupId) {
                     paddingLength = paddingLength.userName.length + 3;
 
                     // Generate string which goes to message
-                    var log = emoji.get('mens') + ' –––– ' +  emoji.get('chart_with_upwards_trend') +
+                    var log = emoji.get('mens') + ' –––– ' + emoji.get('chart_with_upwards_trend') +
                          ' –––– ' + '(24h/48h)\n';
 
                     _.eachRight(drinkersArray, function(userLog) {
@@ -408,9 +408,9 @@ controller.getGroupAlcoholStatusReport = function(chatGroupId) {
 };
 
 controller.getGroupHotBeveragelStatusReport = function(chatGroupId) {
-    return new Promise(function(resolve,reject) {
+    return new Promise(function(resolve, reject) {
         var log = 'Ryhmäsi hörppimät kuumat kupposet:\n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n';
-        db.getDrinksSinceTimestamp(_getTresholdMoment(6), {drinkValue: 0})
+        db.getDrinksSinceTimestamp(_getTresholdMoment(6), { drinkValue: 0 })
         .then(function fetchOk(collection) {
 
             // Filter coffees and teas
@@ -442,7 +442,7 @@ controller.getGroupHotBeveragelStatusReport = function(chatGroupId) {
 };
 
 controller.sendHotBeverageStatusReportForUser = function(userId) {
-    return new Promise(function(resolve,reject) {
+    return new Promise(function(resolve, reject) {
         db.getUserById(userId)
         .then(function(model) {
             var primaryGroupId = (_.isNull(model)) ? null : model.get('primaryGroupId');
@@ -453,7 +453,7 @@ controller.sendHotBeverageStatusReportForUser = function(userId) {
                     resolve();
                 });
             } else {
-                botApi.sendMessage({chat_id: userId, text: 'Käy /moro´ttamassa ryhmässä saadaksesi kahvitilastot näkyviin!'});
+                botApi.sendMessage({ chat_id: userId, text: 'Käy /moro´ttamassa ryhmässä saadaksesi kahvitilastot näkyviin!' });
                 resolve();
             }
         });
@@ -463,7 +463,7 @@ controller.sendHotBeverageStatusReportForUser = function(userId) {
 controller.addCustomValueDrink = function(event, drinkType) {
     var params = event.userCommandParams.split(' ');
     if (params.length < 2) {
-        botApi.sendMessage({chat_id: event.userId, text: '/'+ drinkType +' <senttilitrat> <alkoholi%>'});
+        botApi.sendMessage({ chat_id: event.userId, text: '/' + drinkType + ' <senttilitrat> <alkoholi%>' });
         return Promise.resolve();
     }
     var centLiter = +params[0];
@@ -472,10 +472,10 @@ controller.addCustomValueDrink = function(event, drinkType) {
         // centiliters * 10 * procent / 100 * density of ethanol -> grams of ethanol
         return controller.addDrink(event.eventId, event.userId, event.userCallName, drinkType, Math.round(centLiter * procent * 0.0789), event.isFromGroup);
     } else {
-        botApi.sendMessage({chat_id: event.userId, text: 'Anna '+ drinkType +'n määrä senttilitroina (1-50) ja alkoholipitoisuus prosentteina (1-90)!'});
+        botApi.sendMessage({ chat_id: event.userId, text: 'Anna ' + drinkType + 'n määrä senttilitroina (1-50) ja alkoholipitoisuus prosentteina (1-90)!' });
         return Promise.resolve();
     }
-}
+};
 
 
 // ## Private functions

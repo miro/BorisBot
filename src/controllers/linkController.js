@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 var Promise             = require('bluebird');
 var _                   = require('lodash');
 
@@ -39,9 +39,9 @@ controller.process = function processEvent(event) {
     Promise.resolve()
         .then(() => groupController.addIfNonexistent(event))
         .then(groupModel => LinkModel.where({
-                url: link,
-                telegram_group_id: event.chatGroupId
-            }).fetch()
+            url: link,
+            telegram_group_id: event.chatGroupId
+        }).fetch()
         )
         .then(existingLink => {
             if (existingLink) {

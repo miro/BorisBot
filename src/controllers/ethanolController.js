@@ -13,7 +13,7 @@ var controller = {};
 //
 
 controller.getAlcoholLevel = function(userId) {
-    return new Promise( function(resolve,reject) {
+    return new Promise(function(resolve, reject) {
         var msg = 'Promillesi: ';
 
         _calculateAlcoholLevel(userId, 1)
@@ -39,13 +39,13 @@ controller.getAlcoholLevel = function(userId) {
 //
 
 var _calculateAlcoholLevel = function(userId, startDaysBefore) {
-    return new Promise( function(resolve,reject) {
+    return new Promise(function(resolve, reject) {
         db.getUserById(userId)
-        .then( function UserFetchOk(user) {
+        .then(function UserFetchOk(user) {
 
             var weight = user.get('weight');
             var isMale = user.get('isMale');
-            var startMoment = moment().subtract(startDaysBefore,'days');
+            var startMoment = moment().subtract(startDaysBefore, 'days');
 
             db.getDrinksSinceTimestampSortedForUser(userId, startMoment)
             .then(function drinkFetchOk(collection) {
@@ -55,7 +55,7 @@ var _calculateAlcoholLevel = function(userId, startDaysBefore) {
                 var differenceInHours = 0;
 
                 _.each(collection, function(model) {
-                    differenceInHours = moment(model['timestamp']).diff(startMoment,'hours', true);
+                    differenceInHours = moment(model['timestamp']).diff(startMoment, 'hours', true);
                     alchLevel = _drunklevel(drinkEthGrams, differenceInHours, weight, isMale);
 
                     // If user was sober before this drink, reset startMoment to this drinks timestamp
@@ -67,13 +67,13 @@ var _calculateAlcoholLevel = function(userId, startDaysBefore) {
                 });
 
                 // Calculate effect of the last drink to current time
-                differenceInHours = moment().diff(startMoment,'hours', true);
+                differenceInHours = moment().diff(startMoment, 'hours', true);
                 alchLevel = _drunklevel(drinkEthGrams, differenceInHours, weight, isMale);
 
                 // If this is true, user have taken his first drink in the first 30% of the range
                 // and there is no other calculated "soberpoints", so this function needs to be called
                 // again with wider range
-                var rangeAsHours = moment(moment()).diff(moment().subtract(startDaysBefore,'days'), 'hours', true);
+                var rangeAsHours = moment(moment()).diff(moment().subtract(startDaysBefore, 'days'), 'hours', true);
                 if (differenceInHours > rangeAsHours * 0.7 && differenceInHours < rangeAsHours) {
                     reject('rangeError');
                 }
@@ -82,7 +82,7 @@ var _calculateAlcoholLevel = function(userId, startDaysBefore) {
                 }
             });
         })
-        .catch( function noUserFound() {
+        .catch(function noUserFound() {
             reject('userError');
         });
     });
@@ -91,9 +91,9 @@ var _calculateAlcoholLevel = function(userId, startDaysBefore) {
 // Source: http://www.mvnet.fi/blogi/index.php?title=alkoholin_palaminen_ja_alkoholilaskuri&more=1&c=1&tb=1&pb=1
 var _burnRate = function(weight) {
     var liverBurnRate = 0.1; // 1 gram of ethanol per 10 kg bodymass in one hour
-    var otherOrgansBurnRate = (liverBurnRate / 0.94) * 0.06 // 94% from liver, 6% from other organs
-    var safeParam = 0.90 // Modifies the output to be less than it really is, making final estimates more safe
-    return (liverBurnRate + otherOrgansBurnRate) * safeParam * weight // grams per hour
+    var otherOrgansBurnRate = (liverBurnRate / 0.94) * 0.06; // 94% from liver, 6% from other organs
+    var safeParam = 0.90; // Modifies the output to be less than it really is, making final estimates more safe
+    return (liverBurnRate + otherOrgansBurnRate) * safeParam * weight; // grams per hour
 };
 
 var _perMil = function(ethGrams, weight, isMale) {
@@ -104,7 +104,7 @@ var _perMil = function(ethGrams, weight, isMale) {
 
 var _drunklevel = function(ethGrams, hours, weight, male) {
     var burnedEthGrams = _burnRate(weight) * hours;
-    return _perMil(ethGrams-burnedEthGrams, weight, male).toFixed(2);
+    return _perMil(ethGrams - burnedEthGrams, weight, male).toFixed(2);
 };
 
 module.exports = controller;

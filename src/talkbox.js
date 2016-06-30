@@ -4,21 +4,19 @@
 //      Counterpart for this file is the commander.js, which handles all the command messages
 
 var Promise     = require('bluebird');
-var request     = require('request');
-var moment      = require('moment-timezone');
 var _           = require('lodash');
 var crypto      = require('crypto');
 var fs          = require('fs');
 
 var textController  = require('./controllers/textController');
 var linkController  = require('./controllers/linkController');
+var brain           = require('./brain');
 var logger          = require('./logger');
 var cfg             = require('./config');
 
 
-
 module.exports = function(event) {
-    return new Promise(function (resolve, reject) {
+    return new Promise((resolve) => {
 
         logger.log('debug', 'Talkbox "%s" event from user %s', event.rawInput, event.userCallName);
 
@@ -30,6 +28,7 @@ module.exports = function(event) {
 
         // The mainchat conversation is stored because it will be used
         // as neural network teaching material for bot
+        // TODO: move this to separate module
         if (event.chatGroupId === cfg.allowedGroups.mainChatId) {
             if (!fs.existsSync(cfg.mainChatLog)) {
                 fs.writeFileSync(cfg.mainChatLog,
@@ -55,7 +54,17 @@ module.exports = function(event) {
             );
         }
 
+        // Did someone say ILTAA?
+        //
+        // TODO: it might be useful if we would create a "declarative"
+        // system in which you can input key words which then trigger
+        // event calls to the brain.js
+        if (event.rawInput.toLowerCase().indexOf('iltaa') >= 0) {
+            console.log('lol');
+            brain.answerIltaa(event);
+        }
+
         // Always resolve
         resolve();
     });
-}
+};

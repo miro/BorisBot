@@ -7,7 +7,6 @@ var CronJob         = require('cron').CronJob;
 var botApi  = require('./botApi');
 var brain   = require('./brain');
 var cfg     = require('./config');
-var logger  = require('./logger');
 var generic = require('./generic');
 
 var drinkController         = require('./controllers/drinkController');
@@ -33,18 +32,16 @@ scheduler.addJob = function(cronObj) {
 };
 
 scheduler.startJobs = function() {
-    _.each(scheduler.jobs, function(job) {
+    _.each(scheduler.jobs, job => {
         job.start();
     });
 };
 
 scheduler.stopJobs = function() {
-    _.each(scheduler.jobs, function(job) {
+    _.each(scheduler.jobs, job => {
         job.stop();
     });
 };
-
-
 
 
 // ## Add default jobs
@@ -53,12 +50,15 @@ scheduler.stopJobs = function() {
 // "Time until kesäpäivät"
 scheduler.addJob({
     cronTime: '00 00 10 * * *',
-    onTick: function sendTimeUntilKesaPaivatToSpinniMobi() {
+    onTick: function timeTilKesaPaivatToSpinniMobi() {
         var startMoment = moment('2016-07-15 18:00');
         var daysLeft = startMoment.diff(moment(), 'days');
 
         if (daysLeft > 0) {
-            botApi.sendMessage({chat_id: cfg.allowedGroups.mainChatId, text: 'HUOOOMENTA! Kesäpäiviin aikaa ' + daysLeft + ' päivää!!'});
+            botApi.sendMessage({
+                chat_id: cfg.allowedGroups.mainChatId,
+                text: 'HUOOOMENTA! Kesäpäiviin aikaa ' + daysLeft + ' päivää!!'
+            });
         }
     },
     timeZone: cfg.botTimezone
@@ -72,7 +72,7 @@ scheduler.addJob({
         drinkController.getDailyAlcoholLogForEachGroup()
         .then(logs => brain.announceDrinkLogsToGroups(logs));
     }
-})
+});
 
 // "Check clubroom's lightness value"
 scheduler.addJob({
@@ -114,7 +114,7 @@ scheduler.addJob({
         restaurantController.updateMenus();
     },
     timeZone: cfg.botTimeZone
-})
+});
 
 // "Update memes every week"
 scheduler.addJob({
@@ -123,6 +123,6 @@ scheduler.addJob({
         memeController.getMemes();
     },
     timeZone: cfg.botTimeZone
-})
+});
 
 module.exports = scheduler;
