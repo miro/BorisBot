@@ -43,6 +43,7 @@ WORKDIR /app
 RUN     npm install
 
 # Trigger migration script
+RUN     chmod +x ./tools/run-migrations.sh
 RUN     ./tools/run-migrations.sh
 
 # Open port 3000
