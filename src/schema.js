@@ -45,6 +45,7 @@ collections.Users = bookshelf.Collection.extend({
 
 
 module.exports = {
+    knex,
     bookshelf,
     models,
     collections
