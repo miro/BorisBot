@@ -210,6 +210,9 @@ controller.listExpls = function(event) {
 };
 
 function echoExplanation(explModel, requestingEvent) {
+    // update the echo to DB
+    db.markExplAsEchoed(explModel.get('id'));
+
     if (explModel.get('messageId')) {
 
         // this expl is a reference to older message
