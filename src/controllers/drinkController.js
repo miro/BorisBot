@@ -215,24 +215,36 @@ controller.getPersonalDrinkLog = function(userId) {
 
     return db.getDrinksSinceTimestamp(moment().subtract(2, 'day'), { drinker_telegram_id: userId })
     .then(collection => {
-        var message = 'Juomasi viimeisen 48h ajalta:\n';
+        let message = 'Juomasi viimeisen 48h ajalta:\n';
 
-        var currentDay;
-        _.each(collection.models, model => {
-            var modelTimestamp = moment(model.get('timestamp'));
+        const groupedDrinkRows = _
+            .chain(collection.models)
+            .map(drink => {
+                const timestamp = drink.get('timestamp');
+                const rowTimestamp = moment(timestamp).format('HH:mm');
 
-            if (!currentDay || currentDay.isBefore(modelTimestamp, 'day')) {
-                message += '\n\n' + emoji.get(':calendar:');
-                message += modelTimestamp.format('DD.MM') + '\n';
+                const logRow = `${rowTimestamp} - ${drink.get('drinkType')}`;
 
-                currentDay = modelTimestamp.clone();
-            }
+                return { logRow, timestamp };
+            })
+            .groupBy(rowItem => moment(rowItem.timestamp).format('YYYY-MM-DD'))
+            .value();
 
-            message += modelTimestamp.format('HH:mm');
-            message += ' - ' + model.get('drinkType') + '\n';
+        const orderedGroupKeys = _.keys(groupedDrinkRows).sort();
+        _.each(orderedGroupKeys, (datestamp) => {
+            let logItems = groupedDrinkRows[datestamp];
+
+            // add header row for this day
+            message += '\n\n' + emoji.get(':calendar:');
+            message += moment(datestamp, 'YYYY-MM-DD').format('DD.MM') + '\n';
+
+            // add actual content of this day
+            _.each(logItems, item => {
+                message += item.logRow + '\n';
+            });
         });
 
-        message += '______________\n';
+        message += '\n______________\n';
         message += 'Yhteensä ' + collection.models.length + ' kpl';
 
         botApi.sendMessage({ chat_id: userId, text: message });
