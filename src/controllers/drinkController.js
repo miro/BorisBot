@@ -42,19 +42,17 @@ controller.showDrinkKeyboard = function(userId, eventIsFromGroup) {
     msg += 'Käytä allaolevaa näppäimistöä merkataksesi juoman, tai anna /kippis <juoman nimi>\n';
     msg += '(Tämä komento ei lisännyt vielä yhtään juomaa juoduksi.)';
 
-    return new Promise((resolve) => {
-        botApi.sendMessage({
-            chat_id: userId,
-            text: msg,
-            reply_markup: JSON.stringify({
-                keyboard,
-                resize_keyboard: true,
-                one_time_keyboard: true
-            })
-        });
 
-        resolve();
+    botApi.sendMessage({
+        chat_id: userId,
+        text: msg,
+        reply_markup: JSON.stringify({
+            keyboard,
+            resize_keyboard: true,
+            one_time_keyboard: true
+        })
     });
+    return Promise.resolve();
 };
 
 
@@ -328,28 +326,28 @@ controller.drawGraph = function(userId, chatGroupId, msgIsFromGroup, userCommand
 
 
 controller.getDrinksAmount = function(
-    userId, chatGroupId, chatGroupTitle, targetIsGroup, alcoholic
+    userId, chatGroupId, chatGroupTitle, targetIsGroup, getAlcohol
 ) {
     return new Promise(resolve => {
 
-        var drinkType = (alcoholic) ? 'alkoholillista juomaa' : 'alkoholitonta juomaa';
+        var drinkType = (getAlcohol) ? 'alkoholillista juomaa' : 'alkoholitonta juomaa';
         if (targetIsGroup) {
 
             var dbFetches = [];
 
             // all-time drinks for group
-            dbFetches.push(db.getCount('drinks', { chatGroupId }, null, alcoholic));
+            dbFetches.push(db.getCount('drinks', { chatGroupId }, null, getAlcohol));
             dbFetches.push(db.getCount(
                 'drinks',
                 { chatGroupId },
                 moment().subtract(1, 'days').toJSON(),
-                alcoholic
+                getAlcohol
             ));
             dbFetches.push(db.getCount(
                 'drinks',
                 { chatGroupId },
                 moment().subtract(2, 'days').toJSON(),
-                alcoholic
+                getAlcohol
             ));
 
             Promise.all(dbFetches).then(function fetchOk(counts) {
@@ -363,7 +361,7 @@ controller.getDrinksAmount = function(
             });
         }
         else {
-            db.getCount('drinks', null, null, alcoholic)
+            db.getCount('drinks', null, null, getAlcohol)
             .then(function fetchOk(drinkCount) {
                 botApi.sendMessage({
                     chat_id: userId,
@@ -518,24 +516,20 @@ controller.getGroupHotBeveragelStatusReport = function(chatGroupId) {
 };
 
 controller.sendHotBeverageStatusReportForUser = function(userId) {
-    return new Promise(resolve => {
-        db.getUserById(userId)
-        .then(model => {
-            var primaryGroupId = (_.isNull(model)) ? null : model.get('primaryGroupId');
-            if (!_.isNull(primaryGroupId)) {
-                controller.getGroupHotBeveragelStatusReport(primaryGroupId)
-                .then(msg => {
-                    botApi.sendMessage(userId, msg);
-                    resolve();
-                });
-            } else {
-                botApi.sendMessage({
-                    chat_id: userId,
-                    text: 'Käy /moro´ttamassa ryhmässä saadaksesi kahvitilastot näkyviin!'
-                });
-                resolve();
-            }
-        });
+    return db.getUserById(userId)
+    .then(model => {
+        var primaryGroupId = (_.isNull(model)) ? null : model.get('primaryGroupId');
+        if (!_.isNull(primaryGroupId)) {
+            controller.getGroupHotBeveragelStatusReport(primaryGroupId)
+            .then(msg => {
+                botApi.sendMessage(userId, msg);
+            });
+        } else {
+            botApi.sendMessage({
+                chat_id: userId,
+                text: 'Käy /moro´ttamassa ryhmässä saadaksesi kahvitilastot näkyviin!'
+            });
+        }
     });
 };
 
@@ -549,8 +543,9 @@ controller.addCustomValueDrink = function(event, drinkType) {
         return Promise.resolve();
     }
 
-    var centLiter = +params[0];
-    var procent = +(params[1].replace(',', '.'));
+    var centLiter = + params[0];
+    var procent = + (params[1].replace(',', '.'));
+
     if (centLiter > 0 && centLiter <= 50 && procent >= 1.0 && procent <= 90.0) {
         // centiliters * 10 * procent / 100 * density of ethanol -> grams of ethanol
         return controller.addDrink(

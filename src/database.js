@@ -17,7 +17,8 @@ var db = {};
 //
 // Add new drink
 db.registerDrink = function(messageId, chatGroupId, drinker, drinkType, drinkValue, userModel) {
-    var drinkVal = (!_.isNull(drinkValue)) ? drinkValue : 10;
+    drinkValue = (!_.isNull(drinkValue)) ? drinkValue : 10;
+
     const userId = userModel ? userModel.get('id') : null;
 
     var drink = new schema.models.Drink({
@@ -26,7 +27,7 @@ db.registerDrink = function(messageId, chatGroupId, drinker, drinkType, drinkVal
         drinker_telegram_id: drinker,
         drinker_id: userId,
         drinkType,
-        drinkValue: drinkVal
+        drinkValue
     })
     .save();
 
