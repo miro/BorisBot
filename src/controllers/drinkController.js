@@ -212,33 +212,30 @@ controller.addDrink = function(
 
 
 controller.getPersonalDrinkLog = function(userId) {
-    return new Promise(resolve => {
 
-        db.getDrinksSinceTimestamp(moment().subtract(2, 'day'), { drinker_telegram_id: userId })
-        .then(collection => {
-            var message = 'Juomasi viimeisen 48h ajalta:\n';
+    return db.getDrinksSinceTimestamp(moment().subtract(2, 'day'), { drinker_telegram_id: userId })
+    .then(collection => {
+        var message = 'Juomasi viimeisen 48h ajalta:\n';
 
-            var currentDay;
-            _.each(collection.models, model => {
-                var modelTimestamp = moment(model.get('timestamp'));
+        var currentDay;
+        _.each(collection.models, model => {
+            var modelTimestamp = moment(model.get('timestamp'));
 
-                if (!currentDay || currentDay.isBefore(modelTimestamp, 'day')) {
-                    message += '\n\n' + emoji.get(':calendar:');
-                    message += modelTimestamp.format('DD.MM') + '\n';
+            if (!currentDay || currentDay.isBefore(modelTimestamp, 'day')) {
+                message += '\n\n' + emoji.get(':calendar:');
+                message += modelTimestamp.format('DD.MM') + '\n';
 
-                    currentDay = modelTimestamp.clone();
-                }
+                currentDay = modelTimestamp.clone();
+            }
 
-                message += modelTimestamp.format('HH:mm');
-                message += ' - ' + model.get('drinkType') + '\n';
-            });
-
-            message += '______________\n';
-            message += 'Yhteensä ' + collection.models.length + ' kpl';
-
-            botApi.sendMessage({ chat_id: userId, text: message });
-            resolve();
+            message += modelTimestamp.format('HH:mm');
+            message += ' - ' + model.get('drinkType') + '\n';
         });
+
+        message += '______________\n';
+        message += 'Yhteensä ' + collection.models.length + ' kpl';
+
+        botApi.sendMessage({ chat_id: userId, text: message });
     });
 };
 
@@ -432,23 +429,23 @@ controller.getGroupAlcoholStatusReport = function(chatGroupId) {
                     }
 
                     // Filter users who have alcoLevel > 0
-                    drinkersArray = _.filter(drinkersArray, object => {
-                        return object.alcoLevel > 0.00;
-                    });
+                    drinkersArray = _.filter(drinkersArray, object =>
+                        object.alcoLevel > 0.00
+                    );
 
                     if (drinkersArray.length === 0) {
                         resolve('Ei humaltuneita käyttäjiä.');
                     }
 
                     // Sort list by alcoLevel
-                    drinkersArray = _.sortBy(drinkersArray, object => {
-                        return parseFloat(object.alcoLevel);
-                    });
+                    drinkersArray = _.sortBy(drinkersArray, object =>
+                        parseFloat(object.alcoLevel)
+                    );
 
                     // Calculate needed padding
-                    var paddingLength = _.max(drinkersArray, object => {
-                        return object.userName.length;
-                    });
+                    var paddingLength = _.max(drinkersArray, object =>
+                        object.userName.length
+                    );
                     paddingLength = paddingLength.userName.length + 3;
 
                     // Generate string which goes to message
