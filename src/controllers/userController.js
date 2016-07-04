@@ -1,10 +1,13 @@
-var cfg         = require('../config');
-var db          = require('../database');
-var botApi      = require('../botApi');
+/* eslint-disable max-len */
 
-var Promise     = require('bluebird');
-var moment      = require('moment-timezone');
-var _           = require('lodash');
+const Promise     = require('bluebird');
+const moment      = require('moment-timezone');
+const _           = require('lodash');
+
+const cfg         = require('../config');
+const db          = require('../database');
+const botApi      = require('../botApi');
+
 
 // set default timezone to bot timezone
 moment.tz.setDefault(cfg.botTimezone);
@@ -12,13 +15,21 @@ moment.tz.setDefault(cfg.botTimezone);
 var controller = {};
 
 
-controller.newUserProcess = function(userId, userName, userFirstName, userLastName, userCommandParams) {
-    return new Promise(function(resolve, reject) {
+controller.newUserProcess = function(
+    userId, userName, userFirstName, userLastName, userCommandParams
+) {
+    return new Promise(resolve => {
         db.getUserById(userId)
-        .then(function(exists) {
+        .then(exists => {
             if (exists) {
-                botApi.sendMessage({ chat_id: userId, text: 'Käyttäjä ' + userName + ' on jo rekisteröity!\n' +
-                    'Jos haluat päivittää tietojasi, poista vanha käyttäjä komennolla\n/poistatunnus ja komenna /luotunnus uudelleen.' });
+                const text = 'Käyttäjä ' + userName + ' on jo rekisteröity!\n' +
+                    'Jos haluat päivittää tietojasi, poista vanha käyttäjä komennolla\n' +
+                    '/poistatunnus ja komenna /luotunnus uudelleen.';
+
+                botApi.sendMessage({
+                    chat_id: userId,
+                    text
+                });
                 resolve();
             }
             else {
@@ -27,32 +38,49 @@ controller.newUserProcess = function(userId, userName, userFirstName, userLastNa
                 var isMale = userCommandParams.split(' ')[1];
 
                 if (userCommandParams.split(' ').length !== 2) {
-                    botApi.sendMessage({ chat_id: userId, text: 'Rekisteröi käyttäjä komennolla /luotunnus <paino> <sukupuoli>' });
+                    botApi.sendMessage({
+                        chat_id: userId,
+                        text: 'Rekisteröi käyttäjä komennolla /luotunnus <paino> <sukupuoli>'
+                    });
                     resolve();
 
                 } else if (_.isNaN(weight) || weight <= 0) {
-                    botApi.sendMessage({ chat_id: userId, text: 'Paino ei ollut positiivinen kokonaisluku!' });
+                    botApi.sendMessage({
+                        chat_id: userId,
+                        text: 'Paino ei ollut positiivinen kokonaisluku!'
+                    });
                     resolve();
 
                 } else if (weight < 40) {
-                    botApi.sendMessage({ chat_id: userId, text: 'Laitathan oikean painosi, kiitos. ;)' });
+                    botApi.sendMessage({
+                        chat_id: userId,
+                        text: 'Laitathan oikean painosi, kiitos. ;)'
+                    });
                     resolve();
 
                 } else if (isMale !== 'mies' && isMale !== 'nainen') {
-                    botApi.sendMessage({ chat_id: userId, text: 'Parametri "' + isMale + '" ei ollut "mies" tai "nainen"!' });
+                    botApi.sendMessage({
+                        chat_id: userId,
+                        text: 'Parametri "' + isMale + '" ei ollut "mies" tai "nainen"!'
+                    });
                     resolve();
                 }
                 else {
-                    isMale = (isMale === 'mies') ? true : false;
+                    isMale = isMale === 'mies';
 
                     db.registerUser(userId, userName, userFirstName, userLastName, weight, isMale)
                     .then(function registerOk() {
-                        var msg = 'Käyttäjätunnuksesi luotiin onnistuneesti, olé!\n\n';
-                        msg += 'Käy lisäämässä itsesi johonkin ryhmään huutamalla ryhmän kanavalla /moro. ';
-                        msg += 'Muuten kippiksiäsi ei lasketa mukaan ryhmän tilastoihin.\n\n';
+                        var msg = [
+                            'Käyttäjätunnuksesi luotiin onnistuneesti, olé!\n\n',
+                            'Käy lisäämässä itsesi johonkin ryhmään',
+                            ' huutamalla ryhmän kanavalla /moro. ',
+                            'Muuten kippiksiäsi ei lasketa mukaan ryhmän tilastoihin.\n\n',
 
-                        msg += 'HUOM: ilmoittamasi painon perusteella lasketut promilleluvut ovat täysiä arvioita, ';
-                        msg += 'eikä niiden pohjalta voi tehdä mitään päätelmiä minkään suhteen. Stay safe!';
+                            'HUOM: ilmoittamasi painon perusteella lasketut promilleluvut',
+                            ' ovat täysiä arvioita, ',
+                            'eikä niiden pohjalta voi tehdä mitään päätelmiä',
+                            ' minkään suhteen. Stay safe!'
+                        ].join('');
 
                         botApi.sendMessage({ chat_id: userId, text: msg });
                         resolve();
@@ -64,21 +92,26 @@ controller.newUserProcess = function(userId, userName, userFirstName, userLastNa
 };
 
 controller.getCurrentSettings = function(userId) {
-    return new Promise(function(resolve, reject) {
-        db.getUserById(userId).then(function(user) {
+    return new Promise(resolve => {
+        db.getUserById(userId).then(user => {
+            let msg = '';
             if (!user) {
-                var msg = 'Sinulla ei ole vielä käyttäjätunnusta minulle!\n';
+                msg = 'Sinulla ei ole vielä käyttäjätunnusta minulle!\n';
                 msg += 'Tee sellainen käyttämällä /luotunnus -komentoa.';
 
                 botApi.sendMessage({ chat_id: userId, text: msg });
                 return resolve();
             }
             else {
-                var msg = 'Käyttäjätunnuksesi tiedot ovat seuraavat:\n\n';
+                let groupDisplayName = user.get('primaryGroupName')
+                    ? (user.get('primaryGroupName') + '\n')
+                    : '-\n';
+
+                msg = 'Käyttäjätunnuksesi tiedot ovat seuraavat:\n\n';
 
                 msg += 'Etunimi: ' + user.get('firstName') + '\n';
                 msg += 'Sukunimi: ' + user.get('lastName') + '\n';
-                msg += 'Group: ' + (user.get('primaryGroupName') ? (user.get('primaryGroupName') + '\n') : '-\n');
+                msg += 'Group: ' + groupDisplayName;
                 msg += 'Paino: ' + user.get('weight') + 'kg\n';
                 msg += 'Sukupuoli: ' + (user.get('isMale') ? 'mies' : 'nainen');
 
@@ -90,17 +123,23 @@ controller.getCurrentSettings = function(userId) {
 };
 
 controller.removeUser = function(userId, userName) {
-    return new Promise(function(resolve, reject) {
+    return new Promise(resolve => {
         db.getUserById(userId)
-        .then(function(exists) {
+        .then(exists => {
             if (!exists) {
-                botApi.sendMessage({ chat_id: userId, text: 'Käyttäjää ' + userName + ' ei löytynyt tietokannasta!' });
+                botApi.sendMessage({
+                    chat_id: userId,
+                    text: 'Käyttäjää ' + userName + ' ei löytynyt tietokannasta!'
+                });
                 resolve();
             }
             else {
                 db.removeUser(userId)
                 .then(function deleteOk() {
-                    botApi.sendMessage({ chat_id: userId, text: 'Käyttäjän ' + userName + ' poistaminen onnistui!' });
+                    botApi.sendMessage({
+                        chat_id: userId,
+                        text: 'Käyttäjän ' + userName + ' poistaminen onnistui!'
+                    });
                     resolve();
                 });
             }
@@ -110,16 +149,22 @@ controller.removeUser = function(userId, userName) {
 
 
 controller.setGroup = function(userId, chatGroupId, chatGroupTitle, messageIsFromGroup) {
-    return new Promise(function(resolve, reject) {
+    return new Promise(resolve => {
         if (!messageIsFromGroup) {
-            botApi.sendMessage({ chat_id: userId, text: 'Sinun täytyy lähettää tämä komento jostain ryhmästä määrittääksesi ensisijaisen ryhmäsi!' });
+            botApi.sendMessage({
+                chat_id: userId,
+                text: 'Sinun täytyy lähettää tämä komento jostain ryhmästä määrittääksesi ensisijaisen ryhmäsi!'
+            });
             resolve();
         }
         else {
             db.getUserById(userId)
-            .then(function(exists) {
+            .then(exists => {
                 if (!exists) {
-                    botApi.sendMessage({ chat_id: chatGroupId, text: 'Käyttäjääsi ei ole vielä luotu botille!\nLuo sellainen huutamalla minulle privassa /luotunnus' });
+                    botApi.sendMessage({
+                        chat_id: chatGroupId,
+                        text: `Käyttäjääsi ei ole vielä luotu botille!\n Luo sellainen huutamalla minulle privassa /luotunnus`
+                    });
                     resolve();
                 }
                 else {
@@ -127,7 +172,7 @@ controller.setGroup = function(userId, chatGroupId, chatGroupTitle, messageIsFro
                     .then(function updateOk() {
                         botApi.sendMessage({
                             chat_id: chatGroupId,
-                            text: '_Sielusi ratsastaa ikuisesti kera ' + chatGroupTitle + '-urhojen_',
+                            text: `_Sielusi ratsastaa ikuisesti kera ${chatGroupTitle}-urhojen_`,
                             parse_mode: 'Markdown'
                         });
                         resolve();

@@ -10,7 +10,7 @@ const botApi    = require('../botApi');
 var controller = {};
 
 controller.fetchImage = function(event) {
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
         if (!cfg.bingApiKey) {
             botApi.sendMessage({ chat_id: event.targetId, text: 'Ei tällähetkellä käytössä.' });
             return resolve();
@@ -36,20 +36,27 @@ controller.fetchImage = function(event) {
                 safeSearch: 'Off'
             }
         },
-        function(err, resp, body) {
+        function requestCallback(err, resp, body) {
             if (!err) {
                 var info = JSON.parse(body);
                 if (_.isEmpty(info.value)) {
-                    botApi.sendMessage({ chat_id: event.targetId, text: 'En löytänyt yhtään kuvaa ' + emoji.get(':frowning:') });
-                    resolve();
+                    botApi.sendMessage({
+                        chat_id: event.targetId,
+                        text: 'En löytänyt yhtään kuvaa ' + emoji.get(':frowning:')
+                    });
+                    return resolve();
                 } else {
                     var img = _.sample(info.value);
-                    botApi.sendMessage({ chat_id: event.targetId, text: '<b>' + img.name + '</b>\n\n' + img.contentUrl, parse_mode: 'HTML' });
-                    resolve();
+                    botApi.sendMessage({
+                        chat_id: event.targetId,
+                        text: '<b>' + img.name + '</b>\n\n' + img.contentUrl,
+                        parse_mode: 'HTML'
+                    });
+                    return resolve();
                 }
             } else {
                 logger.error(err);
-                reject(err);
+                return reject(err);
             }
         });
     });

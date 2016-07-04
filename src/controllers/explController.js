@@ -133,13 +133,14 @@ controller.getRandomExpl = function(event) {
 
 controller.removeExpl = function(userId, targetId, params) {
     return new Promise((resolve) => {
-
         if (params === '') {
             botApi.sendMessage({ chat_id: targetId, text: '!rm [avain]' });
             return resolve();
         }
+
         var splitParams = params.split(' ');
         const key = _.toLower(splitParams[0]);
+
         db.fetchExplMadeByUser(userId, key)
         .then(expl => {
             if (!_.isNull(expl)) {
