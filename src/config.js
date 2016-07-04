@@ -1,10 +1,7 @@
 var _           = require('lodash');
-var winston     = require('winston');
 var moment      = require('moment-timezone');
 
 var cfg = {}; // the cfg object which will be returned
-
-// TODO: remove the log stuff to independent module
 
 // The timezone in which the bot outputs all the datetimes
 cfg.botTimezone = 'Europe/Helsinki';
@@ -42,7 +39,7 @@ cfg.adminUsers = [24175254, 100100780];
 // List of users who can send messages through bot
 cfg.botTalkUsers = _.union(cfg.adminUsers, [73814886]);
 
-cfg.ignoredUsers = [50446519]; // users whom commands are ignored
+cfg.ignoredUsers = []; // users whom commands are ignored
 
 // Port which the Boris server will listen to
 cfg.serverPort = process.env.BORISBOT_PORT || 3000;
@@ -63,6 +60,9 @@ cfg.plotlyApiKey = process.env.BORISBOT_PLOTLY_APIKEY;
 cfg.imgFlipUserName = process.env.BORISBOT_IMGFLIP_USERNAME;
 cfg.imgFlipPassword = process.env.BORISBOT_IMGFLIP_PASSWORD;
 
+// Bing Image Seach API config
+cfg.bingApiKey = process.env.BORISBOT_BING_APIKEY;
+
 // Local directories for data storage
 cfg.resourceDirectory = process.env.BORISBOT_RESOURCES_LOCATION || __dirname + '/../resources/';
 cfg.plotlyDirectory = cfg.resourceDirectory + 'plotly/';
@@ -75,38 +75,7 @@ cfg.requiredDirectories = [cfg.resourceDirectory, cfg.plotlyDirectory, cfg.webca
 cfg.webcamURL = process.env.BORISBOT_WEBCAM_URL;
 
 // Logging config
-cfg.logLocation = process.env.BORISBOT_LOGFILE || cfg.logDirectory + 'output.log';
-
-var logOptions = {};
-logOptions.transports = [
-    new (winston.transports.Console)({
-        timestamp: function() {
-            return moment().format('YYYY-MM-DDTHH:mm:SS');
-        },
-        level: 'debug',
-        colorize: true
-    })
-];
-
-// Add logs also to file if env is production
-if (cfg.env === 'production') {
-    logOptions.transports.push(
-        new (winston.transports.File)({
-                filename: cfg.logLocation,
-                level: 'info',
-                timestamp: function() {
-                    return moment().format('YYYY-MM-DDTHH:mm:SS');
-                },
-                formatter: function(options) {
-                    return options.timestamp() +'--'+ options.level.toUpperCase() +'--'+ (undefined !== options.message ? options.message : '');
-                },
-                maxsize: 10000000,
-                json: false
-        })
-    );
-}
-
-cfg.logger = new (winston.Logger)(logOptions);
-
+cfg.logLocation = process.env.BORISBOT_LOGFILE_LOCATION || cfg.logDirectory + 'output.log';
+cfg.mainChatLog = process.env.BORISBOT_MAINCHAT_LOG_LOCATION || cfg.logDirectory + 'mainchat.log';
 
 module.exports = cfg;

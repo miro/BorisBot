@@ -1,22 +1,20 @@
+/* eslint-disable max-len */
 // # Commander
 //
 //      This module is reponsible for handling all the commands (messages starting with "/")
 //      what the users sends.
 //
-//      Counterpart for this file is the talkbox.js, which handles all the non-command messages from events
-//      (in case the bot is configured to see all the messages)
+//      Counterpart for this file is the talkbox.js, which handles all the non-command messages
+//      from events (in case the bot is configured to see all the messages)
 
 var Promise     = require('bluebird');
-var request     = require('request');
-
 var _           = require('lodash');
 var emoji       = require('node-emoji');
-var emojiRegex  = require('emoji-regex');
 
-var cfg         = require('./config');
 var botApi      = require('./botApi');
 var generic     = require('./generic');
-var logger      = cfg.logger;
+var logger      = require('./logger');
+var brain       = require('./brain');
 
 var userController          = require('./controllers/userController');
 var drinkController         = require('./controllers/drinkController');
@@ -25,9 +23,10 @@ var memeController          = require('./controllers/memeController');
 var textController          = require('./controllers/textController');
 var restaurantController    = require('./controllers/restaurant/restaurantController');
 var explController          = require('./controllers/explController');
+var imageController         = require('./controllers/imageController');
 
-module.exports = function (event) {
-    return new Promise(function (resolve, reject) {
+module.exports = function(event) {
+    return new Promise((resolve) => {
 
         logger.log('debug', 'Command %s from user %s', event.userCommand, event.userCallName);
 
@@ -39,29 +38,34 @@ module.exports = function (event) {
             case '!add':
                 explController.addExpl(event)
                 .then(resolve);
-            break;
+                break;
 
             case '??':
             case '!expl':
                 explController.getExpl(event)
                 .then(resolve);
-            break;
+                break;
 
             case '!rexpl':
-                explController.getRandomExpl(event.targetId)
+                explController.getRandomExpl(event)
                 .then(resolve);
-            break;
+                break;
 
             case '!ls':
             case '!list':
-                explController.listExpls(event.targetId)
+                explController.listExpls(event)
                 .then(resolve);
-            break;
+                break;
 
             case '!rm':
                 explController.removeExpl(event.userId, event.targetId, event.userCommandParams)
                 .then(resolve);
-            break;
+                break;
+
+            case '!g':
+                imageController.fetchImage(event)
+                .then(resolve);
+                break;
 
 
             // /-commands
@@ -70,25 +74,25 @@ module.exports = function (event) {
             case '/sumppi':
             case '/kahvi':
             case emoji.get(':coffee:'):
-                drinkController.addDrink(event.eventId, event.userId, event.userCallName, 'coffee',  0, event.isFromGroup)
+                drinkController.addDrink(event.eventId, event.userId, event.userCallName, 'coffee', 0, event.isFromGroup)
                 .then(resolve);
-            break;
+                break;
 
             case '/tee':
             case emoji.get(':tea:'):
                 drinkController.addDrink(event.eventId, event.userId, event.userCallName, 'tea', 0, event.isFromGroup)
                 .then(resolve);
-            break;
+                break;
 
             case '/kahvit':
                 drinkController.sendHotBeverageStatusReportForUser(event.userId)
                 .then(resolve);
-            break;
+                break;
 
             case '/kippis':
                 drinkController.showDrinkKeyboard(event.userId, event.isFromGroup)
                 .then(resolve);
-            break;
+                break;
 
             case '/kalja':
             case '/juoma':
@@ -122,41 +126,49 @@ module.exports = function (event) {
                     drinkController.addDrink(event.eventId, event.userId, event.userCallName, drinkType, drinkValue, event.isFromGroup)
                     .then(resolve);
                 }
-            break;
+                break;
+
+            case '/viina':
+                drinkController.addCustomValueDrink(event, 'viina')
+                .then(resolve);
+                break;
 
             case '/kaljoja':
                 drinkController.getDrinksAmount(event.userId, event.chatGroupId, event.chatGroupTitle, event.isFromGroup, true)
                 .then(resolve);
-            break;
+                break;
 
             case '/virvokkeita':
                 drinkController.getDrinksAmount(event.userId, event.chatGroupId, event.chatGroupTitle, event.isFromGroup, false)
                 .then(resolve);
-            break;
+                break;
 
             case '/log':
             case '/otinko':
                 drinkController.getPersonalDrinkLog(event.userId)
-                .then(function() {
+                .then(() => {
                     if (event.isFromGroup) {
-                        botApi.sendMessage({chat_id: event.userId, text: 'PS: anna "' +
-                            userCommand + '"-komento suoraan minulle, älä spämmää turhaan ryhmächättiä!'});
+                        botApi.sendMessage({
+                            chat_id: event.userId,
+                            text: `PS: anna "${event.userCommand}"-komento suoraan minulle,
+                            älä spämmää turhaan ryhmächättiä!`
+                        });
                     }
                     resolve();
                 });
-            break;
+                break;
 
             case '/kumpi':
             case '/valitse':
                 generic.whichOne(event.targetId, event.userCommandParams);
                 resolve();
-            break;
+                break;
 
             case '/start':
             case '/help':
                 generic.help(event.userId);
                 resolve();
-            break;
+                break;
 
             // # "Histogram" - returns visualization from drink log data.
             // If triggered from a group, returns a graph from that group's data
@@ -166,7 +178,7 @@ module.exports = function (event) {
             case '/histogrammi':
                 drinkController.drawGraph(event.userId, event.chatGroupId, event.isFromGroup, event.userCommandParams)
                 .then(resolve);
-            break;
+                break;
 
             // Sends image of current state of Spänni's webcam
             // Triggering of this is only possible from the spännimobi group
@@ -175,36 +187,43 @@ module.exports = function (event) {
             case '/webcam':
                 generic.webcam(event.userId, event.chatGroupId, event.isFromGroup)
                 .then(resolve);
-            break;
+                break;
 
             // Add new user to 'user'-table
-            // This function doesn't assign primaryGroupId for user, this can be done from /setgroup- function
+            // This function doesn't assign primaryGroupId for user,
+            // this can be done from /setgroup- function.
             // Takes two parameters, weight of the person and gender
             case '/addme':
             case '/luotunnus':
                 if (event.isFromGroup) {
-                    botApi.sendMessage({chat_id: event.chatGroupId, text: 'Jutellaan lisää privassa ' + emoji.get(':smirk:')});
-                    botApi.sendMessage({chat_id: event.userId, text: 'Luo käyttäjätunnus komennolla /luotunnus <paino> <sukupuoli>'});
+                    botApi.sendMessage({
+                        chat_id: event.chatGroupId,
+                        text: 'Jutellaan lisää privassa ' + emoji.get(':smirk:')
+                    });
+                    botApi.sendMessage({
+                        chat_id: event.userId,
+                        text: 'Luo käyttäjätunnus komennolla /luotunnus <paino> <sukupuoli>'
+                    });
                     resolve();
                 }
                 else {
                     userController.newUserProcess(event.userId, event.userName, event.userFirstName, event.userLastName, event.userCommandParams)
                     .then(resolve);
                 }
-            break;
+                break;
 
             // Echo the current user settings
             case '/settings':
                 userController.getCurrentSettings(event.userId)
                 .then(resolve);
-            break;
+                break;
 
             // Removes existing user from the database
             case '/removeme':
             case '/poistatunnus':
                 userController.removeUser(event.userId, event.userName)
                 .then(resolve);
-            break;
+                break;
 
             // Set primaryGroupId for user
             // Can be called from any group which have this bot in it
@@ -214,73 +233,85 @@ module.exports = function (event) {
             case '/ryhmä':
                 userController.setGroup(event.userId, event.chatGroupId, event.chatGroupTitle, event.isFromGroup)
                 .then(resolve);
-            break;
+                break;
 
             case '/jono':
             case '/viive':
                 generic.commandCount(event.userId).then(resolve);
-            break;
+                break;
 
             case '/promillet':
             case '/promille':
                 if (event.isFromGroup) {
                     drinkController.getGroupAlcoholStatusReport(event.chatGroupId)
-                    .then(function(msg) {
-                        botApi.sendMessage({chat_id: event.chatGroupId, text: msg});
+                    .then((msg) => {
+                        botApi.sendMessage({ chat_id: event.chatGroupId, text: msg });
                         resolve();
                     });
                 }
                 else {
                     ethanolController.getAlcoholLevel(event.userId)
-                    .then(function(msg) {
-                        botApi.sendMessage({chat_id: event.userId, text: msg + ' \u2030'});
+                    .then((msg) => {
+                        botApi.sendMessage({ chat_id: event.userId, text: msg + ' \u2030' });
                         resolve();
                     })
-                    .catch(function(e) {
-                        botApi.sendMessage({chat_id: event.userId, text: e});
+                    .catch((e) => {
+                        botApi.sendMessage({ chat_id: event.userId, text: e });
                         resolve();
                     });
                 }
-            break;
+                break;
 
             case '/meemit':
                 memeController.sendSupportedMemes(event.userId);
                 resolve();
-            break;
+                break;
 
             case '/luomeemi':
                 memeController.dispatch(event.userId);
                 resolve();
-            break;
+                break;
 
             case '/pankkitili':
             case '/tilinumero':
             case '/tili':
-                botApi.sendMessage({chat_id: event.targetId, text: 'FI78 1439 3500 0219 70'});
+                botApi.sendMessage({
+                    chat_id: event.targetId,
+                    text: 'FI78 1439 3500 0219 70'
+                });
                 resolve();
-            break;
+                break;
 
             case '/puhelin':
             case '/puh':
-                botApi.sendMessage({chat_id: event.targetId, text: '041 369 2262'});
+                botApi.sendMessage({
+                    chat_id: event.targetId,
+                    text: '041 369 2262'
+                });
                 resolve();
-            break;
+                break;
 
             case '/iltaa':
-                botApi.sendMessage({chat_id: event.targetId, text: 'iltaa'});
+                brain.answerIltaa(event);
                 resolve();
-            break;
+                break;
 
             case '/tiivista':
                 if (!event.isFromGroup) {
-                    botApi.sendMessage({ chat_id: event.userId, text: 'Tämä komento toimii vain ryhmästä!'});
+                    botApi.sendMessage({ chat_id: event.userId, text: 'Tämä komento toimii vain ryhmästä!' });
                     resolve();
                 } else {
-                    var param = (_.isFinite(event.userCommandParams.split(' ')[0])) ? event.userCommandParams.split(' ')[0] : 1000;
-                    botApi.sendMessage({chat_id: event.chatGroupId, text: textController.getSummary(event.chatGroupId, param)});
+                    var param = (_.isFinite(event.userCommandParams.split(' ')[0]))
+                    ? event.userCommandParams.split(' ')[0]
+                    : 1000;
+
+                    botApi.sendMessage({
+                        chat_id: event.chatGroupId,
+                        text: textController.getSummary(event.chatGroupId, param)
+                    });
                     resolve();
                 }
-            break;
+                break;
 
             case '/ravintolat':
             case '/raflat':
@@ -289,57 +320,66 @@ module.exports = function (event) {
             case '/safkat':
             case '/menu':
                 restaurantController.getAllMenusForToday(event.isFromGroup)
-                .then(function(msg) {
-                    botApi.sendMessage({chat_id: event.targetId, text: msg, parse_mode: 'Markdown', disable_web_page_preview: true});
+                .then((msg) => {
+                    botApi.sendMessage({
+                        chat_id: event.targetId,
+                        text: msg,
+                        parse_mode: 'Markdown',
+                        disable_web_page_preview: true
+                    });
                     resolve();
                 })
-                .catch( e => {
+                .catch(e => {
                     logger.log('error', 'Error on getAllMenusForToday: %s', e);
                     resolve();
                 });
-            break;
+                break;
 
+            case '/juurinyt':
+                generic.justNow(event);
+                resolve();
+            break;
 
             // # Admin commands
             //
             case '/adminhelp':
                 generic.adminhelp(event.userId);
                 resolve();
-            break;
+                break;
 
             case '/botgrouptalk':
                 generic.talkAsBotToMainGroup(event.userId, event.userCommandParams);
                 resolve();
-            break;
+                break;
 
             case '/botgroupprivatetalk':
                 generic.talkAsBotToUsersInMainGroup(event.userId, event.userCommandParams)
                 .then(resolve);
-            break;
+                break;
 
             case '/botprivatetalk':
                 generic.talkAsBotToUser(event.userId, event.userCommandParams)
                 .then(resolve);
-            break;
+                break;
 
             case '/logs':
                 generic.sendLog(event.userId, event.userCommandParams)
                 .then(resolve);
-            break;
+                break;
 
             case '/ban':
                 generic.banUser(event.userId, event.userCommandParams)
                 .then(resolve);
-            break;
+                break;
 
             case '/unban':
                 generic.unbanUser(event.userId, event.userCommandParams)
                 .then(resolve);
-            break;
+                break;
 
             default:
                 logger.log('debug', 'Unknown command: ' + event.rawInput);
                 resolve();
         }
     });
-}
+};

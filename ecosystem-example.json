@@ -1,0 +1,41 @@
+{
+    "apps" : [
+        {
+            "name"      : "borisbot",
+            "script"    : "src/server.js",
+            "instances"  : "1",
+            "merge_logs": true,
+            "env": {
+                "NODE_ENV": "development",
+                "TZ": "Europe/Helsinki",
+
+                "BORISBOT_PORT": 3000,
+
+                "BORISBOT_PUBLIC_URL": "",
+                "BORISBOT_TELEGRAM_APIKEY": "",
+                "BORISBOT_PUBLIC_CERTIFICATE": "",
+
+                "BORISBOT_PLOTLY_USERNAME": "",
+                "BORISBOT_PLOTLY_APIKEY": "",
+
+                "BORISBOT_IMGFLIP_USERNAME": "",
+                "BORISBOT_IMGFLIP_PASSWORD": "",
+
+                "BORISBOT_BING_APIKEY": "",
+
+                "BORISBOT_WEBCAM_URL": "",
+
+                "BORISBOT_DATABASE_URL": "",
+                "BORISBOT_DATABASE_PASSWORD": "",
+
+                "BORISBOT_RESOURCES_LOCATION": "",
+                "BORISBOT_LOGFILE_LOCATION": "",
+                "BORISBOT_MAINCHAT_LOG_LOCATION": ""
+
+            },
+            "env_production" : {
+              "NODE_ENV": "production",
+            }
+        }
+    ]
+}

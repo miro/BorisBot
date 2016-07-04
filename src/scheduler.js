@@ -5,9 +5,8 @@ var _               = require('lodash');
 var CronJob         = require('cron').CronJob;
 
 var botApi  = require('./botApi');
-var brain  = require('./brain');
+var brain   = require('./brain');
 var cfg     = require('./config');
-var logger  = cfg.logger;
 var generic = require('./generic');
 
 var drinkController         = require('./controllers/drinkController');
@@ -33,18 +32,16 @@ scheduler.addJob = function(cronObj) {
 };
 
 scheduler.startJobs = function() {
-    _.each(scheduler.jobs, function(job) {
+    _.each(scheduler.jobs, job => {
         job.start();
     });
 };
 
 scheduler.stopJobs = function() {
-    _.each(scheduler.jobs, function(job) {
+    _.each(scheduler.jobs, job => {
         job.stop();
     });
 };
-
-
 
 
 // ## Add default jobs
@@ -53,12 +50,15 @@ scheduler.stopJobs = function() {
 // "Time until kesäpäivät"
 scheduler.addJob({
     cronTime: '00 00 10 * * *',
-    onTick: function sendTimeUntilKesaPaivatToSpinniMobi() {
-        var startMoment = moment('2015-07-24 18:00');
+    onTick: function timeTilKesaPaivatToSpinniMobi() {
+        var startMoment = moment('2016-07-15 18:00');
         var daysLeft = startMoment.diff(moment(), 'days');
 
         if (daysLeft > 0) {
-            botApi.sendMessage({chat_id: cfg.allowedGroups.mainChatId, text: 'HUOOOMENTA! Kesäpäiviin aikaa ' + daysLeft + ' päivää!!'});
+            botApi.sendMessage({
+                chat_id: cfg.allowedGroups.mainChatId,
+                text: 'HUOOOMENTA! Kesäpäiviin aikaa ' + daysLeft + ' päivää!!'
+            });
         }
     },
     timeZone: cfg.botTimezone
@@ -72,24 +72,30 @@ scheduler.addJob({
         drinkController.getDailyAlcoholLogForEachGroup()
         .then(logs => brain.announceDrinkLogsToGroups(logs));
     }
-})
-
-// "Check clubroom's lightness value on weekdays"
-scheduler.addJob({
-    cronTime: '00 */5 0-8,15-23 * * 1-5',
-    onTick: function checkClubRoomStatus() {
-        generic.checkWebcamLightness();
-    },
-    timeZone: cfg.botTimezone
 });
 
-// "Check clubroom's lightness value on weekends"
+// "Check clubroom's lightness value"
 scheduler.addJob({
-    cronTime: '00 */5 * * * 6-7',
+    cronTime: '00 */5 * * * *',
     onTick: function checkClubRoomStatus() {
-        generic.checkWebcamLightness();
+        var now = moment();
+        var month = now.month();
+        var weekday = now.day();
+
+        // If it is summer period or weekend, check lightness every five minutes
+        if ((month >= 4 && month <= 7) || weekday === 0 || weekday === 6) {
+            generic.checkWebcamLightness();
+
+        // If it is school period, check lightness only before 8:00 and after 16:00
+        } else {
+            var hour = now.hour();
+            if (hour <= 8 || hour >= 16) {
+                generic.checkWebcamLightness();
+            }
+        }
+
     },
-    timeZone: cfg.botTimeZone
+    timeZone: cfg.botTimezone
 });
 
 // "Delete expired messages from textController
@@ -108,7 +114,7 @@ scheduler.addJob({
         restaurantController.updateMenus();
     },
     timeZone: cfg.botTimeZone
-})
+});
 
 // "Update memes every week"
 scheduler.addJob({
@@ -117,6 +123,6 @@ scheduler.addJob({
         memeController.getMemes();
     },
     timeZone: cfg.botTimeZone
-})
+});
 
 module.exports = scheduler;

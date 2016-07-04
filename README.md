@@ -1,4 +1,4 @@
-BorisBot
+BorisBot [![Sponsored by Chilicorn.org](https://img.shields.io/badge/sponsored%20by-chilicorn.org-brightgreen.svg)](http://chilicorn.org)
 =========
 
 for-the-lulz -based [Telegram Bot](https://telegram.org/blog/bot-revolution). Currently capable of keeping track of your & your Telegram group's drink consumption. Talks only Finnish at the moment. See some of the available commands from [here](commands.md)
@@ -16,6 +16,7 @@ This repository consists of NodeJS web server, which subscribes and understands 
 ## Get development started
 **Create your Telegram Bot and run the backend for it locally**
 
+0. Ensure that you have all the required software installed [(see list)](start-from-scratch.md)
 1. Clone this repository and run `npm install`
 2. Create local database (see instructions below) 
 3. Create your own bot via Telegram's [@BotFather](https://telegram.me/botfather)
@@ -52,7 +53,9 @@ For production environments add also these:
 * `NODE_ENV` - if `production`, tries to connect to database via `$DATABASE_URL`. (This is required only on prod environment)
 * `DATABASE_URL` - connection string to database (when the `$NODE_ENV` is production)
 
+### Docker support
 
+If you are going to use Docker, insert your environment variables to ecosystem-example.json and rename it to ecosystem.json.
 
 ### Create development PostgreSQL database
 

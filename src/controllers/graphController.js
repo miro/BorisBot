@@ -1,11 +1,11 @@
 var config  = require('../config');
 var db      = require('../database');
+var logger  = require('../logger');
 
 var Promise = require('bluebird');
 var plotly  = require('plotly')(config.plotlyUserName, config.plotlyApiKey);
 var _       = require('lodash');
 var moment  = require('moment-timezone');
-var logger  = config.logger;
 
 var controller = {};
 
@@ -18,13 +18,13 @@ controller.makeHistogram = function(momentObjects, startTimestamp) {
 
         var data = [{
             x: dates,
-            y: _.fill(Array(dates.length),1),
+            y: _.fill(Array(dates.length), 1),
             type: 'histogram',
-            histfunc: 'sum',
+            histfunc: 'sum'
         }];
 
         var layout = {
-            title:  'Kippikset alkaen ' + startTimestamp.format('DD.MM.YY'),
+            title: 'Kippikset alkaen ' + startTimestamp.format('DD.MM.YY'),
             xaxis: {
                 title: 'Aika',
                 titlefont: {
@@ -33,10 +33,10 @@ controller.makeHistogram = function(momentObjects, startTimestamp) {
                     color: 'lightgrey'
                 },
                 type: 'date',
-                range: [startTimestamp.subtract(6,'hour').format('x'), moment().add(6,'hour').format('x')],
+                range: [startTimestamp.subtract(6, 'hour').format('x'), moment().add(6, 'hour').format('x')],
                 autorange: false,
                 tickangle: 45,
-                ticks: 'outside',
+                ticks: 'outside'
             },
             yaxis: {
                 title: 'Kippisten lkm', // NOTE: "ä" in here breaks the plotly library
@@ -51,20 +51,20 @@ controller.makeHistogram = function(momentObjects, startTimestamp) {
                 showgrid: true,
                 zeroline: true,
                 gridwidth: 1.5,
-                tickmode:"auto",
-                ticks:"",
-                nticks:20,
+                tickmode: 'auto',
+                ticks: '',
+                nticks: 20
             },
             bargap: 0.3
         };
 
         var graphOptions = {
-            layout: layout,
+            layout,
             fileopt: 'overwrite',
             filename: 'latestBorisGraph'
         };
 
-        plotly.plot(data, graphOptions, function (err, msg) {
+        plotly.plot(data, graphOptions, function(err, msg) {
             if (err) return reject(err);
             return resolve(msg);
         });

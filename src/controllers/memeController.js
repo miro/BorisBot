@@ -7,7 +7,7 @@ var replys  = require('../replys');
 var cfg     = require('../config');
 var utils   = require('../utils');
 var botApi  = require('../botApi');
-var logger  = cfg.logger;
+var logger  = require('../logger');
 
 // TODO: the need to reply-to-the-messages in private conversation is frustrating to users.
 // Make this work while "naturally" chatting with the bot
@@ -34,26 +34,26 @@ controller.dispatch = function(userId) {
                 .then(function(bottomText) {
                     _generateMeme(memeObject.id, upperText, bottomText)
                     .then(function(imageUrl) {
-                        var filename = cfg.memeDirectory + userId + '_' + moment().format('x') + '.jpg'
+                        var filename = cfg.memeDirectory + userId + '_' + moment().format('x') + '.jpg';
                         utils.downloadFile(imageUrl, filename)
                         .then(function() {
-                            botApi.sendPhoto({chat_id: userId, file: filename});
+                            botApi.sendPhoto({ chat_id: userId, file: filename });
                         });
                     }).catch(function(err) {
-                        logger.log('error', 'Error when generating meme: %s', err)
-                        botApi.sendMessage({ chat_id: userId, text: 'Tapahtui virhe, pahoittelut.'});
+                        logger.log('error', 'Error when generating meme: %s', err);
+                        botApi.sendMessage({ chat_id: userId, text: 'Tapahtui virhe, pahoittelut.' });
                     });
                 });
             });
 
         } else {
-            botApi.sendMessage({user_id: userId, text: 'Meemiä ' + _.startCase(memeType) + ' ei löytynyt! Löydät tuetut meemit komennolla /meemit'});
+            botApi.sendMessage({ user_id: userId, text: 'Meemiä ' + _.startCase(memeType) + ' ei löytynyt! Löydät tuetut meemit komennolla /meemit' });
         }
     });
 
     // .sendMessageAndListenForReply -function may return reject
     // if user hasn't replied to the question.
-    Promise.onPossiblyUnhandledRejection( err => {
+    Promise.onPossiblyUnhandledRejection(err => {
         logger.log('info', 'Unhandled rejection on memeController, possibly user didn´t response: %s', err);
     });
 };
@@ -64,17 +64,18 @@ controller.sendSupportedMemes = function(targetId) {
         msg += '\n';
         msg += meme.name;
     });
-    botApi.sendMessage({chat_id: targetId, text: msg});
+    botApi.sendMessage({ chat_id: targetId, text: msg });
 };
 
 // Get memes which ImgFlip.com supports
 controller.getMemes = function() {
-    request('https://api.imgflip.com/get_memes', function(error,res,body) {
+    request('https://api.imgflip.com/get_memes', function(error, res, body) {
         try {
             var response = JSON.parse(body);
         }
         catch (error) {
             logger.error('Something fishy coming from imgflip');
+            return;
         }
 
         if (response['success']) {
@@ -83,6 +84,7 @@ controller.getMemes = function() {
             });
         } else {
             logger.log('error', 'Error when using ImgFlip.com API');
+            return;
         }
     });
 };
@@ -99,7 +101,7 @@ var _getMemeObject = function(memeName) {
 };
 
 var _generateMeme = function(templateId, topText, bottomText) {
-    return new Promise(function(resolve,reject) {
+    return new Promise(function(resolve, reject) {
         var data = {};
         data.template_id = templateId;
         data.username = cfg.imgFlipUserName;
@@ -107,7 +109,7 @@ var _generateMeme = function(templateId, topText, bottomText) {
         data.text0 = topText;
         data.text1 = bottomText;
 
-        request.post('https://api.imgflip.com/caption_image', {form: data}, function(err, httpResponse, body) {
+        request.post('https://api.imgflip.com/caption_image', { form: data }, function(err, httpResponse, body) {
             if (err) {
                 reject(err);
                 return;

@@ -1,6 +1,5 @@
 var express         = require('express');
 var bodyParser      = require('body-parser');
-var request         = require('request');
 var _               = require('lodash');
 var fs              = require('fs');
 var exec            = require('child_process').exec;
@@ -10,14 +9,13 @@ var botApi          = require('./botApi');
 var cfg             = require('./config');
 var msgHistory      = require('./messageHistory');
 var scheduler       = require('./scheduler');
-var memeController  = require('./controllers/memeController');
+var explController  = require('./controllers/explController');
+var logger          = require('./logger');
+
 var routes          = require('./routes');
 
-var logger          = cfg.logger;
 
 var app         = express();
-
-
 
 // # Express middleware
 app.use(bodyParser.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
@@ -32,9 +30,9 @@ app.set('views', __dirname + '/www/views');
 
 // Telegram Webhook API
 app.post('/api/webhook', function(req, res) {
-    var msg = req.body.message;
+    var updateId = req.body.update_id;
 
-    if (!msgHistory.startProcessingMsg(msg.message_id)) {
+    if (!msgHistory.startProcessingMsg(updateId)) {
         // this message is already parsed
         logger.log('info', 'Message ignored due to messageHistory state!');
         res.sendStatus(200);
@@ -42,13 +40,17 @@ app.post('/api/webhook', function(req, res) {
     }
 
     // Send message to the actual bot
+
+    // Check if body was message or edited_message
+    var msg = (req.body.message) ? req.body.message : req.body.edited_message;
+
     dispatcher(msg)
     .then(function() {
-        msgHistory.messageProcessed(msg.message_id);
+        msgHistory.messageProcessed(updateId);
         res.sendStatus(200);
     })
     .error(function() {
-        msgHistory.messageProcessingFailed(msg.message_id);
+        msgHistory.messageProcessingFailed(updateId);
         res.sendStatus(500);
     });
 });
@@ -106,3 +108,5 @@ botApi.setWebhook({url: cfg.webhookUrl, certificate: cfg.certificateFile})
 // Start scheduler
 scheduler.startJobs();
 
+// Update expl keys for !rexpl
+explController.updateRexplKeys();

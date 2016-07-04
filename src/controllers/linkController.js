@@ -1,9 +1,7 @@
-'use strict'
 var Promise             = require('bluebird');
-var _                   = require('lodash');
 
 var cfg                 = require('../config');
-var logger              = cfg.logger;
+var logger              = require('../logger');
 var LinkModel           = require('../schema').models.Link;
 var botApi              = require('../botApi');
 var groupController     = require('./groupController');
@@ -36,12 +34,12 @@ controller.process = function processEvent(event) {
     // -> event has a link!
     logger.debug('Link to ' + link + ' found from event payload');
 
-    Promise.resolve()
+    return Promise.resolve()
         .then(() => groupController.addIfNonexistent(event))
-        .then(groupModel => LinkModel.where({
-                url: link,
-                telegram_group_id: event.chatGroupId
-            }).fetch()
+        .then(() => LinkModel.where({
+            url: link,
+            telegram_group_id: event.chatGroupId
+        }).fetch()
         )
         .then(existingLink => {
             if (existingLink) {
@@ -53,7 +51,7 @@ controller.process = function processEvent(event) {
                     .save();
 
                 // Be annoying to the user who linked this
-                punishFromOldLink(existingLink, event);
+                return punishFromOldLink(existingLink, event);
             }
             else {
                 return controller.addLink(link, event);

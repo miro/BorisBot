@@ -20,6 +20,7 @@ RUN     apt-get update && apt-get install -y -q --no-install-recommends \
         wget \
     && rm -rf /var/lib/apt/lists/*
 
+ENV     NODE_ENV production
 ENV     NVM_DIR /usr/local/nvm
 ENV     NODE_VERSION 5.5.0
 
@@ -34,6 +35,7 @@ ENV     NODE_PATH $NVM_DIR/versions/node/v$NODE_VERSION/lib/node_modules
 ENV     PATH      $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 
 RUN     npm install pm2 -g
+RUN     npm install knex -g
 
 # Copy host directory into container and install required node_modules
 COPY    . /app/
@@ -42,8 +44,13 @@ RUN     npm install
 
 # Build website related stuff
 RUN     npm run build
-    
+
+
+# Trigger migration script
+RUN     chmod +x ./tools/run-migrations.sh
+RUN     ./tools/run-migrations.sh
+
 # Open port 3000
 EXPOSE  3000
 
-CMD     ["pm2", "start",  "src/server.js", "--name=borisbot", "--no-daemon"]
+CMD     ["pm2", "start",  "ecosystem.json", "--env", "production", "--no-daemon"]

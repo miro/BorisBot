@@ -6,7 +6,7 @@ var emojiRegex  = require('emoji-regex');
 
 var cfg         = require('./config');
 var replys      = require('./replys');
-var logger      = cfg.logger;
+var logger      = require('./logger');
 
 var commander   = require('./commander');
 var talkbox     = require('./talkbox');
@@ -33,12 +33,15 @@ module.exports = function parseTelegramEvent(msg) {
     event.userName = msg.from.username;
     event.userFirstName = msg.from.first_name;
     event.userLastName = msg.from.last_name;
-    event.userCallName = _.isUndefined(event.userName) ? userFirstName : ('@' + event.userName); // this can be used on messages
+    event.userCallName = _.isUndefined(event.userName) ? event.userFirstName : ('@' + event.userName); // this can be used on messages
     event.replyToMessage = msg.reply_to_message;
 
     event.isFromGroup = !_.isUndefined(msg.chat.title);
     event.chatGroupId = event.isFromGroup ? msg.chat.id : null;
     event.chatGroupTitle = event.isFromGroup ? msg.chat.title : null;
+
+    event.editDate = (msg.edit_date) ? msg.edit_date : null;
+    event.entities = (msg.entities) ? msg.entities : null;
 
     // Check if user is ignored
     var userIsIgnored = cfg.ignoredUsers.indexOf(event.userId) >= 0;

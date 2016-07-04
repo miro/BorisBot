@@ -1,4 +1,3 @@
-'use strict'
 var Promise             = require('bluebird');
 var GroupModel          = require('../schema').models.Group;
 

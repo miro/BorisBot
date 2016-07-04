@@ -38,3 +38,5 @@ node_modules
 # Editor config
 .editorconfig
 
+# PM2 ecosystem
+ecosystem.json

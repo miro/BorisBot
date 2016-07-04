@@ -1,9 +1,8 @@
-var cfg     = require('../config');
-
 var _       = require('lodash');
 var moment  = require('moment-timezone');
 
-var logger  = cfg.logger;
+var log  = require('../logger');
+
 
 var controller = {};
 
@@ -14,7 +13,7 @@ controller.history = {};
 
 controller.addMessage = function(chatId, msg) {
     if (_.isNull(chatId) || msg === '') {
-        logger.log('debug', 'textController: message was empty or didn´t come from group chat');
+        log.log('debug', 'message was empty or didn´t come from group chat');
         return false;
     } else {
         if (_.isUndefined(controller.history[chatId])) {
@@ -22,32 +21,35 @@ controller.addMessage = function(chatId, msg) {
         }
         var maxSize = 2000; // Max size of message list
         if (controller.history[chatId].length >= maxSize) {
-            logger.log('warn', 'textController: maximum list size (%d) reached on chatId %s', maxSize, chatId)
+            log.warn('maximum list size (%d) reached on chatId %s', maxSize, chatId);
             controller.history[chatId].pop();
         }
         controller.history[chatId].unshift([moment().unix(), msg]);
         return true;
     }
-}
+};
 
-controller.getSummary = function(chatId, n) {
+controller.getSummary = function(chatId, msgCount) {
     if (_.isUndefined(controller.history[chatId]) || _.isEmpty(controller.history[chatId])) {
         return 'Tiivistettävää ei löydy.';
     } else {
-        n = (n < controller.history[chatId].length) ? n : controller.history[chatId].length;
+        msgCount = (msgCount < controller.history[chatId].length)
+            ? msgCount
+            : controller.history[chatId].length;
+
         // TODO: Create more complex algorithm
-        var dice = _.floor(Math.random() * n);
+        var dice = _.floor(Math.random() * msgCount);
         return controller.history[chatId][dice][1];
     }
-}
+};
 
 controller.deleteExpired = function() {
     if (_.isEmpty(controller.history)) {
         return;
     } else {
-        var expired = moment().unix() - (controller.hoursToExpire*3600);
-        _.forEach(controller.history, function(groupMsgs) {
-            for (var i = groupMsgs.length-1; i >= 0; i--) {
+        var expired = moment().unix() - (controller.hoursToExpire * 3600);
+        _.forEach(controller.history, (groupMsgs) => {
+            for (var i = groupMsgs.length - 1; i >= 0; i--) {
                 if (groupMsgs[i][0] < expired) {
                     groupMsgs.pop();
                 } else {
@@ -57,6 +59,6 @@ controller.deleteExpired = function() {
         });
         return;
     }
-}
+};
 
 module.exports = controller;
