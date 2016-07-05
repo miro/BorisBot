@@ -32,8 +32,7 @@ controller.fetchImage = function(event) {
                 q: query,
                 count: 10,
                 offset: Math.round(Math.random() * 30),
-                mkt: 'fi-FI',
-                safeSearch: 'Off'
+                mkt: 'fi-FI'
             }
         },
         function requestCallback(err, resp, body) {
