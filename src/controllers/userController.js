@@ -16,52 +16,62 @@ moment.tz.setDefault(cfg.botTimezone);
 var controller = {};
 
 
-controller.newUserProcess = function(
-    userId, userName, userFirstName, userLastName, userCommandParams
-) {
+controller.newUserProcess = function(event) {
     return new Promise(resolve => {
-        db.getUserById(userId)
+        if (event.isFromGroup) {
+            botApi.sendMessage({
+                chat_id: event.chatGroupId,
+                text: 'Jutellaan lisää privassa ' + emoji.get(':smirk:')
+            });
+            botApi.sendMessage({
+                chat_id: event.userId,
+                text: 'Luo käyttäjätunnus komennolla /luotunnus <paino> <sukupuoli>'
+            });
+            return resolve();
+        }
+
+        db.getUserById(event.userId)
         .then(exists => {
             if (exists) {
-                const text = 'Käyttäjä ' + userName + ' on jo rekisteröity!\n' +
+                const text = 'Käyttäjä ' + event.userName + ' on jo rekisteröity!\n' +
                     'Jos haluat päivittää tietojasi, poista vanha käyttäjä komennolla\n' +
                     '/poistatunnus ja komenna /luotunnus uudelleen.';
 
                 botApi.sendMessage({
-                    chat_id: userId,
+                    chat_id: event.userId,
                     text
                 });
                 resolve();
             }
             else {
 
-                var weight = parseInt(userCommandParams.split(' ')[0], 10);
-                var isMale = userCommandParams.split(' ')[1];
+                var weight = parseInt(event.userCommandParams.split(' ')[0], 10);
+                var isMale = event.userCommandParams.split(' ')[1];
 
-                if (userCommandParams.split(' ').length !== 2) {
+                if (event.userCommandParams.split(' ').length !== 2) {
                     botApi.sendMessage({
-                        chat_id: userId,
+                        chat_id: event.userId,
                         text: 'Rekisteröi käyttäjä komennolla /luotunnus <paino> <sukupuoli>'
                     });
                     resolve();
 
                 } else if (_.isNaN(weight) || weight <= 0) {
                     botApi.sendMessage({
-                        chat_id: userId,
+                        chat_id: event.userId,
                         text: 'Paino ei ollut positiivinen kokonaisluku!'
                     });
                     resolve();
 
                 } else if (weight < 40) {
                     botApi.sendMessage({
-                        chat_id: userId,
+                        chat_id: event.userId,
                         text: 'Laitathan oikean painosi, kiitos. ;)'
                     });
                     resolve();
 
                 } else if (isMale !== 'mies' && isMale !== 'nainen') {
                     botApi.sendMessage({
-                        chat_id: userId,
+                        chat_id: event.userId,
                         text: 'Parametri "' + isMale + '" ei ollut "mies" tai "nainen"!'
                     });
                     resolve();
@@ -69,7 +79,7 @@ controller.newUserProcess = function(
                 else {
                     isMale = isMale === 'mies';
 
-                    db.registerUser(userId, userName, userFirstName, userLastName, weight, isMale)
+                    db.registerUser(event.userId, event.userName, event.userFirstName, event.userLastName, weight, isMale)
                     .then(function registerOk() {
                         var msg = [
                             'Käyttäjätunnuksesi luotiin onnistuneesti, olé!\n\n',
@@ -83,7 +93,7 @@ controller.newUserProcess = function(
                             ' minkään suhteen. Stay safe!'
                         ].join('');
 
-                        botApi.sendMessage({ chat_id: userId, text: msg });
+                        botApi.sendMessage({ chat_id: event.userId, text: msg });
                         resolve();
                     });
                 }

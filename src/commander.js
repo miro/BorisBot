@@ -28,7 +28,7 @@ var imageController         = require('./controllers/imageController');
 module.exports = function(event) {
     return new Promise((resolve) => {
 
-        logger.log('debug', 'Command %s from user %s', event.userCommand, event.userCallName);
+        logger.debug('Command %s from user %s', event.userCommand, event.userCallName);
 
         // Dispatch command!
         switch (event.userCommand) {
@@ -99,33 +99,8 @@ module.exports = function(event) {
             case emoji.get(':beer:'):
             case emoji.get(':wine_glass:'):
             case emoji.get(':cocktail:'):
-
-                if (event.isFromGroup) {
-                    drinkController.showDrinkKeyboard(event.userId, event.isFromGroup)
-                    .then(resolve);
-                }
-                else {
-                    // TODO: move this logic into drinkController!!
-
-                    // Figure out drinkType
-                    var drinkType;
-                    if (event.userCommand === '/juoma') {
-                        drinkType = event.userCommandParams;
-                    }
-                    else if (event.userCommand.charAt(0) === '/') {
-                        // this was a user command
-                        drinkType = 'kalja ' + event.userCommandParams;
-                    }
-                    else {
-                        // This was an emoji + possible parameters
-                        drinkType = event.userCommand + ' ' + event.userCommandParams;
-                    }
-
-                    var drinkValue = 12; // For now this is fixed for all drinks
-
-                    drinkController.addDrink(event.eventId, event.userId, event.userCallName, drinkType, drinkValue, event.isFromGroup)
-                    .then(resolve);
-                }
+                drinkController.parseAddCommand(event)
+                .then(resolve);
                 break;
 
             case '/viina':
@@ -146,16 +121,7 @@ module.exports = function(event) {
             case '/log':
             case '/otinko':
                 drinkController.getPersonalDrinkLog(event.userId)
-                .then(() => {
-                    if (event.isFromGroup) {
-                        botApi.sendMessage({
-                            chat_id: event.userId,
-                            text: `PS: anna "${event.userCommand}"-komento suoraan minulle,
-                            älä spämmää turhaan ryhmächättiä!`
-                        });
-                    }
-                    resolve();
-                });
+                .then(resolve);
                 break;
 
             case '/kumpi':
@@ -195,21 +161,8 @@ module.exports = function(event) {
             // Takes two parameters, weight of the person and gender
             case '/addme':
             case '/luotunnus':
-                if (event.isFromGroup) {
-                    botApi.sendMessage({
-                        chat_id: event.chatGroupId,
-                        text: 'Jutellaan lisää privassa ' + emoji.get(':smirk:')
-                    });
-                    botApi.sendMessage({
-                        chat_id: event.userId,
-                        text: 'Luo käyttäjätunnus komennolla /luotunnus <paino> <sukupuoli>'
-                    });
-                    resolve();
-                }
-                else {
-                    userController.newUserProcess(event.userId, event.userName, event.userFirstName, event.userLastName, event.userCommandParams)
-                    .then(resolve);
-                }
+                userController.newUserProcess(event)
+                .then(resolve);
                 break;
 
             // Echo the current user settings
@@ -242,24 +195,8 @@ module.exports = function(event) {
 
             case '/promillet':
             case '/promille':
-                if (event.isFromGroup) {
-                    drinkController.getGroupAlcoholStatusReport(event.chatGroupId)
-                    .then((msg) => {
-                        botApi.sendMessage({ chat_id: event.chatGroupId, text: msg });
-                        resolve();
-                    });
-                }
-                else {
-                    ethanolController.getAlcoholLevel(event.userId)
-                    .then((msg) => {
-                        botApi.sendMessage({ chat_id: event.userId, text: msg + ' \u2030' });
-                        resolve();
-                    })
-                    .catch((e) => {
-                        botApi.sendMessage({ chat_id: event.userId, text: e });
-                        resolve();
-                    });
-                }
+                drinkController.parseStatusCommand(event)
+                .then(resolve);
                 break;
 
             case '/meemit':
@@ -277,7 +214,7 @@ module.exports = function(event) {
             case '/tili':
                 botApi.sendMessage({
                     chat_id: event.targetId,
-                    text: 'FI78 1439 3500 0219 70'
+                    text: 'Spinnin tilinumero: FI78 1439 3500 0219 70'
                 });
                 resolve();
                 break;
@@ -286,7 +223,7 @@ module.exports = function(event) {
             case '/puh':
                 botApi.sendMessage({
                     chat_id: event.targetId,
-                    text: '041 369 2262'
+                    text: 'Spinnin puhelinnumero: 041 369 2262'
                 });
                 resolve();
                 break;
@@ -299,7 +236,7 @@ module.exports = function(event) {
             case '/tiivista':
                 textController.getSummary(event)
                 .then(resolve);
-            break;
+                break;
 
             case '/ravintolat':
             case '/raflat':
@@ -309,12 +246,12 @@ module.exports = function(event) {
             case '/menu':
                 restaurantController.getAllMenusForToday(event)
                 .then(resolve);
-            break;
+                break;
 
             case '/juurinyt':
                 generic.justNow(event);
                 resolve();
-            break;
+                break;
 
             // # Admin commands
             //

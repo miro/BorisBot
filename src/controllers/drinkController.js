@@ -569,6 +569,59 @@ controller.addCustomValueDrink = function(event, drinkType) {
     }
 };
 
+controller.parseAddCommand = function(event) {
+    return new Promise((resolve,reject) => {
+        if (event.isFromGroup) {
+            controller.showDrinkKeyboard(event.userId, event.isFromGroup)
+            .then(resolve);
+        }
+        else {
+
+            // Figure out drinkType
+            var drinkType;
+            if (event.userCommand === '/juoma') {
+                drinkType = event.userCommandParams;
+            }
+            else if (event.userCommand.charAt(0) === '/') {
+                // this was a user command
+                drinkType = 'kalja ' + event.userCommandParams;
+            }
+            else {
+                // This was an emoji + possible parameters
+                drinkType = event.userCommand + ' ' + event.userCommandParams;
+            }
+
+            var drinkValue = 12; // For now this is fixed for all drinks via this command
+
+            controller.addDrink(event.eventId, event.userId, event.userCallName, drinkType, drinkValue, event.isFromGroup)
+            .then(resolve);
+        }
+    });
+}
+
+controller.parseStatusCommand = function(event) {
+    return new Promise((resolve,reject) => {
+        if (event.isFromGroup) {
+            drinkController.getGroupAlcoholStatusReport(event.chatGroupId)
+            .then((msg) => {
+                botApi.sendMessage({ chat_id: event.chatGroupId, text: msg });
+                resolve();
+            });
+        }
+        else {
+            ethanolController.getAlcoholLevel(event.userId)
+            .then((msg) => {
+                botApi.sendMessage({ chat_id: event.userId, text: msg + ' \u2030' });
+                resolve();
+            })
+            .catch((e) => {
+                botApi.sendMessage({ chat_id: event.userId, text: e });
+                resolve();
+            });
+        }
+    });
+}
+
 
 // ## Private functions
 //
