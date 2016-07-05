@@ -1,3 +1,4 @@
+'use strict'
 var cfg     = require('./config');
 var request = require('request');
 var stream  = require('stream');
