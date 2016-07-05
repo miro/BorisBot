@@ -228,11 +228,6 @@ module.exports = function(event) {
                 resolve();
                 break;
 
-            case '/iltaa':
-                brain.answerIltaa(event);
-                resolve();
-                break;
-
             case '/tiivista':
                 textController.getSummary(event)
                 .then(resolve);
