@@ -7,6 +7,7 @@ var parserJuvenes   = require('./parsers/juvenes');
 var parserHertsi    = require('./parsers/hertsi');
 var parserReaktori  = require('./parsers/reaktori');
 var resources       = require('./restaurantsConfig');
+var botApi          = require('../../botApi');
 
 var cfg             = require('../../config');
 var logger          = require('../../logger');
@@ -42,11 +43,11 @@ var diners = {
     }
 };
 
-controller.getAllMenusForToday = function (isFromGroup) {
+controller.getAllMenusForToday = function (event) {
     return new Promise(function(resolve,reject)  {
 
         // Process only three main diners if message is from group
-        var validDiners = (isFromGroup && moment().isBefore(moment('15:00', 'HH:mm'))) ? {
+        var validDiners = (event.isFromGroup && moment().isBefore(moment('15:00', 'HH:mm'))) ? {
             reaktori: diners.reaktori,
             newton: diners.newton,
             hertsi: diners.hertsi
@@ -61,11 +62,10 @@ controller.getAllMenusForToday = function (isFromGroup) {
 
         // Check if every diner is closed
         if (_.isEmpty(validDiners)) {
-            resolve('Ei ravintoloita auki.');
-            return;
+            return resolve('Ei ravintoloita auki.');
         }
         // Use shorter presentation if event is from group
-        var style = (!isFromGroup) ? _splitMealsToRows : x => x.join(', ');
+        var style = (!event.isFromGroup) ? _splitMealsToRows : x => x.join(', ');
 
         var s = new String();
         _.forEach(validDiners, function(diner, name) {
@@ -81,7 +81,15 @@ controller.getAllMenusForToday = function (isFromGroup) {
                 s += ' _ruokalistaa ei saatavilla_\n';
             }
         });
-        resolve(s);
+
+        botApi.sendMessage({
+            chat_id: event.targetId,
+            text: s,
+            parse_mode: 'Markdown',
+            disable_web_page_preview: true
+        });
+
+        return resolve();
     });
 };
 

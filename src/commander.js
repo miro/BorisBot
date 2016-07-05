@@ -297,21 +297,9 @@ module.exports = function(event) {
                 break;
 
             case '/tiivista':
-                if (!event.isFromGroup) {
-                    botApi.sendMessage({ chat_id: event.userId, text: 'Tämä komento toimii vain ryhmästä!' });
-                    resolve();
-                } else {
-                    var param = (_.isFinite(event.userCommandParams.split(' ')[0]))
-                    ? event.userCommandParams.split(' ')[0]
-                    : 1000;
-
-                    botApi.sendMessage({
-                        chat_id: event.chatGroupId,
-                        text: textController.getSummary(event.chatGroupId, param)
-                    });
-                    resolve();
-                }
-                break;
+                textController.getSummary(event)
+                .then(resolve);
+            break;
 
             case '/ravintolat':
             case '/raflat':
@@ -319,21 +307,9 @@ module.exports = function(event) {
             case '/safka':
             case '/safkat':
             case '/menu':
-                restaurantController.getAllMenusForToday(event.isFromGroup)
-                .then((msg) => {
-                    botApi.sendMessage({
-                        chat_id: event.targetId,
-                        text: msg,
-                        parse_mode: 'Markdown',
-                        disable_web_page_preview: true
-                    });
-                    resolve();
-                })
-                .catch(e => {
-                    logger.log('error', 'Error on getAllMenusForToday: %s', e);
-                    resolve();
-                });
-                break;
+                restaurantController.getAllMenusForToday(event)
+                .then(resolve);
+            break;
 
             case '/juurinyt':
                 generic.justNow(event);
