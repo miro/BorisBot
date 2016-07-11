@@ -1,8 +1,9 @@
-var cfg     = require('../config');
-var logger  = require('../logger');
-
 var _       = require('lodash');
 var moment  = require('moment-timezone');
+
+var log  = require('../logger');
+var botApi = require('../botApi');
+
 
 var controller = {};
 
@@ -13,7 +14,7 @@ controller.history = {};
 
 controller.addMessage = function(chatId, msg) {
     if (_.isNull(chatId) || msg === '') {
-        logger.log('debug', 'textController: message was empty or didn´t come from group chat');
+        log.debug('message was empty or didn´t come from group chat');
         return false;
     } else {
         if (_.isUndefined(controller.history[chatId])) {
@@ -21,7 +22,7 @@ controller.addMessage = function(chatId, msg) {
         }
         var maxSize = 2000; // Max size of message list
         if (controller.history[chatId].length >= maxSize) {
-            logger.log('warn', 'textController: maximum list size (%d) reached on chatId %s', maxSize, chatId);
+            log.warn('maximum list size (%d) reached on chatId %s', maxSize, chatId);
             controller.history[chatId].pop();
         }
         controller.history[chatId].unshift([moment().unix(), msg]);
@@ -29,15 +30,34 @@ controller.addMessage = function(chatId, msg) {
     }
 };
 
-controller.getSummary = function(chatId, n) {
-    if (_.isUndefined(controller.history[chatId]) || _.isEmpty(controller.history[chatId])) {
-        return 'Tiivistettävää ei löydy.';
-    } else {
-        n = (n < controller.history[chatId].length) ? n : controller.history[chatId].length;
+controller.getSummary = function(event) {
+    return new Promise((resolve, reject) => {
+        if (!event.isFromGroup) {
+            botApi.sendMessage({ chat_id: event.userId, text: 'Tämä komento toimii vain ryhmästä!' });
+            return resolve();
+        }
+        var history = controller.history[event.chatGroupId];
+        if (_.isUndefined(history) || _.isEmpty(history)) {
+            botApi.sendMessage({ chat_id: event.userId, text: 'Tiivistettävää ei löydy.'});
+            return resolve();
+        }
+
+        var param = (_.isFinite(event.userCommandParams.split(' ')[0]))
+        ? event.userCommandParams.split(' ')[0]
+        : 1000;
+
+        param = (param < history.length) ? param : history.length;
+
         // TODO: Create more complex algorithm
-        var dice = _.floor(Math.random() * n);
-        return controller.history[chatId][dice][1];
-    }
+        var dice = _.floor(Math.random() * param);
+
+        botApi.sendMessage({
+            chat_id: event.chatGroupId,
+            text: history[dice][1]
+        });
+        return resolve();
+    })
+
 };
 
 controller.deleteExpired = function() {
@@ -45,7 +65,7 @@ controller.deleteExpired = function() {
         return;
     } else {
         var expired = moment().unix() - (controller.hoursToExpire * 3600);
-        _.forEach(controller.history, function(groupMsgs) {
+        _.forEach(controller.history, (groupMsgs) => {
             for (var i = groupMsgs.length - 1; i >= 0; i--) {
                 if (groupMsgs[i][0] < expired) {
                     groupMsgs.pop();

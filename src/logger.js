@@ -2,6 +2,7 @@ const winston   = require('winston');
 const moment    = require('moment-timezone');
 const cfg       = require('./config');
 
+
 var logOptions = {};
 logOptions.transports = [
     new (winston.transports.Console)({
@@ -17,16 +18,17 @@ logOptions.transports = [
 if (cfg.env === 'production') {
     logOptions.transports.push(
         new (winston.transports.File)({
-                filename: cfg.logLocation,
-                level: 'info',
-                timestamp: function() {
-                    return moment().format('YYYY-MM-DDTHH:mm:SS');
-                },
-                formatter: function(options) {
-                    return options.timestamp() +'--'+ options.level.toUpperCase() +'--'+ (undefined !== options.message ? options.message : '');
-                },
-                maxsize: 10000000,
-                json: false
+            filename: cfg.logLocation,
+            level: 'info',
+            timestamp: function() {
+                return moment().format('YYYY-MM-DDTHH:mm:SS');
+            },
+            formatter: function(options) {
+                var msg = (options.message !== undefined ? options.message : '');
+                return `${options.timestamp()}--${options.level.toUpperCase()}--${msg}`;
+            },
+            maxsize: 10000000,
+            json: false
         })
     );
 }
@@ -34,3 +36,4 @@ if (cfg.env === 'production') {
 var logger = new (winston.Logger)(logOptions);
 
 module.exports = logger;
+

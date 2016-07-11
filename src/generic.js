@@ -213,7 +213,6 @@ generic.justNow = function(event) {
     request({uri: 'http://www.iltalehti.fi/', encoding: null}, function(error, response, html) {
         if(!error){
 
-            var output = [];
             var selectors = [
                 '.juurinyt > p > a',
                 '#iltab_luetuimmat-kaikki1 > p > a > span:nth-child(2)'
@@ -221,15 +220,22 @@ generic.justNow = function(event) {
             html = iconv.decode(new Buffer(html), "ISO-8859-1");
             var $ = cheerio.load(html);
 
+            var output = [];
             $(selectors.join(", ")).each( function() {
-                output.push($( this ).text());
+                var text = $( this ).text();
+                if (text != generic.lastJustNow) {
+                    output.push(text)
+                }
             });
 
-            var pre = (Math.random()*100 < 60) ?
-                ['Voiko tämä olla tottakaan! ', 'Mites tuota, ',
+            var message = _.sample(output);
+            generic.lastJustNow = message;
+
+            var pre = ((Math.random()*100 < 60) && (message.indexOf(':') === -1)) ?
+                ['Voiko tämä olla tottakaan! ', 'Mitäs? ',
                 'Mitä vittua! ', 'Tästä Perttekin olisi ylpeä: ',
                 '..uskomatonta! ', 'Timo Soini: ', 'Kai se on pakko uskoa! ',
-                'Mitähän nyt taas, ', 'Marsaklan päiväkäsky: ', 'Näin vaikuttaa Brexit: ',
+                'Mitähän nyt taas?! ', 'Marsaklan päiväkäsky: ', 'Näin vaikuttaa Brexit: ',
                 'Lama näkyy jo ihmisten kasvoilla: ', 'Enkelihoidot suosiossa: ',
                 'Uskomaton käänne puljujärven draftissa: ', 'Sote-uudistuksen laajat vaikutukset: ',
                 'Tätä et uskonut lukevasi ikinä koskaan: ', 'Arvaatko mitä? ', 'Miksi / Miksi ei ',
@@ -241,7 +247,7 @@ generic.justNow = function(event) {
                 'Sote-uudistuksessa käänne: ', 'Timo Soini: en mielestäni ole Hitler, koska ', 'Helleraja taas rikki: ',
                 'Lähestyykö Suomea matala/korkeapaine? Pekka Pouta ennustaa: ', 'Jatkuvat vaikeudet ajoivat yrittäjän ahdinkoon: ',
                 'Säätilassa kernainen muutos, johon liittyy, että ', 'Miehet ja naiset kertovat: ', 'No johan pomppas! ',
-                '"Vittu" kertoi Mauri Kunnas - Syyt taustaan ovat ', 'Uniikki tiedottaa: ', 'Tämä on fantastinen juttu: ',
+                '"Vittu" kertoi Mauri Kunnas - Syyt taustaan ovat: ', 'Uniikki tiedottaa: ', 'Tämä on fantastinen juttu: ',
                 'Mi-tä?! ', 'Nainen lihotti lähes 60 kiloa yllättävän metodin avulla: ', 'Mies masturboi koirallaan - lisäksi: ',
                 'Tätä et tiennyt enkelihoidoista: ', 'Oikeestikko?! ', 'Syöpää vedestä - asian tuntiat älähtävät: ',
                 'Ehkä elämällä ei olekaan niin suurta merkitystä: ', 'Koru-Arvin tarinassa uusi käänne: ',
@@ -249,7 +255,7 @@ generic.justNow = function(event) {
                 'Ylikomisarion viimeinen toive: ', 'Oispa tosiaan näin, että ', 'Vanha kansa ennusti tämän: ',
                 'Yleinen loruhan sen jo tiesi: ', 'Jos mennään näillä: ', 'Eiku sano vaan: '] : [''];
 
-            var post = (Math.random()*100 < 60) ?
+            var post = ((Math.random()*100 < 60) && (message.indexOf('-') === -1)) ?
                 [' - humalassa', ' - pajareissa',
                 ' saatana', ' - reaktio oli uskomaton!', ' iltaa',
                 ' - luona armopöydän', ' - eipä siinä', ' - mutta missä oli Puljujärvi?!',
@@ -262,15 +268,11 @@ generic.justNow = function(event) {
                 ' - voisiko tämä olla mahdollista myös Suomessa?', ' - taustalla varsin outo syy', ' - raiskasi saatana',
                 ' - oikeustoimiakin väläytelty', ' - rakastaja uunissa?', ' - paljastui huijaukseksi'] : [''];
 
-            var message = '<b>JUURI NYT </b>' + _.sample(pre) + _.sample(output) + _.sample(post);
             botApi.sendMessage({
                 chat_id: event.targetId,
-                text: message,
+                text: '<b>JUURI NYT </b>' + _.sample(pre) + message + _.sample(post),
                 parse_mode: 'HTML'
             });
-
-
-
 
         } else {
             logger.error('Error when fetching "Iltalehti": ' + error);

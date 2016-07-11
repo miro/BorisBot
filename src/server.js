@@ -1,3 +1,8 @@
+/* eslint-disable no-unused-vars */
+// ^ this is disabled since express error handlers must announce
+//   all the required parameters in order to work, and it mismatches
+//   with that rule
+
 var express         = require('express');
 var bodyParser      = require('body-parser');
 var _               = require('lodash');
@@ -21,12 +26,12 @@ app.use(bodyParser.json()); // parse json
 
 // # Routes
 //
-app.post('/api/webhook', function(req, res) {
+app.post('/api/webhook', (req, res) => {
     var updateId = req.body.update_id;
 
     if (!msgHistory.startProcessingMsg(updateId)) {
         // this message is already parsed
-        logger.log('info', 'Message ignored due to messageHistory state!');
+        logger.info('Message ignored due to messageHistory state!');
         res.sendStatus(200);
         return;
     }
@@ -37,18 +42,18 @@ app.post('/api/webhook', function(req, res) {
     var msg = (req.body.message) ? req.body.message : req.body.edited_message;
 
     dispatcher(msg)
-    .then(function() {
+    .then(() => {
         msgHistory.messageProcessed(updateId);
         res.sendStatus(200);
     })
-    .error(function() {
+    .error(() => {
         msgHistory.messageProcessingFailed(updateId);
         res.sendStatus(500);
     });
 });
 
 // Catch all 404 route (this needs to be last)
-app.get('*', function(req, res, next) {
+app.get('*', (req, res, next) => {
     var err = new Error();
     err.status = 404;
     next(err);
@@ -56,8 +61,13 @@ app.get('*', function(req, res, next) {
 
 // # Error handlers
 app.use(function handle404(err, req, res, next) { // 404
+    const fallbackMsg = [
+        '404 Content not found',
+        'but such are the mysteries of the Internet sometimes'
+    ].join(' - ');
+
     if (err.status !== 404) return next(err);
-    res.send(err.message || '404 Content not found - but such are the mysteries of the Internet sometimes');
+    return res.send(err.message || fallbackMsg);
 });
 app.use(function genericErrorHandler(err, req, res, next) { // 500
     err.status = _.isUndefined(err.status) ? 500 : err.status;
@@ -66,31 +76,34 @@ app.use(function genericErrorHandler(err, req, res, next) { // 500
 });
 
 // # Make required directories
-_.each(cfg.requiredDirectories, function(directory) {
-    fs.lstat(directory, function(err, stats) {
+_.each(cfg.requiredDirectories, directory => {
+    fs.lstat(directory, (err, stats) => {
         logger.log(err);
-        if (err && err['code'] === 'ENOENT') {
+
+        if (err && err.code === 'ENOENT') {
             var mkdir = 'mkdir -p ' + directory;
-            var child = exec(mkdir, function(err,stdout,stderr) {
-                if (err) throw err;
-                logger.log('info', 'Created folder: ' + directory);
+            var child = exec(mkdir, (mkdirErr, stdout, stderr) => {
+                if (mkdirErr) throw mkdirErr;
+                logger.info('Created folder: ' + directory);
             });
-        };
+        }
     });
 });
 
 // # Start the server
-app.listen(cfg.serverPort, function() {
+app.listen(cfg.serverPort, () => {
     logger.log('info', 'BorisBot backend started at port ' + cfg.serverPort);
 });
 
 // Subscribe webhook
-botApi.setWebhook({url: cfg.webhookUrl, certificate: cfg.certificateFile})
+botApi.setWebhook({ url: cfg.webhookUrl, certificate: cfg.certificateFile })
 // Run test sequence
-.then(() => botApi.getMe()).then(r => logger.log('info', 'I am %s / @%s', r.first_name, r.username));
+.then(() => botApi.getMe())
+.then(response => logger.info('I am %s / @%s', response.first_name, response.username));
 
 // Start scheduler
 scheduler.startJobs();
 
 // Update expl keys for !rexpl
 explController.updateRexplKeys();
+

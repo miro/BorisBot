@@ -20,8 +20,10 @@ RUN     apt-get update && apt-get install -y -q --no-install-recommends \
         wget \
     && rm -rf /var/lib/apt/lists/*
 
+# Configure NodeJS
+ENV     NODE_ENV production
 ENV     NVM_DIR /usr/local/nvm
-ENV     NODE_VERSION 5.5.0
+ENV     NODE_VERSION 6.2.2
 
 # Install nvm with node and npm
 RUN     curl https://raw.githubusercontent.com/creationix/nvm/v0.30.2/install.sh | bash \

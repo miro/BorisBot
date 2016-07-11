@@ -1,4 +1,4 @@
-BorisBot
+BorisBot [![Sponsored by Chilicorn.org](https://img.shields.io/badge/sponsored%20by-chilicorn.org-brightgreen.svg)](http://chilicorn.org)
 =========
 
 for-the-lulz -based [Telegram Bot](https://telegram.org/blog/bot-revolution). Currently capable of keeping track of your & your Telegram group's drink consumption. Talks only Finnish at the moment. See some of the available commands from [here](commands.md)
