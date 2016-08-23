@@ -88,7 +88,7 @@ botApi.sendPhoto = (options) => _sendFile('photo', options);
 botApi.setWebhook = (options) => {
 
     // Delete old webhook
-    request
+    return request
     .post(`${cfg.tgApiUrl}/setWebhook`)
     .send({ url: '' })
     .then((res, err) => _validateResponse('setWebhook', res, err))
